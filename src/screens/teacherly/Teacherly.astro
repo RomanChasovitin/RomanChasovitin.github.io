@@ -1,0 +1,115 @@
+---
+// Teacherly, in its own look: white, purple buttons, big color blobs at the edges, a script logo.
+import BackToIntro from '../../components/BackToIntro.astro';
+import { formatYears, projects } from '../../content/projects';
+import Lesson from './Lesson';
+
+const project = projects.find((item) => item.id === 'teacherly')!;
+const role = project.roles[0];
+---
+
+<section id="teacherly" data-screen class="overflow-hidden bg-white font-helvetica text-tl-ink">
+  <div class="blob yellow" aria-hidden="true"></div>
+  <div class="blob teal" aria-hidden="true"></div>
+  <div class="blob sky" aria-hidden="true"></div>
+  <BackToIntro class="text-sm font-bold text-tl-purple hover:underline" />
+
+  <div class="relative flex h-full items-center gap-[3.5vw] px-[5vw]">
+    <div class="w-[26vw] shrink-0">
+      <h2 class="font-dancing text-[clamp(3rem,5.5vw,6rem)] leading-none font-bold text-tl-purple">
+        Teacher<span class="text-tl-teal">ly</span>
+      </h2>
+      <p class="mt-4 text-sm text-tl-ink/70">{role.title}, {formatYears(role.period)}, through Mad Devs</p>
+      <p class="mt-6 text-[clamp(1.4rem,2vw,2rem)] leading-tight font-bold">Turning teachers into teams</p>
+      <p class="mt-4 leading-relaxed">
+        A British ed-tech startup: interactive lessons, their creation and delivery, video classes at the 2020 peak,
+        grades, curriculum and schedule.
+      </p>
+      <p class="mt-5 text-sm text-tl-ink/70">{project.stack.join(', ')}</p>
+      <p class="mt-8 text-sm leading-relaxed">
+        Build a lesson on the right in five steps, then launch it and teach it on a call.
+      </p>
+    </div>
+
+    <div class="h-[82svh] min-w-0 flex-1">
+      <Lesson client:idle />
+    </div>
+  </div>
+</section>
+
+<style>
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .yellow {
+    top: -14vw;
+    left: -9vw;
+    width: 28vw;
+    aspect-ratio: 1;
+    background: var(--color-tl-yellow);
+  }
+
+  .teal {
+    right: -8vw;
+    bottom: -12vw;
+    width: 26vw;
+    aspect-ratio: 1;
+    background: var(--color-tl-teal);
+  }
+
+  .sky {
+    bottom: 6svh;
+    left: 22vw;
+    width: 5vw;
+    aspect-ratio: 1;
+    background: var(--color-tl-sky);
+  }
+</style>
+
+<style is:global>
+  /* Classes used by the Lesson island. */
+  #teacherly .lesson-block {
+    animation: lesson-drop 450ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  }
+
+  #teacherly .next-block {
+    animation: lesson-nudge 1.6s ease-in-out infinite;
+  }
+
+  #teacherly .video-progress {
+    animation: lesson-progress 12s linear forwards;
+  }
+
+  @keyframes lesson-drop {
+    from {
+      opacity: 0;
+      translate: 0 -0.8rem;
+    }
+  }
+
+  @keyframes lesson-nudge {
+    50% {
+      box-shadow: 0 0 0 5px rgb(78 64 155 / 0.18);
+    }
+  }
+
+  @keyframes lesson-progress {
+    from {
+      width: 0;
+    }
+    to {
+      width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #teacherly .lesson-block,
+    #teacherly .next-block,
+    #teacherly .video-progress {
+      animation: none;
+    }
+  }
+</style>
