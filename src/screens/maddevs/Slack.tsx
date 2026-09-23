@@ -360,7 +360,7 @@ export default function Slack() {
             className="group relative block size-9 rounded-lg transition hover:scale-105"
             style={{ boxShadow: `0 0 0 2px ${project.color}` }}
           >
-            <img src={`/icons/${project.id}.png`} alt={project.name} width={64} height={64} className="size-9 rounded-lg" />
+            <img src={`/icons/${project.id}.svg`} alt={project.name} width={64} height={64} className="size-9 rounded-lg" />
           </a>
         ))}
       </div>

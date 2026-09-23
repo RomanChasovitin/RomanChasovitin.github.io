@@ -30,13 +30,14 @@ const brandIcons = {
   github: siGithub,
   telegram: siTelegram,
 };
-// Company icons come from their own sites; the closed ones from old screenshots.
+// Company icons: rounded squares with a logo element in the brand's two main colors (public/icons).
 const images: Partial<Record<IconName, string>> = {
-  exparte: '/icons/exparte.png',
-  maddevs: '/icons/maddevs.png',
-  bilebile: '/icons/bilebile.png',
-  teacherly: '/icons/teacherly.png',
-  chocolife: '/icons/chocolife.png',
+  exparte: '/icons/exparte.svg',
+  maddevs: '/icons/maddevs.svg',
+  bilebile: '/icons/bilebile.svg',
+  teacherly: '/icons/teacherly.svg',
+  chocolife: '/icons/chocolife.svg',
+  besmart: '/icons/besmart.svg',
 };
 
 const brand = icon in brandIcons ? brandIcons[icon as keyof typeof brandIcons] : null;
