@@ -25,7 +25,7 @@ const netEdges = netNodes.flatMap((node, index) =>
 
 <section id="intro" data-screen class="hero">
   <ul class="strips">
-    <li class="strip" data-strip="me" data-active style="--i: 0">
+    <li class="strip" data-strip="me" data-opens="about" data-active style="--i: 0">
       <button type="button" class="face" aria-expanded="true" aria-controls="strip-me">
         <span class="spine">{profile.name}</span>
       </button>
@@ -42,6 +42,7 @@ const netEdges = netNodes.flatMap((node, index) =>
           Now at <Mention icon={profile.now.icon} href={profile.now.href} label={profile.now.label} />
         </p>
         <p class="me-hint">From Angular 2 in 2018 to Next.js today. Click a project for the details.</p>
+        <a class="me-more" href="#about">More about me</a>
         <p class="me-contacts">
           {profile.contacts.map((contact) => <Mention icon={contact.icon} href={contact.href} label={contact.label} />)}
         </p>
@@ -408,6 +409,17 @@ const netEdges = netNodes.flatMap((node, index) =>
   .me-hint {
     margin-top: 1.2em;
     color: #666;
+  }
+
+  .me-more {
+    align-self: flex-start;
+    margin-top: 1.4em;
+    padding: 0.6em 1.3em;
+    border-radius: 999px;
+    background: #000;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
   }
 
   .me-contacts {
