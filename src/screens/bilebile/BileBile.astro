@@ -1,0 +1,648 @@
+---
+// bile-bile.kz: the view from a compartment window on the Aktobe to Mangystau line. The train stops at four
+// stations; each one shows a working piece of what I built: search, the seat map, checkout, the ticket.
+import BackToIntro from '../../components/BackToIntro.astro';
+import { formatYears, projects } from '../../content/projects';
+
+const project = projects.find((item) => item.id === 'bilebile')!;
+const role = project.roles[0];
+
+// Station names are real stops on the line; the times are made up.
+const stations = [
+  { name: 'Aktobe-1', time: '18:40', title: 'From scratch', body: 'I built the bile-bile.kz front end from zero: React and Next.js on top of a Python back end.' },
+  { name: 'Kandyagash', time: '20:55', title: 'The seat map', body: 'Every car drawn from live back-end data: free and taken berths, upper and lower, the price of each. Pick one.' },
+  { name: 'Beyneu', time: '04:10', title: 'Checkout', body: 'Order forms for several passengers at once, each one checked before it reaches billing.' },
+  { name: 'Mangystau', time: '09:25', title: 'Built to hold', body: 'Tests and fault tolerance for the days when everyone buys tickets at once.' },
+];
+
+// A compartment car: 9 compartments of 4 berths. Odd numbers are lower berths.
+const taken = new Set([1, 2, 4, 7, 8, 11, 12, 15, 17, 18, 20, 23, 26, 27, 28, 31, 33, 34]);
+const compartments = Array.from({ length: 9 }, (_, index) => {
+  const first = index * 4 + 1;
+  return [first + 1, first + 3, first, first + 2]; // upper row, then lower row
+});
+const price = (seat: number) => (seat % 2 ? 16800 : 14500);
+---
+
+<section
+  id="bilebile"
+  data-screen
+  data-stations={JSON.stringify(stations)}
+  class="overflow-hidden bg-bb-navy font-inter text-white"
+>
+  <BackToIntro class="text-sm text-bb-silver transition-colors hover:text-white" />
+
+  <div class="flex h-full flex-col px-[5vw] pt-[9svh] pb-[4svh]">
+    <header class="flex items-end justify-between gap-8">
+      <div class="flex items-center gap-4">
+        <img src="/icons/bilebile.png" alt="" width="64" height="64" class="size-11 rounded-lg" />
+        <div>
+          <h2 class="text-2xl font-extrabold tracking-tight">{project.name}</h2>
+          <p class="text-sm text-bb-silver">{role.title}, {formatYears(role.period)}, through Mad Devs</p>
+        </div>
+      </div>
+      <p class="text-sm text-bb-silver">{project.stack.join(', ')}</p>
+    </header>
+
+    <!-- The window -->
+    <div class="window mt-5 h-[40svh] shrink-0" aria-hidden="true">
+      <div class="sky"></div>
+      <div class="sun"></div>
+      <div class="layer mountains"></div>
+      <div class="layer hills"></div>
+      <div class="layer poles"></div>
+      <div class="layer ground"></div>
+      <div class="sign"><span data-sign>{stations[0].name}</span></div>
+      <div class="curtain left"></div>
+      <div class="curtain right"></div>
+    </div>
+
+    <!-- The route -->
+    <ol class="route mt-6 grid grid-cols-4" style={`--progress: 0`}>
+      {
+        stations.map((station, index) => (
+          <li>
+            <button type="button" data-station={index} class="stop" aria-current={index === 0 ? 'step' : undefined}>
+              <span class="dot" />
+              <span class="font-bold">{station.name}</span>
+              <span class="text-xs text-bb-silver tabular-nums">{station.time}</span>
+            </button>
+          </li>
+        ))
+      }
+      <span class="train" aria-hidden="true"></span>
+    </ol>
+
+    <!-- What this station is about -->
+    <div class="mt-6 grid min-h-0 flex-1 grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-[4vw]">
+      <div aria-live="polite">
+        <p class="text-sm text-bb-silver" data-at>Station 1 of 4: {stations[0].name}</p>
+        <h3 class="mt-2 text-[clamp(1.8rem,3vw,3rem)] leading-tight font-extrabold tracking-tight" data-title>
+          {stations[0].title}
+        </h3>
+        <p class="mt-3 max-w-[30em] leading-relaxed text-white/75" data-body>{stations[0].body}</p>
+        <button type="button" data-next class="next mt-6">Next station</button>
+      </div>
+
+      <div class="panel min-h-0">
+        <!-- 1. Search -->
+        <form data-widget="0" class="search" onsubmit="return false">
+          <label><span>From</span><input value="Aktobe-1" readonly /></label>
+          <label><span>To</span><input value="Mangystau" readonly /></label>
+          <label><span>Departure</span><input value="10 December" readonly /></label>
+          <label><span>Passengers</span><input value="1 passenger" readonly /></label>
+          <button type="submit" data-find class="find">Find tickets</button>
+        </form>
+
+        <!-- 2. Seat map -->
+        <div data-widget="1" hidden class="seats">
+          <p class="text-sm font-bold">Car 7, compartment</p>
+          <div class="car" role="group" aria-label="Seats in car 7">
+            {
+              compartments.map((seats) => (
+                <div class="compartment">
+                  {seats.map((seat) => (
+                    <button
+                      type="button"
+                      class="seat"
+                      data-seat={seat}
+                      disabled={taken.has(seat)}
+                      aria-label={`Seat ${seat}, ${seat % 2 ? 'lower' : 'upper'} berth, ${taken.has(seat) ? 'taken' : `${price(seat)} tenge`}`}
+                    >
+                      {seat}
+                    </button>
+                  ))}
+                </div>
+              ))
+            }
+          </div>
+          <p class="legend">
+            <span><i class="free"></i>Free</span><span><i class="taken"></i>Taken</span><span
+              ><i class="mine"></i>Your seat</span
+            >
+          </p>
+          <p class="mt-3 text-sm" data-choice>Pick a free berth. Lower ones cost more.</p>
+        </div>
+
+        <!-- 3. Checkout -->
+        <form data-widget="2" hidden class="checkout" novalidate>
+          <label><span>Full name</span><input data-name placeholder="As in the ID card" autocomplete="off" /></label>
+          <label>
+            <span>IIN</span>
+            <input data-iin inputmode="numeric" maxlength="12" placeholder="12 digits" autocomplete="off" />
+          </label>
+          <p class="hint" data-iin-hint>The IIN has 12 digits.</p>
+          <button type="submit" data-pay class="find" disabled>Pay</button>
+        </form>
+
+        <!-- 4. Ticket -->
+        <div data-widget="3" hidden class="ticket">
+          <div>
+            <p class="text-xs text-bb-muted">Electronic ticket</p>
+            <p class="mt-1 text-lg font-extrabold">Aktobe-1 → Mangystau</p>
+            <p class="mt-1 text-sm">10 December, 18:40</p>
+            <p class="mt-3 text-sm" data-ticket-seat>Car 7, seat 14, upper berth</p>
+            <p class="text-sm" data-ticket-name>Passenger</p>
+          </div>
+          <div class="code" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .window {
+    position: relative;
+    overflow: hidden;
+    border: 14px solid #1b2a44;
+    border-radius: 28px;
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.06),
+      inset 0 20px 60px rgb(0 0 0 / 0.35);
+  }
+
+  .sky {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, #1c2b47 0%, var(--color-bb-navy) 35%, #4a5f86 78%, #6d7fa3 100%);
+  }
+
+  .sun {
+    position: absolute;
+    top: 34%;
+    right: 18%;
+    width: 7vw;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--color-bb-red);
+    box-shadow: 0 0 80px 10px rgb(230 52 69 / 0.35);
+  }
+
+  /* Each layer is a tile repeated sideways and moved at its own speed. */
+  .layer {
+    position: absolute;
+    inset: auto 0 0;
+    background-repeat: repeat-x;
+    animation: pass linear infinite;
+    animation-play-state: paused;
+  }
+
+  .window[data-moving] .layer {
+    animation-play-state: running;
+  }
+
+  .mountains {
+    height: 48%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='200' viewBox='0 0 900 200' preserveAspectRatio='none'%3E%3Cpath d='M0 200V120L90 70l70 40 110-80 90 60 60-30 120 70 90-50 110 60 80-40 80 30v120z' fill='%232e4265'/%3E%3C/svg%3E");
+    background-size: 900px 100%;
+    --tile: 900px;
+    animation-duration: 90s;
+  }
+
+  .hills {
+    height: 30%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='120' viewBox='0 0 700 120' preserveAspectRatio='none'%3E%3Cpath d='M0 120V60c80-30 150-35 230-15s140 30 240 5 170-20 230 10v60z' fill='%23233553'/%3E%3C/svg%3E");
+    background-size: 700px 100%;
+    --tile: 700px;
+    animation-duration: 28s;
+  }
+
+  .poles {
+    height: 62%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='200' viewBox='0 0 420 200' preserveAspectRatio='none'%3E%3Cpath d='M0 30q210 40 420 0' fill='none' stroke='%23142037' stroke-width='1.5'/%3E%3Crect x='0' y='22' width='5' height='178' fill='%23142037'/%3E%3Crect x='-10' y='26' width='26' height='4' fill='%23142037'/%3E%3C/svg%3E");
+    background-size: 420px 100%;
+    --tile: 420px;
+    animation-duration: 2.4s;
+  }
+
+  .ground {
+    height: 12%;
+    background: linear-gradient(180deg, #1a2740, #111b2e);
+  }
+
+  @keyframes pass {
+    to {
+      background-position-x: calc(-1 * var(--tile, 0px));
+    }
+  }
+
+  .sign {
+    position: absolute;
+    bottom: 16%;
+    left: 50%;
+    padding: 0.5em 1.4em;
+    border: 3px solid #fff;
+    border-radius: 4px;
+    background: #1b4f9c;
+    color: #fff;
+    font-size: clamp(1rem, 1.6vw, 1.6rem);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    translate: -50% 0;
+    transition: translate 1.1s cubic-bezier(0.3, 0, 0.2, 1);
+
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      width: 5px;
+      height: 3vw;
+      background: #0f1a2d;
+    }
+
+    &::before {
+      left: 18%;
+    }
+
+    &::after {
+      right: 18%;
+    }
+  }
+
+  .sign[data-state='away'] {
+    translate: -260% 0;
+  }
+
+  .sign[data-state='coming'] {
+    transition: none;
+    translate: 160% 0;
+  }
+
+  /* Folded red curtains at the window edges. */
+  .curtain {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 6%;
+    background: repeating-linear-gradient(90deg, #c92a3a 0 10px, var(--color-bb-red) 10px 22px, #b82434 22px 26px);
+  }
+
+  .curtain.left {
+    left: 0;
+    border-radius: 0 0 60% 0;
+  }
+
+  .curtain.right {
+    right: 0;
+    border-radius: 0 0 0 60%;
+  }
+
+  .route {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0.45rem;
+      right: 12.5%;
+      left: 12.5%;
+      height: 2px;
+      background: repeating-linear-gradient(90deg, var(--color-bb-silver) 0 10px, transparent 10px 16px);
+    }
+  }
+
+  .stop {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  .dot {
+    width: 1rem;
+    height: 1rem;
+    border: 3px solid var(--color-bb-silver);
+    border-radius: 50%;
+    background: var(--color-bb-navy);
+  }
+
+  .stop[aria-current] .dot,
+  .stop[data-passed] .dot {
+    border-color: var(--color-bb-red);
+  }
+
+  .stop[aria-current] .dot {
+    background: var(--color-bb-red);
+  }
+
+  /* The train marker rides along the line between the first and the last stop. */
+  .train {
+    position: absolute;
+    top: 0.05rem;
+    left: calc(12.5% + var(--progress) * 75%);
+    width: 1.8rem;
+    height: 0.8rem;
+    border-radius: 0.4rem;
+    background: #fff;
+    box-shadow: 0 0 0 3px var(--color-bb-navy);
+    translate: -50% 0;
+    transition: left 1.6s cubic-bezier(0.5, 0, 0.3, 1);
+  }
+
+  .next,
+  .find {
+    padding: 0.75em 1.6em;
+    border-radius: 8px;
+    background: var(--color-bb-red);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .next[disabled],
+  .find[disabled] {
+    background: var(--color-bb-silver);
+    cursor: default;
+  }
+
+  /* Their search panel: a white bar with grey fields. */
+  .panel {
+    border-radius: 12px;
+    background: #fff;
+    color: var(--color-bb-ink);
+    padding: 1.1rem;
+    overflow: auto;
+  }
+
+  .search,
+  .checkout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+
+    & label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      padding: 0.55rem 0.8rem;
+      border-radius: 8px;
+      background: var(--color-bb-mist);
+    }
+
+    & span {
+      color: var(--color-bb-muted);
+      font-size: 0.75rem;
+    }
+
+    & input {
+      background: transparent;
+      outline: none;
+    }
+
+    & .find {
+      grid-column: 1 / -1;
+      justify-self: end;
+    }
+  }
+
+  .checkout .hint {
+    grid-column: 1 / -1;
+    color: var(--color-bb-muted);
+    font-size: 0.8rem;
+  }
+
+  .checkout .hint[data-state='bad'] {
+    color: var(--color-bb-red);
+  }
+
+  .checkout .hint[data-state='good'] {
+    color: #2e8b57;
+  }
+
+  .car {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.8rem;
+    padding: 0.6rem;
+    border: 2px solid var(--color-bb-silver);
+    border-radius: 10px;
+  }
+
+  .compartment {
+    display: grid;
+    flex: 1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem;
+    padding-right: 0.5rem;
+    border-right: 1px dashed var(--color-bb-silver);
+
+    &:last-child {
+      padding-right: 0;
+      border-right: 0;
+    }
+  }
+
+  .seat {
+    aspect-ratio: 1;
+    border-radius: 5px;
+    background: var(--color-bb-mist);
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover:not([disabled]) {
+      outline: 2px solid var(--color-bb-red);
+    }
+
+    &[disabled] {
+      background: var(--color-bb-silver);
+      color: #fff;
+      cursor: not-allowed;
+    }
+
+    &[aria-pressed='true'] {
+      background: var(--color-bb-red);
+      color: #fff;
+    }
+  }
+
+  .legend {
+    display: flex;
+    gap: 1.2rem;
+    margin-top: 0.6rem;
+    color: var(--color-bb-muted);
+    font-size: 0.75rem;
+
+    & i {
+      display: inline-block;
+      width: 0.8em;
+      height: 0.8em;
+      margin-right: 0.4em;
+      border-radius: 2px;
+      vertical-align: -0.05em;
+    }
+
+    & .free {
+      background: var(--color-bb-mist);
+      outline: 1px solid var(--color-bb-silver);
+    }
+
+    & .taken {
+      background: var(--color-bb-silver);
+    }
+
+    & .mine {
+      background: var(--color-bb-red);
+    }
+  }
+
+  .ticket {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 100%;
+    padding-left: 1rem;
+    border-left: 4px solid var(--color-bb-red);
+  }
+
+  /* A code block drawn from a fixed pattern, not a real code. */
+  .code {
+    align-self: center;
+    width: 7rem;
+    aspect-ratio: 1;
+    background:
+      conic-gradient(from 90deg at 30% 30%, var(--color-bb-ink) 25%, transparent 0) 0 0 / 1.1rem 1.1rem,
+      repeating-linear-gradient(45deg, var(--color-bb-ink) 0 3px, transparent 3px 7px);
+    border: 6px solid var(--color-bb-ink);
+    border-radius: 4px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .layer {
+      animation: none;
+    }
+
+    .sign,
+    .train {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  const screen = document.getElementById('bilebile')!;
+  const windowEl = screen.querySelector<HTMLElement>('.window')!;
+  const sign = screen.querySelector<HTMLElement>('.sign')!;
+  const signText = screen.querySelector<HTMLElement>('[data-sign]')!;
+  const route = screen.querySelector<HTMLElement>('.route')!;
+  const stops = Array.from(screen.querySelectorAll<HTMLButtonElement>('[data-station]'));
+  const widgets = Array.from(screen.querySelectorAll<HTMLElement>('[data-widget]'));
+  const at = screen.querySelector<HTMLElement>('[data-at]')!;
+  const title = screen.querySelector<HTMLElement>('[data-title]')!;
+  const body = screen.querySelector<HTMLElement>('[data-body]')!;
+  const next = screen.querySelector<HTMLButtonElement>('[data-next]')!;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const stations: { name: string; title: string; body: string }[] = JSON.parse(screen.dataset.stations!);
+
+  let station = 0;
+  let travelling = false;
+  let seat: number | null = null;
+  let passenger = '';
+
+  const TRAVEL_MS = reduced ? 0 : 1600;
+
+  function render() {
+    stops.forEach((stop, index) => {
+      if (index === station) stop.setAttribute('aria-current', 'step');
+      else stop.removeAttribute('aria-current');
+      stop.toggleAttribute('data-passed', index < station);
+    });
+    widgets.forEach((widget, index) => (widget.hidden = index !== station));
+    at.textContent = `Station ${station + 1} of ${stations.length}: ${stations[station].name}`;
+    title.textContent = stations[station].title;
+    body.textContent = stations[station].body;
+    next.textContent = station === stations.length - 1 ? 'Back to Aktobe-1' : 'Next station';
+    next.disabled = station === 1 && seat === null;
+  }
+
+  function travel(to: number) {
+    if (travelling || to === station) return;
+    travelling = true;
+    windowEl.toggleAttribute('data-moving', true);
+    sign.dataset.state = 'away';
+    route.style.setProperty('--progress', String(to / (stations.length - 1)));
+    setTimeout(() => {
+      station = to;
+      render();
+      signText.textContent = stations[to].name;
+      sign.dataset.state = 'coming';
+      // Next frame: let the sign come in from the right and the train stop under it.
+      requestAnimationFrame(() =>
+        requestAnimationFrame(() => {
+          delete sign.dataset.state;
+          setTimeout(() => {
+            windowEl.toggleAttribute('data-moving', false);
+            travelling = false;
+          }, reduced ? 0 : 1100);
+        }),
+      );
+    }, TRAVEL_MS);
+  }
+
+  next.addEventListener('click', () => travel(station === stations.length - 1 ? 0 : station + 1));
+  stops.forEach((stop, index) => stop.addEventListener('click', () => travel(index)));
+  screen.querySelector('[data-find]')!.addEventListener('click', () => travel(1));
+
+  // Seat map
+  const choice = screen.querySelector<HTMLElement>('[data-choice]')!;
+  const seats = Array.from(screen.querySelectorAll<HTMLButtonElement>('[data-seat]'));
+  for (const button of seats) {
+    button.setAttribute('aria-pressed', 'false');
+    button.addEventListener('click', () => {
+      seat = Number(button.dataset.seat);
+      for (const other of seats) other.setAttribute('aria-pressed', String(other === button));
+      const lower = seat % 2 === 1;
+      const cost = (lower ? 16800 : 14500).toLocaleString('ru-RU');
+      choice.textContent = `Car 7, seat ${seat}, ${lower ? 'lower' : 'upper'} berth: ${cost} ₸`;
+      render();
+    });
+  }
+
+  // Checkout: the IIN is 12 digits; the first six are the birth date (YYMMDD).
+  const nameInput = screen.querySelector<HTMLInputElement>('[data-name]')!;
+  const iin = screen.querySelector<HTMLInputElement>('[data-iin]')!;
+  const hint = screen.querySelector<HTMLElement>('[data-iin-hint]')!;
+  const pay = screen.querySelector<HTMLButtonElement>('[data-pay]')!;
+  function check() {
+    iin.value = iin.value.replace(/\D/g, '');
+    const digits = iin.value;
+    const month = Number(digits.slice(2, 4));
+    const day = Number(digits.slice(4, 6));
+    let state: 'bad' | 'good' | '' = '';
+    let text = 'The IIN has 12 digits.';
+    if (digits.length === 12) {
+      const dateOk = month >= 1 && month <= 12 && day >= 1 && day <= 31;
+      state = dateOk ? 'good' : 'bad';
+      text = dateOk ? 'The IIN looks right.' : 'Digits 3 to 6 should be a birth month and day.';
+    } else if (digits.length > 0) {
+      text = `${12 - digits.length} more digits.`;
+    }
+    hint.dataset.state = state;
+    hint.textContent = text;
+    pay.disabled = !(state === 'good' && nameInput.value.trim());
+    const cost = seat ? (seat % 2 ? 16800 : 14500).toLocaleString('ru-RU') : '14 500';
+    pay.textContent = `Pay ${cost} ₸`;
+  }
+  iin.addEventListener('input', check);
+  nameInput.addEventListener('input', check);
+  screen.querySelector('.checkout')!.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (pay.disabled) return;
+    passenger = nameInput.value.trim();
+    const chosen = seat ?? 14;
+    screen.querySelector('[data-ticket-seat]')!.textContent =
+      `Car 7, seat ${chosen}, ${chosen % 2 ? 'lower' : 'upper'} berth`;
+    screen.querySelector('[data-ticket-name]')!.textContent = passenger;
+    travel(3);
+  });
+
+  document.addEventListener('screen:change', () => check());
+  render();
+  check();
+</script>
