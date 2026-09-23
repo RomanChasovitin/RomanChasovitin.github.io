@@ -27,7 +27,8 @@ const role = project.roles[0];
       </p>
       <p class="mt-5 text-sm text-tl-ink/70">{project.stack.join(', ')}</p>
       <p class="mt-8 text-sm leading-relaxed">
-        Build a lesson on the right in five steps, then launch it and teach it on a call.
+        Try the whole loop on the right: lay out a lesson on a free canvas, put it in the timetable, teach it on
+        a call and grade the class.
       </p>
     </div>
 
@@ -69,47 +70,3 @@ const role = project.roles[0];
   }
 </style>
 
-<style is:global>
-  /* Classes used by the Lesson island. */
-  #teacherly .lesson-block {
-    animation: lesson-drop 450ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
-  }
-
-  #teacherly .next-block {
-    animation: lesson-nudge 1.6s ease-in-out infinite;
-  }
-
-  #teacherly .video-progress {
-    animation: lesson-progress 12s linear forwards;
-  }
-
-  @keyframes lesson-drop {
-    from {
-      opacity: 0;
-      translate: 0 -0.8rem;
-    }
-  }
-
-  @keyframes lesson-nudge {
-    50% {
-      box-shadow: 0 0 0 5px rgb(78 64 155 / 0.18);
-    }
-  }
-
-  @keyframes lesson-progress {
-    from {
-      width: 0;
-    }
-    to {
-      width: 100%;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    #teacherly .lesson-block,
-    #teacherly .next-block,
-    #teacherly .video-progress {
-      animation: none;
-    }
-  }
-</style>
