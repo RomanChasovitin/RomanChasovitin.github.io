@@ -8,6 +8,7 @@ import {
   type Report,
   type UserId,
 } from './chat';
+import { brandIcon } from '../../content/icons';
 
 // Classic Slack colors, taken from an archived maddevs.io screenshot where the hero had a Slack window.
 const RAIL = '#261c25';
@@ -21,7 +22,7 @@ const PROJECTS = [
   { id: 'exparte', name: 'Ex Parte', color: '#0061ff' },
   { id: 'bilebile', name: 'bile-bile.kz', color: '#e63445' },
   { id: 'teacherly', name: 'Teacherly', color: '#4e409b' },
-];
+] as const;
 
 type Reaction = { count: number; mine: boolean };
 type Profile = { user: UserId; x: number; y: number };
@@ -360,7 +361,7 @@ export default function Slack() {
             className="group relative block size-9 rounded-lg transition hover:scale-105"
             style={{ boxShadow: `0 0 0 2px ${project.color}` }}
           >
-            <img src={`/icons/${project.id}.svg`} alt={project.name} width={64} height={64} className="size-9 rounded-lg" />
+            <img src={brandIcon[project.id]} alt={project.name} width={64} height={64} className="size-9 rounded-lg" />
           </a>
         ))}
       </div>
