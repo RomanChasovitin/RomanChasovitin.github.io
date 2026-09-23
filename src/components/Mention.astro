@@ -12,6 +12,7 @@ import {
   siTypescript,
   siVuedotjs,
 } from 'simple-icons';
+import { brandIcon } from '../content/icons';
 import type { IconName } from '../content/profile';
 
 type Props = { icon: IconName; href: string; label: string };
@@ -30,13 +31,9 @@ const brandIcons = {
   github: siGithub,
   telegram: siTelegram,
 };
-// Company icons: rounded squares with a logo element in the brand's two main colors (public/icons).
+// Company icons, see content/icons.ts.
 const images: Partial<Record<IconName, string>> = {
-  exparte: '/icons/exparte.svg',
-  maddevs: '/icons/maddevs.svg',
-  bilebile: '/icons/bilebile.svg',
-  teacherly: '/icons/teacherly.svg',
-  chocolife: '/icons/chocolife.svg',
+  ...brandIcon,
   besmart: '/icons/besmart.svg',
 };
 
