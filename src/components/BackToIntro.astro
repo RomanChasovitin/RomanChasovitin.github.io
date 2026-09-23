@@ -1,11 +1,12 @@
 ---
-// Every project screen has one, top left: a real button, dressed in each screen's brand through `class`.
-type Props = { class?: string };
+// Every project screen has one: a real button, dressed in each screen's brand through `class`.
+// By default it sits top left of the screen; `inline` puts it in the flow, for screens with a centered column.
+type Props = { class?: string; inline?: boolean };
 
-const { class: className } = Astro.props;
+const { class: className, inline = false } = Astro.props;
 ---
 
-<a href="#intro" class:list={['back', className]}>Back to intro</a>
+<a href="#intro" class:list={['back', { 'back-inline': inline }, className]}>Back to intro</a>
 
 <style>
   .back {
@@ -21,5 +22,10 @@ const { class: className } = Astro.props;
       background-color 200ms ease,
       border-color 200ms ease,
       color 200ms ease;
+  }
+
+  .back-inline {
+    position: static;
+    align-self: flex-start;
   }
 </style>

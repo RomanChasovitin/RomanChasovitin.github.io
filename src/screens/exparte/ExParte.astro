@@ -19,7 +19,7 @@ const since = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' }).
   <canvas class="absolute inset-0 size-full" aria-hidden="true"></canvas>
   <BackToIntro class="rounded-md border border-xp-rule bg-xp-panel font-geist-mono text-sm text-xp-mist hover:border-xp-cyan hover:text-white" />
 
-  <div data-column class="relative flex h-full w-full flex-col justify-center px-[5vw] min-[900px]:w-[38%]">
+  <div data-column class="relative flex h-full w-full flex-col justify-center px-[5vw] pt-[10svh] pb-[4svh] min-[900px]:w-[38%]">
     <h2><ExParteLogo class="block h-auto w-[clamp(15rem,26vw,28rem)]" /></h2>
     <p class="mt-5 font-geist-mono text-sm text-xp-mist">{role.title} through Mad Devs, since {since}</p>
     <p class="mt-8 max-w-[30em] text-lg leading-relaxed text-xp-mist">
@@ -28,8 +28,7 @@ const since = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' }).
     </p>
     <p class="mt-6 font-geist-mono text-sm text-xp-slate">{project.stack.join(', ')}</p>
 
-    <p class="mt-12 text-sm text-xp-slate">Five nodes glow. Pick one to send an agent through the graph.</p>
-    <ul class="mt-5 flex flex-col border-t border-xp-rule">
+    <ul class="mt-12 flex flex-col border-t border-xp-rule">
       {
         findings.map((finding) => (
           <li class="border-b border-xp-rule" data-item={finding.id}>
