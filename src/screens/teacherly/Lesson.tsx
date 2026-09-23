@@ -1,47 +1,24 @@
-import { useEffect, useRef, useState, type DragEvent, type PointerEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
 
-// Teacherly, the product: build a lesson block by block, launch it, teach it on a video call.
-// Student names are placeholders for the five front-end developers of the team.
+// Teacherly, the product, end to end: create a lesson on a free canvas, split it into screens, put it in the
+// timetable for a class, teach it on a call, then grade the class. Student names are placeholders for the
+// five front-end developers of the team.
 
-type BlockId = 'title' | 'text' | 'video' | 'quiz';
+type Kind = 'text' | 'image' | 'video' | 'shape';
+type Shape = 'circle' | 'star' | 'arrow';
+type Item = { id: number; kind: Kind; x: number; y: number; w: number; h: number; text?: string; shape?: Shape; color?: string };
+type Screen = { id: number; elements: Item[] };
+type Stage = 'create' | 'schedule' | 'teach' | 'grade';
 
-const BLOCKS: { id: BlockId; label: string; color: string; icon: ReactNode }[] = [
-  {
-    id: 'title',
-    label: 'Title',
-    color: '#4e409b',
-    icon: <path d="M5 6h14M12 6v13M9 19h6" />,
-  },
-  {
-    id: 'text',
-    label: 'Text',
-    color: '#e6a2ba',
-    icon: <path d="M5 7h14M5 11h14M5 15h9" />,
-  },
-  {
-    id: 'video',
-    label: 'Video',
-    color: '#65b8be',
-    icon: (
-      <>
-        <rect x="3.5" y="6" width="17" height="12" rx="2" />
-        <path d="m10.5 9.5 4 2.5-4 2.5z" />
-      </>
-    ),
-  },
-  {
-    id: 'quiz',
-    label: 'Quiz',
-    color: '#f2c979',
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="8" />
-        <path d="M9.8 9.8a2.3 2.3 0 1 1 3 2.2c-.6.2-.8.6-.8 1.2M12 16h.01" />
-      </>
-    ),
-  },
+const PURPLE = '#4e409b';
+const COLORS = ['#f7da49', '#65b8be', '#e6a2ba', '#aad5ed', '#f2c979'];
+const SHAPES: Shape[] = ['circle', 'star', 'arrow'];
+const STAGES: { id: Stage; label: string }[] = [
+  { id: 'create', label: 'Create' },
+  { id: 'schedule', label: 'Schedule' },
+  { id: 'teach', label: 'Teach' },
+  { id: 'grade', label: 'Grade' },
 ];
-
 const STUDENTS = [
   { name: 'Asel', color: '#f7da49' },
   { name: 'Bekzat', color: '#65b8be' },
@@ -49,202 +26,514 @@ const STUDENTS = [
   { name: 'Aigerim', color: '#e6a2ba' },
   { name: 'Daniyar', color: '#f2c979' },
 ];
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+const PERIODS = ['09:00', '10:00', '11:15', '12:15', '14:00'];
+/** Lessons already in the timetable, keyed by "day-period". */
+const BUSY: Record<string, string> = {
+  '0-0': 'Maths 9B',
+  '0-3': 'History 8A',
+  '1-1': 'Science 9B',
+  '2-0': 'Maths 9B',
+  '2-2': 'Art 7C',
+  '3-4': 'Science 9B',
+  '4-1': 'Drama 8A',
+  '4-3': 'Maths 9B',
+};
+const GRADES = ['A*', 'A', 'B', 'C', 'D', 'E'];
 
-const PENS = ['#4e409b', '#65b8be', '#e6a2ba', '#f2c979'];
+let nextId = 100;
 
-const QUIZ = ['The redesign', 'Video lessons', 'The lesson editor', 'All of the above'];
+const SEED: Screen[] = [
+  {
+    id: 1,
+    elements: [
+      { id: 1, kind: 'shape', shape: 'circle', color: '#f7da49', x: 70, y: -12, w: 38, h: 60 },
+      { id: 2, kind: 'text', text: 'What I built at Teacherly', x: 6, y: 12, w: 62, h: 18 },
+      { id: 3, kind: 'text', text: 'Maintainer for a year and a half. I redesigned the whole app and made creating lessons much better.', x: 6, y: 38, w: 50, h: 26 },
+      { id: 4, kind: 'image', x: 60, y: 44, w: 32, h: 44 },
+    ],
+  },
+  {
+    id: 2,
+    elements: [
+      { id: 5, kind: 'video', text: 'Video lessons, added at the 2020 peak', x: 6, y: 12, w: 50, h: 62 },
+      { id: 6, kind: 'text', text: 'At the peak I led five front-end developers. All before AI tools.', x: 60, y: 22, w: 34, h: 30 },
+      { id: 7, kind: 'shape', shape: 'star', color: '#65b8be', x: 70, y: 62, w: 16, h: 26 },
+    ],
+  },
+];
 
-function Icon({ children, color }: { children: ReactNode; color: string }) {
+function ShapeArt({ shape, color }: { shape: Shape; color: string }) {
   return (
-    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      {children}
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="size-full" aria-hidden="true">
+      {shape === 'circle' && <circle cx="50" cy="50" r="50" fill={color} />}
+      {shape === 'star' && <path d="m50 2 13 33 35 2-27 22 9 35-30-19-30 19 9-35L2 37l35-2z" fill={color} />}
+      {shape === 'arrow' && <path d="M4 42h62V18l30 32-30 32V58H4z" fill={color} />}
     </svg>
   );
 }
 
-function LessonPage({ blocks, quizAnswer, onAnswer, playing, onPlay, small = false }: {
-  blocks: BlockId[];
-  quizAnswer: string | null;
-  onAnswer?: (answer: string) => void;
-  playing: boolean;
-  onPlay?: () => void;
-  small?: boolean;
+function ItemArt({ element }: { element: Item }) {
+  if (element.kind === 'shape') return <ShapeArt shape={element.shape!} color={element.color!} />;
+  if (element.kind === 'image') {
+    // A picture placeholder drawn in the brand colors.
+    return (
+      <svg viewBox="0 0 160 110" preserveAspectRatio="xMidYMid slice" className="size-full rounded-[0.8cqw]" aria-hidden="true">
+        <rect width="160" height="110" fill="#aad5ed" />
+        <circle cx="122" cy="30" r="14" fill="#f7da49" />
+        <path d="M0 110 50 52l30 32 22-20 58 46z" fill="#4e409b" />
+        <path d="M60 110 102 64l58 46z" fill="#65b8be" />
+      </svg>
+    );
+  }
+  if (element.kind === 'video') {
+    return (
+      <div className="relative flex size-full items-center justify-center overflow-hidden rounded-[0.8cqw] bg-gradient-to-br from-[#4e409b] to-[#6b5cc0]">
+        <span className="absolute -top-[20%] -right-[10%] aspect-square w-[45%] rounded-full bg-[#f7da49]/80" />
+        <span className="relative flex aspect-square w-[14%] items-center justify-center rounded-full bg-white/90 text-[2.2cqw] text-[#4e409b]">▶</span>
+        <span className="absolute bottom-[6%] left-[5%] text-[1.5cqw] font-bold text-white">{element.text}</span>
+      </div>
+    );
+  }
+  return null;
+}
+
+/** One screen of the lesson, drawn in container units so it scales from a thumbnail to the full stage. */
+function Board({
+  screen,
+  editable = false,
+  selected,
+  onSelect,
+  onChange,
+}: {
+  screen: Screen;
+  editable?: boolean;
+  selected?: number | null;
+  onSelect?: (id: number | null) => void;
+  onChange?: (element: Item) => void;
 }) {
+  const board = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ id: number; mode: 'move' | 'size'; x: number; y: number; start: Item } | null>(null);
+  const [editing, setEditing] = useState<number | null>(null);
+
+  function begin(event: PointerEvent, element: Item, mode: 'move' | 'size') {
+    if (!editable || editing === element.id) return;
+    event.stopPropagation();
+    (event.target as HTMLElement).setPointerCapture(event.pointerId);
+    drag.current = { id: element.id, mode, x: event.clientX, y: event.clientY, start: element };
+    onSelect?.(element.id);
+  }
+
+  function move(event: PointerEvent) {
+    const current = drag.current;
+    if (!current) return;
+    const box = board.current!.getBoundingClientRect();
+    const dx = ((event.clientX - current.x) / box.width) * 100;
+    const dy = ((event.clientY - current.y) / box.height) * 100;
+    const start = current.start;
+    onChange?.(
+      current.mode === 'move'
+        ? { ...start, x: start.x + dx, y: start.y + dy }
+        : { ...start, w: Math.max(6, start.w + dx), h: Math.max(6, start.h + dy) },
+    );
+  }
+
   return (
-    <div className={`flex flex-col ${small ? 'gap-3' : 'gap-5'}`}>
-      {blocks.includes('title') && (
-        <div className="lesson-block">
-          <p className="text-xs font-bold text-tl-purple">Lesson 1</p>
-          <h4 className={`${small ? 'text-xl' : 'text-3xl'} mt-1 font-bold`}>What I built at Teacherly</h4>
-          <p className="mt-1 text-sm text-tl-ink/70">Front-End Maintainer, 2019–2021, through Mad Devs</p>
-        </div>
-      )}
-      {blocks.includes('text') && (
-        <p className={`lesson-block max-w-[36em] leading-relaxed ${small ? 'text-sm' : ''}`}>
-          For a year and a half I maintained the app and redesigned all of it. I made creating and editing
-          interactive lessons much better, and at the peak I led five front-end developers. All before AI tools.
-        </p>
-      )}
-      {blocks.includes('video') && (
-        <div className="lesson-block">
-          <button
-            type="button"
-            onClick={onPlay}
-            className="relative flex aspect-video w-full max-w-md cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-tl-purple to-[#6b5cc0] text-white"
-            aria-label={playing ? 'Pause the video' : 'Play the video'}
+    <div
+      ref={board}
+      onPointerMove={move}
+      onPointerUp={() => (drag.current = null)}
+      onPointerDown={() => editable && onSelect?.(null)}
+      className="relative aspect-video w-full overflow-hidden rounded-xl bg-white [container-type:inline-size]"
+      style={editable ? { backgroundImage: 'radial-gradient(#e5e2f0 1px, transparent 1px)', backgroundSize: '2.5cqw 2.5cqw' } : undefined}
+    >
+      {screen.elements.map((element) => {
+        const isSelected = editable && selected === element.id;
+        return (
+          <div
+            key={element.id}
+            onPointerDown={(event) => begin(event, element, 'move')}
+            onDoubleClick={() => editable && element.kind === 'text' && setEditing(element.id)}
+            className={`absolute ${editable ? 'cursor-move' : ''} ${isSelected ? 'outline-2 outline-offset-2 outline-[#4e409b]' : ''}`}
+            style={{ left: `${element.x}%`, top: `${element.y}%`, width: `${element.w}%`, height: `${element.h}%` }}
           >
-            <span className="absolute -top-8 -right-8 size-32 rounded-full bg-tl-yellow/80" />
-            <span className="absolute -bottom-10 -left-6 size-28 rounded-full bg-tl-teal/80" />
-            <span className="relative flex size-14 items-center justify-center rounded-full bg-white/90 text-tl-purple">
-              {playing ? '❚❚' : '▶'}
-            </span>
-            {playing && <span className="video-progress absolute bottom-0 left-0 h-1 bg-tl-yellow" />}
-          </button>
-          <p className="mt-2 text-sm text-tl-ink/70">
-            Video lessons: I added them at the 2020 peak, when every class went online.
-          </p>
-        </div>
-      )}
-      {blocks.includes('quiz') && (
-        <div className="lesson-block">
-          <p className="font-bold">Which of these did I build?</p>
-          <div className="mt-2 grid max-w-md grid-cols-2 gap-2">
-            {QUIZ.map((option) => {
-              const picked = quizAnswer === option;
-              const right = option === 'All of the above';
-              return (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => onAnswer?.(option)}
-                  className="cursor-pointer rounded-lg border-2 px-3 py-2 text-left text-sm transition-colors"
-                  style={{
-                    borderColor: picked ? (right ? '#65b8be' : '#f2c979') : '#e5e2f0',
-                    background: picked ? (right ? '#eaf6f7' : '#fdf6e6') : '#fff',
-                  }}
-                >
-                  {option}
-                </button>
-              );
-            })}
+            {element.kind === 'text' ? (
+              <p
+                contentEditable={editing === element.id}
+                suppressContentEditableWarning
+                onBlur={(event) => {
+                  setEditing(null);
+                  onChange?.({ ...element, text: event.currentTarget.textContent ?? '' });
+                }}
+                className={`size-full leading-snug text-[#322d4d] outline-none ${element.id === screen.elements.find((item) => item.kind === 'text')?.id ? 'text-[4cqw] font-bold' : 'text-[2.2cqw]'} ${editing === element.id ? 'cursor-text rounded bg-[#f9f7ff]' : ''}`}
+              >
+                {element.text}
+              </p>
+            ) : (
+              <ItemArt element={element} />
+            )}
+            {isSelected && (
+              <span
+                onPointerDown={(event) => begin(event, element, 'size')}
+                className="absolute -right-1.5 -bottom-1.5 size-3 cursor-nwse-resize rounded-sm bg-[#4e409b]"
+                aria-hidden="true"
+              />
+            )}
           </div>
-          {quizAnswer && (
-            <p className="mt-2 text-sm">
-              {quizAnswer === 'All of the above' ? 'Right: all three.' : 'Yes, and the other two as well.'}
-            </p>
-          )}
-        </div>
-      )}
+        );
+      })}
     </div>
   );
 }
 
 export default function Lesson() {
-  const [blocks, setBlocks] = useState<BlockId[]>([]);
-  const [dragOver, setDragOver] = useState(false);
-  const [quizAnswer, setQuizAnswer] = useState<string | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [live, setLive] = useState(false);
+  const [stage, setStage] = useState<Stage>('create');
+  const [reached, setReached] = useState(0);
+  const [title, setTitle] = useState('What I built at Teacherly');
+  const [screens, setScreens] = useState<Screen[]>(SEED);
+  const [current, setCurrent] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
+  const [shapeTurn, setShapeTurn] = useState(0);
+  const [slot, setSlot] = useState<string | null>(null);
+  const [assigned, setAssigned] = useState<string[]>(STUDENTS.map((student) => student.name));
+  const [scheduled, setScheduled] = useState(false);
+  const [grades, setGrades] = useState<Record<string, { grade: string; comment: string; present: boolean }>>(() =>
+    Object.fromEntries(STUDENTS.map((student) => [student.name, { grade: 'A', comment: '', present: true }])),
+  );
+  const [published, setPublished] = useState(false);
 
-  const nextBlock = BLOCKS[blocks.length]?.id ?? null;
-  const step = Math.min(blocks.length + 1, BLOCKS.length + 1);
+  const screen = screens[current];
 
-  function add(id: BlockId) {
-    if (id === nextBlock) setBlocks((all) => [...all, id]);
+  function go(next: Stage) {
+    const index = STAGES.findIndex((item) => item.id === next);
+    setReached((value) => Math.max(value, index));
+    setStage(next);
+    setSelected(null);
   }
 
-  function onDrop(event: DragEvent) {
-    event.preventDefault();
-    setDragOver(false);
-    add(event.dataTransfer.getData('text/plain') as BlockId);
+  function update(element: Item) {
+    setScreens((all) =>
+      all.map((item, index) =>
+        index === current ? { ...item, elements: item.elements.map((old) => (old.id === element.id ? element : old)) } : item,
+      ),
+    );
   }
 
-  const instruction = nextBlock
-    ? `Add the ${BLOCKS[blocks.length].label.toLowerCase()} block: click it or drag it onto the page.`
-    : 'The lesson is ready. Launch it to teach it live.';
+  function add(kind: Kind) {
+    const offset = (screen.elements.length % 4) * 4;
+    const element: Item = {
+      id: nextId++,
+      kind,
+      x: 30 + offset,
+      y: 26 + offset,
+      w: kind === 'text' ? 36 : kind === 'shape' ? 14 : 34,
+      h: kind === 'text' ? 16 : kind === 'shape' ? 24 : 44,
+      text: kind === 'text' ? 'Double-click to edit' : kind === 'video' ? 'A new video' : undefined,
+      shape: kind === 'shape' ? SHAPES[shapeTurn % SHAPES.length] : undefined,
+      color: kind === 'shape' ? COLORS[shapeTurn % COLORS.length] : undefined,
+    };
+    if (kind === 'shape') setShapeTurn((value) => value + 1);
+    setScreens((all) => all.map((item, index) => (index === current ? { ...item, elements: [...item.elements, element] } : item)));
+    setSelected(element.id);
+  }
+
+  function remove() {
+    if (selected === null) return;
+    setScreens((all) =>
+      all.map((item, index) => (index === current ? { ...item, elements: item.elements.filter((element) => element.id !== selected) } : item)),
+    );
+    setSelected(null);
+  }
+
+  function onKeyDown(event: KeyboardEvent) {
+    const typing = (event.target as HTMLElement).isContentEditable || (event.target as HTMLElement).tagName === 'INPUT';
+    if (typing || selected === null) return;
+    if (event.key === 'Delete' || event.key === 'Backspace') remove();
+    if (event.key === 'Escape') {
+      // Keep Escape for the selection, not for "back to intro".
+      event.preventDefault();
+      setSelected(null);
+    }
+  }
+
+  const slotLabel = slot ? `${DAYS[Number(slot.split('-')[0])]}, ${PERIODS[Number(slot.split('-')[1])]}` : null;
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-[#e5e2f0] bg-white font-helvetica text-tl-ink shadow-[0_30px_70px_-35px_rgb(78_64_155/0.45)]">
-      <header className="flex items-center gap-4 border-b border-[#eeebf7] px-5 py-3">
+    <div
+      onKeyDown={onKeyDown}
+      className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-[#e5e2f0] bg-white font-helvetica text-tl-ink shadow-[0_30px_70px_-35px_rgb(78_64_155/0.45)]"
+    >
+      <header className="flex items-center gap-5 border-b border-[#eeebf7] px-5 py-3">
         <span className="font-dancing text-2xl font-bold text-tl-purple">
           Teacher<span className="text-tl-teal">ly</span>
         </span>
-        <span className="text-sm text-tl-ink/60">{live ? 'Live lesson' : 'Lesson builder'}</span>
-        <span className="ml-auto text-sm text-tl-ink/60">
-          {live ? <LiveClock /> : `Step ${step} of ${BLOCKS.length + 1}`}
-        </span>
+        <ol className="flex items-center gap-1 text-sm">
+          {STAGES.map((item, index) => (
+            <li key={item.id} className="flex items-center gap-1">
+              {index > 0 && <span className="text-tl-ink/30">›</span>}
+              <button
+                type="button"
+                disabled={index > reached}
+                onClick={() => go(item.id)}
+                aria-current={stage === item.id ? 'step' : undefined}
+                className="cursor-pointer rounded-full px-3 py-1 disabled:cursor-default disabled:text-tl-ink/35 aria-[current=step]:bg-tl-purple aria-[current=step]:text-white"
+              >
+                {index + 1}. {item.label}
+              </button>
+            </li>
+          ))}
+        </ol>
+        {stage === 'teach' && (
+          <span className="ml-auto text-sm text-tl-ink/60">
+            <LiveClock />
+          </span>
+        )}
       </header>
 
-      {!live ? (
+      {stage === 'create' && (
         <div className="flex min-h-0 flex-1">
-          <aside className="flex w-44 shrink-0 flex-col gap-2 border-r border-[#eeebf7] bg-tl-mist p-3" aria-label="Blocks">
-            {BLOCKS.map((block) => {
-              const done = blocks.includes(block.id);
-              const isNext = block.id === nextBlock;
-              return (
-                <button
-                  key={block.id}
-                  type="button"
-                  draggable={isNext}
-                  onDragStart={(event) => event.dataTransfer.setData('text/plain', block.id)}
-                  onClick={() => add(block.id)}
-                  disabled={!isNext}
-                  className={`flex items-center gap-2.5 rounded-lg border-2 bg-white px-3 py-2.5 text-left text-sm font-bold transition ${
-                    isNext ? 'next-block cursor-grab border-tl-purple' : 'border-transparent'
-                  } ${done ? 'opacity-45' : ''} ${!isNext && !done ? 'opacity-60' : ''}`}
-                >
-                  <Icon color={block.color}>{block.icon}</Icon>
-                  {block.label}
-                  {done && <span className="ml-auto text-tl-teal">✓</span>}
-                </button>
-              );
-            })}
+          <aside className="flex w-40 shrink-0 flex-col gap-2 overflow-y-auto border-r border-[#eeebf7] bg-tl-mist p-3" aria-label="Screens">
+            {screens.map((item, index) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => {
+                  setCurrent(index);
+                  setSelected(null);
+                }}
+                aria-current={index === current || undefined}
+                className="cursor-pointer rounded-lg border-2 border-transparent p-1 text-left text-xs aria-[current=true]:border-tl-purple"
+              >
+                <div className="pointer-events-none">
+                  <Board screen={item} />
+                </div>
+                <span className="mt-1 block">Screen {index + 1}</span>
+              </button>
+            ))}
             <button
               type="button"
-              disabled={nextBlock !== null}
-              onClick={() => setLive(true)}
-              className="mt-auto cursor-pointer rounded-full bg-tl-purple px-4 py-2.5 text-sm font-bold text-white disabled:cursor-default disabled:bg-[#c9c4e0]"
+              onClick={() => {
+                setScreens((all) => [...all, { id: nextId++, elements: [] }]);
+                setCurrent(screens.length);
+              }}
+              className="cursor-pointer rounded-lg border-2 border-dashed border-[#d9d4ee] py-3 text-xs font-bold text-tl-purple"
             >
-              Launch lesson ›
+              + Add screen
             </button>
           </aside>
 
           <div className="flex min-w-0 flex-1 flex-col">
-            <p className="border-b border-[#eeebf7] px-6 py-2.5 text-sm" aria-live="polite">
-              {instruction}
-            </p>
-            <div
-              onDragOver={(event) => {
-                event.preventDefault();
-                setDragOver(true);
-              }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={onDrop}
-              className={`min-h-0 flex-1 overflow-y-auto p-6 transition-colors ${dragOver ? 'bg-tl-mist' : ''}`}
-            >
-              {blocks.length === 0 ? (
-                <div className="flex h-full items-center justify-center rounded-xl border-2 border-dashed border-[#d9d4ee] text-sm text-tl-ink/50">
-                  An empty lesson. Start with the title block.
-                </div>
-              ) : (
-                <LessonPage
-                  blocks={blocks}
-                  quizAnswer={quizAnswer}
-                  onAnswer={setQuizAnswer}
-                  playing={playing}
-                  onPlay={() => setPlaying((value) => !value)}
-                />
-              )}
+            <div className="flex items-center gap-2 border-b border-[#eeebf7] px-5 py-2.5">
+              <input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                aria-label="Lesson title"
+                className="mr-auto min-w-0 flex-1 rounded-md px-2 py-1 font-bold outline-none focus:bg-tl-mist"
+              />
+              {(['text', 'image', 'video', 'shape'] as Kind[]).map((kind) => (
+                <button
+                  key={kind}
+                  type="button"
+                  onClick={() => add(kind)}
+                  className="cursor-pointer rounded-full border border-[#d9d4ee] px-3 py-1 text-sm capitalize hover:border-tl-purple hover:text-tl-purple"
+                >
+                  + {kind === 'shape' ? 'Shape' : kind}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={remove}
+                disabled={selected === null}
+                className="cursor-pointer rounded-full px-3 py-1 text-sm text-[#c2410c] disabled:cursor-default disabled:text-tl-ink/30"
+              >
+                Delete
+              </button>
+            </div>
+            <div className="flex min-h-0 flex-1 items-center justify-center bg-tl-mist p-5">
+              <div className="w-full max-w-[min(100%,calc((82svh-9rem)*16/9))]">
+                <Board screen={screen} editable selected={selected} onSelect={setSelected} onChange={update} />
+              </div>
+            </div>
+            <div className="flex items-center justify-between border-t border-[#eeebf7] px-5 py-3 text-sm">
+              <span className="text-tl-ink/60">Drag to move, the corner to resize, double-click text to edit.</span>
+              <PrimaryButton onClick={() => go('schedule')}>Next: schedule it</PrimaryButton>
             </div>
           </div>
         </div>
-      ) : (
-        <Call
-          stage={<LessonPage blocks={blocks} quizAnswer={quizAnswer} onAnswer={setQuizAnswer} playing={playing} onPlay={() => setPlaying((value) => !value)} small />}
-          onEnd={() => setLive(false)}
-        />
+      )}
+
+      {stage === 'schedule' && (
+        <div className="flex min-h-0 flex-1 gap-5 p-5">
+          <div className="min-w-0 flex-1">
+            <p className="mb-3 text-sm">
+              Pick a free period for <span className="font-bold">{title}</span> ({screens.length} screens).
+            </p>
+            <div className="grid grid-cols-[4rem_repeat(5,minmax(0,1fr))] gap-1.5 text-sm">
+              <span />
+              {DAYS.map((day) => (
+                <span key={day} className="text-center font-bold">
+                  {day}
+                </span>
+              ))}
+              {PERIODS.map((time, period) => (
+                <PeriodRow key={time} time={time} period={period} slot={slot} onPick={setSlot} title={title} />
+              ))}
+            </div>
+          </div>
+          <aside className="flex w-64 shrink-0 flex-col rounded-xl bg-tl-mist p-4" aria-label="Class">
+            <p className="font-bold">Front-end team</p>
+            <p className="text-xs text-tl-ink/60">{assigned.length} of {STUDENTS.length} students</p>
+            <ul className="mt-3 space-y-2">
+              {STUDENTS.map((student) => (
+                <li key={student.name}>
+                  <label className="flex cursor-pointer items-center gap-2.5">
+                    <input
+                      type="checkbox"
+                      checked={assigned.includes(student.name)}
+                      onChange={(event) =>
+                        setAssigned((all) => (event.target.checked ? [...all, student.name] : all.filter((name) => name !== student.name)))
+                      }
+                      className="accent-[#4e409b]"
+                    />
+                    <Avatar name={student.name} color={student.color} />
+                    {student.name}
+                  </label>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-auto">
+              {scheduled && slotLabel && (
+                <p className="mb-3 text-sm text-[#2e7d6f]">
+                  Assigned to {assigned.length} students for {slotLabel}.
+                </p>
+              )}
+              <PrimaryButton
+                disabled={!slot || assigned.length === 0}
+                onClick={() => (scheduled ? go('teach') : setScheduled(true))}
+              >
+                {scheduled ? 'Start the lesson' : 'Assign lesson'}
+              </PrimaryButton>
+            </div>
+          </aside>
+        </div>
+      )}
+
+      {stage === 'teach' && (
+        <Call screens={screens} students={STUDENTS.filter((student) => assigned.includes(student.name))} onEnd={() => go('grade')} />
+      )}
+
+      {stage === 'grade' && (
+        <div className="flex min-h-0 flex-1 flex-col p-5">
+          <p className="text-sm">
+            <span className="font-bold">{title}</span>
+            {slotLabel && `, ${slotLabel}`}. Grade the class.
+          </p>
+          <table className="mt-4 w-full border-separate border-spacing-y-1.5 text-sm">
+            <thead className="text-left text-tl-ink/60">
+              <tr>
+                <th className="px-3 font-normal">Student</th>
+                <th className="px-3 font-normal">Present</th>
+                <th className="px-3 font-normal">Grade</th>
+                <th className="px-3 font-normal">Comment</th>
+                <th className="px-3" />
+              </tr>
+            </thead>
+            <tbody>
+              {STUDENTS.filter((student) => assigned.includes(student.name)).map((student) => {
+                const row = grades[student.name];
+                const set = (patch: Partial<typeof row>) => setGrades((all) => ({ ...all, [student.name]: { ...all[student.name], ...patch } }));
+                return (
+                  <tr key={student.name} className="bg-tl-mist">
+                    <td className="rounded-l-lg px-3 py-2">
+                      <span className="flex items-center gap-2.5">
+                        <Avatar name={student.name} color={student.color} />
+                        {student.name}
+                      </span>
+                    </td>
+                    <td className="px-3">
+                      <input type="checkbox" checked={row.present} onChange={(event) => set({ present: event.target.checked })} className="accent-[#4e409b]" aria-label={`${student.name} was present`} />
+                    </td>
+                    <td className="px-3">
+                      <select value={row.grade} onChange={(event) => set({ grade: event.target.value })} disabled={published} className="rounded-md border border-[#d9d4ee] bg-white px-2 py-1" aria-label={`Grade for ${student.name}`}>
+                        {GRADES.map((grade) => (
+                          <option key={grade}>{grade}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-3">
+                      <input value={row.comment} onChange={(event) => set({ comment: event.target.value })} disabled={published} placeholder="A short note for the student" className="w-full rounded-md border border-[#d9d4ee] bg-white px-2 py-1" aria-label={`Comment for ${student.name}`} />
+                    </td>
+                    <td className="rounded-r-lg px-3 text-xs text-[#2e7d6f]">{published ? 'Sent' : ''}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <div className="mt-auto flex items-center justify-between pt-4 text-sm">
+            <span className="text-tl-ink/60">
+              {published ? 'Grades are in the students’ reports.' : 'Grades go to each student’s report when you publish them.'}
+            </span>
+            {published ? (
+              <PrimaryButton onClick={() => go('create')}>Plan the next lesson</PrimaryButton>
+            ) : (
+              <PrimaryButton onClick={() => setPublished(true)}>Publish grades</PrimaryButton>
+            )}
+          </div>
+        </div>
       )}
     </div>
+  );
+}
+
+function PeriodRow({ time, period, slot, onPick, title }: { time: string; period: number; slot: string | null; onPick: (slot: string) => void; title: string }) {
+  return (
+    <>
+      <span className="self-center text-xs text-tl-ink/60 tabular-nums">{time}</span>
+      {DAYS.map((_, day) => {
+        const key = `${day}-${period}`;
+        const busy = BUSY[key];
+        const picked = slot === key;
+        return (
+          <button
+            key={key}
+            type="button"
+            disabled={Boolean(busy)}
+            onClick={() => onPick(key)}
+            className="h-12 cursor-pointer truncate rounded-lg border-2 px-2 text-left text-xs disabled:cursor-default"
+            style={
+              busy
+                ? { borderColor: 'transparent', background: '#f1eff8', color: '#322d4d99' }
+                : picked
+                  ? { borderColor: PURPLE, background: PURPLE, color: '#fff', fontWeight: 700 }
+                  : { borderColor: '#e5e2f0', background: '#fff' }
+            }
+          >
+            {busy ?? (picked ? title : '')}
+          </button>
+        );
+      })}
+    </>
+  );
+}
+
+function PrimaryButton({ children, onClick, disabled = false }: { children: ReactNode; onClick: () => void; disabled?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="cursor-pointer rounded-full bg-tl-purple px-5 py-2.5 text-sm font-bold text-white disabled:cursor-default disabled:bg-[#c9c4e0]"
+    >
+      {children} ›
+    </button>
+  );
+}
+
+function Avatar({ name, color }: { name: string; color: string }) {
+  return (
+    <span className="flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold" style={{ background: color }}>
+      {name[0]}
+    </span>
   );
 }
 
@@ -262,7 +551,10 @@ function LiveClock() {
   );
 }
 
-function Call({ stage, onEnd }: { stage: ReactNode; onEnd: () => void }) {
+const PENS = ['#4e409b', '#65b8be', '#e6a2ba', '#f2c979'];
+
+function Call({ screens, students, onEnd }: { screens: Screen[]; students: typeof STUDENTS; onEnd: () => void }) {
+  const [slide, setSlide] = useState(0);
   const [mic, setMic] = useState(true);
   const [camera, setCamera] = useState(true);
   const [pen, setPen] = useState<string | null>(null);
@@ -270,8 +562,8 @@ function Call({ stage, onEnd }: { stage: ReactNode; onEnd: () => void }) {
   const [chatOpen, setChatOpen] = useState(false);
   const [speaking, setSpeaking] = useState(0);
   const [chat, setChat] = useState([
-    { from: 'Asel', text: 'Can we go back to the quiz after this?' },
-    { from: 'Nurlan', text: 'The video block loads fast now 👍' },
+    { from: 'Asel', text: 'Can we see the redesign screen again at the end?' },
+    { from: 'Nurlan', text: 'The video starts fast now 👍' },
   ]);
   const [draft, setDraft] = useState('');
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -279,9 +571,9 @@ function Call({ stage, onEnd }: { stage: ReactNode; onEnd: () => void }) {
 
   // Someone is always talking in a class.
   useEffect(() => {
-    const timer = setInterval(() => setSpeaking((value) => (value + 1 + Math.floor(Math.random() * 3)) % (STUDENTS.length + 1)), 2600);
+    const timer = setInterval(() => setSpeaking((value) => (value + 1 + Math.floor(Math.random() * 3)) % (students.length + 1)), 2600);
     return () => clearInterval(timer);
-  }, []);
+  }, [students.length]);
 
   useEffect(() => {
     const element = canvas.current!;
@@ -296,63 +588,73 @@ function Call({ stage, onEnd }: { stage: ReactNode; onEnd: () => void }) {
     return () => observer.disconnect();
   }, []);
 
-  function point(event: PointerEvent) {
-    const box = canvas.current!.getBoundingClientRect();
-    return [event.clientX - box.left, event.clientY - box.top] as const;
-  }
-
-  function onPointerDown(event: PointerEvent) {
-    if (!pen) return;
-    drawing.current = true;
-    canvas.current!.setPointerCapture(event.pointerId);
-    const context = canvas.current!.getContext('2d')!;
-    context.strokeStyle = pen;
-    context.lineWidth = 4;
-    context.lineCap = 'round';
-    context.lineJoin = 'round';
-    context.beginPath();
-    context.moveTo(...point(event));
-  }
-
-  function onPointerMove(event: PointerEvent) {
-    if (!drawing.current) return;
-    const context = canvas.current!.getContext('2d')!;
-    context.lineTo(...point(event));
-    context.stroke();
-  }
-
-  function clear() {
+  const clear = () => {
     const element = canvas.current!;
     element.getContext('2d')!.clearRect(0, 0, element.width, element.height);
+  };
+
+  const point = (event: PointerEvent) => {
+    const box = canvas.current!.getBoundingClientRect();
+    return [event.clientX - box.left, event.clientY - box.top] as const;
+  };
+
+  function turn(to: number) {
+    setSlide(Math.max(0, Math.min(screens.length - 1, to)));
+    clear();
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-[#1f1b33] text-white">
       <div className="flex min-h-0 flex-1 gap-3 p-3">
-        <div className="relative min-w-0 flex-1 overflow-hidden rounded-xl bg-white p-5 text-tl-ink">
-          <p className="absolute top-2 right-3 rounded-full bg-tl-mist px-2.5 py-0.5 text-xs text-tl-ink/70">
-            Roman is sharing the lesson
-          </p>
-          <div className="h-full overflow-hidden">{stage}</div>
-          <canvas
-            ref={canvas}
-            onPointerDown={onPointerDown}
-            onPointerMove={onPointerMove}
-            onPointerUp={() => (drawing.current = false)}
-            className={`absolute inset-0 size-full ${pen ? 'cursor-crosshair' : 'pointer-events-none'}`}
-            aria-label="Annotation layer"
-          />
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <div className="relative flex min-h-0 flex-1 items-center justify-center rounded-xl bg-[#2b2645] p-3">
+            <div className="relative w-full max-w-[min(100%,calc((82svh-12rem)*16/9))]">
+              <Board screen={screens[slide]} />
+              <canvas
+                ref={canvas}
+                onPointerDown={(event) => {
+                  if (!pen) return;
+                  drawing.current = true;
+                  canvas.current!.setPointerCapture(event.pointerId);
+                  const context = canvas.current!.getContext('2d')!;
+                  Object.assign(context, { strokeStyle: pen, lineWidth: 4, lineCap: 'round', lineJoin: 'round' });
+                  context.beginPath();
+                  context.moveTo(...point(event));
+                }}
+                onPointerMove={(event) => {
+                  if (!drawing.current) return;
+                  const context = canvas.current!.getContext('2d')!;
+                  context.lineTo(...point(event));
+                  context.stroke();
+                }}
+                onPointerUp={() => (drawing.current = false)}
+                className={`absolute inset-0 size-full ${pen ? 'cursor-crosshair' : 'pointer-events-none'}`}
+                aria-label="Annotation layer"
+              />
+            </div>
+          </div>
+          <div className="flex items-center justify-center gap-3 text-sm">
+            <button type="button" onClick={() => turn(slide - 1)} disabled={slide === 0} className="cursor-pointer rounded-full bg-white/10 px-3 py-1 disabled:opacity-30">
+              ‹ Previous
+            </button>
+            <span className="tabular-nums text-white/70">
+              Screen {slide + 1} of {screens.length}
+            </span>
+            <button type="button" onClick={() => turn(slide + 1)} disabled={slide === screens.length - 1} className="cursor-pointer rounded-full bg-white/10 px-3 py-1 disabled:opacity-30">
+              Next ›
+            </button>
+          </div>
         </div>
 
-        <div className="grid w-60 shrink-0 auto-rows-fr grid-cols-2 gap-2">
-          <Tile name="Roman (teacher)" color="#4e409b" speaking={speaking === 0 && mic} muted={!mic} camera={camera} hand={hand} wide />
-          {STUDENTS.map((student, index) => (
+        <div className="grid w-56 shrink-0 auto-rows-fr grid-cols-2 gap-2">
+          <Tile name="Roman (teacher)" color={PURPLE} speaking={speaking === 0 && mic} muted={!mic} camera={camera} hand={hand} wide />
+          {students.map((student, index) => (
             <Tile key={student.name} name={student.name} color={student.color} speaking={speaking === index + 1} muted={speaking !== index + 1} camera />
           ))}
         </div>
 
         {chatOpen && (
-          <aside className="flex w-64 shrink-0 flex-col rounded-xl bg-white text-tl-ink" aria-label="Chat">
+          <aside className="flex w-60 shrink-0 flex-col rounded-xl bg-white text-tl-ink" aria-label="Chat">
             <p className="border-b border-[#eeebf7] px-3 py-2 text-sm font-bold">Class chat</p>
             <div className="flex-1 space-y-2 overflow-y-auto p-3 text-sm">
               {chat.map((message, index) => (
@@ -370,13 +672,7 @@ function Call({ stage, onEnd }: { stage: ReactNode; onEnd: () => void }) {
                 setDraft('');
               }}
             >
-              <input
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-                placeholder="Message the class"
-                aria-label="Message the class"
-                className="w-full rounded-lg bg-tl-mist px-3 py-2 outline-none"
-              />
+              <input value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Message the class" aria-label="Message the class" className="w-full rounded-lg bg-tl-mist px-3 py-2 outline-none" />
             </form>
           </aside>
         )}
@@ -389,15 +685,7 @@ function Call({ stage, onEnd }: { stage: ReactNode; onEnd: () => void }) {
         {pen && (
           <span className="flex items-center gap-1.5 px-1">
             {PENS.map((color) => (
-              <button
-                key={color}
-                type="button"
-                onClick={() => setPen(color)}
-                aria-label={`Pen color ${color}`}
-                aria-pressed={pen === color}
-                className="size-5 cursor-pointer rounded-full ring-white aria-pressed:ring-2"
-                style={{ background: color }}
-              />
+              <button key={color} type="button" onClick={() => setPen(color)} aria-label={`Pen color ${color}`} aria-pressed={pen === color} className="size-5 cursor-pointer rounded-full ring-white aria-pressed:ring-2" style={{ background: color }} />
             ))}
             <button type="button" onClick={clear} className="cursor-pointer px-2 text-xs text-white/70 hover:text-white">
               Clear
@@ -407,7 +695,7 @@ function Call({ stage, onEnd }: { stage: ReactNode; onEnd: () => void }) {
         <Control active={hand} onClick={() => setHand(!hand)} label={hand ? 'Lower hand' : 'Raise hand'} />
         <Control active={chatOpen} onClick={() => setChatOpen(!chatOpen)} label="Chat" />
         <button type="button" onClick={onEnd} className="ml-3 cursor-pointer rounded-full bg-[#e5484d] px-4 py-2 text-sm font-bold">
-          End lesson
+          End lesson and grade
         </button>
       </div>
     </div>
@@ -439,15 +727,16 @@ function Tile({ name, color, speaking, muted, camera, hand = false, wide = false
   return (
     <div
       className={`relative flex items-center justify-center overflow-hidden rounded-lg transition-shadow ${wide ? 'col-span-2' : ''}`}
-      style={{ background: camera ? `${color}33` : '#2b2645', boxShadow: speaking ? `inset 0 0 0 3px #65b8be` : undefined }}
+      style={{ background: camera ? `${color}33` : '#2b2645', boxShadow: speaking ? 'inset 0 0 0 3px #65b8be' : undefined }}
     >
-      <span
-        className="flex size-11 items-center justify-center rounded-full text-sm font-bold text-tl-ink"
-        style={{ background: color, color: color === '#4e409b' ? '#fff' : undefined }}
-      >
+      <span className="flex size-11 items-center justify-center rounded-full text-sm font-bold" style={{ background: color, color: color === PURPLE ? '#fff' : '#322d4d' }}>
         {name[0]}
       </span>
-      {hand && <span className="absolute top-1.5 left-2 text-lg" aria-label="Hand raised">✋</span>}
+      {hand && (
+        <span className="absolute top-1.5 left-2 text-lg" aria-label="Hand raised">
+          ✋
+        </span>
+      )}
       <span className="absolute bottom-1 left-2 text-xs">
         {name}
         {muted && <span className="ml-1 text-white/50">(muted)</span>}
