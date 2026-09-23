@@ -17,6 +17,11 @@ const MENTION = '#fef7d2';
 const LINK = '#1264a3';
 const MUTED = '#616061';
 const PICKER = ['👍', '🎉', '🔥', '👀', '🙌', '🚀'];
+const PROJECTS = [
+  { id: 'exparte', name: 'Ex Parte', color: '#0061ff' },
+  { id: 'bilebile', name: 'bile-bile.kz', color: '#e63445' },
+  { id: 'teacherly', name: 'Teacherly', color: '#4e409b' },
+];
 
 type Reaction = { count: number; mine: boolean };
 type Profile = { user: UserId; x: number; y: number };
@@ -174,6 +179,13 @@ export default function Slack() {
 
   function renderText(text: string): ReactNode[] {
     return text.split(/(@\w+|#[a-z0-9-]+)/g).map((part, index) => {
+      if (part === '@here') {
+        return (
+          <span key={index} className="rounded px-0.5 font-bold" style={{ background: MENTION }}>
+            @here
+          </span>
+        );
+      }
       if (part.startsWith('@') && part.slice(1) in users) {
         const user = part.slice(1) as UserId;
         return (
@@ -335,8 +347,22 @@ export default function Slack() {
       className="relative flex h-full w-full overflow-hidden rounded-lg bg-white font-lato text-[0.9rem] text-[#1d1c1d] shadow-[0_40px_80px_-30px_rgb(0_0_0/0.8)]"
     >
       <div className="flex w-14 shrink-0 flex-col items-center gap-3 pt-3" style={{ background: RAIL }}>
-        <span className="flex size-9 items-center justify-center rounded-lg bg-[#ec1c24] text-sm font-black text-white">MD</span>
-        <span className="size-9 rounded-lg border-2 border-dashed border-white/25" aria-hidden="true" />
+        <span className="flex size-9 items-center justify-center rounded-lg bg-[#ec1c24] text-sm font-black text-white ring-2 ring-white ring-offset-2 ring-offset-[#261c25]">
+          MD
+        </span>
+        <span className="mt-2 text-[0.6rem] font-bold tracking-wide text-white/50">Projects</span>
+        {/* Client work that came through Mad Devs; each opens its own screen. */}
+        {PROJECTS.map((project) => (
+          <a
+            key={project.id}
+            href={`#${project.id}`}
+            title={`${project.name}: open its screen`}
+            className="group relative block size-9 rounded-lg transition hover:scale-105"
+            style={{ boxShadow: `0 0 0 2px ${project.color}` }}
+          >
+            <img src={`/icons/${project.id}.png`} alt={project.name} width={64} height={64} className="size-9 rounded-lg" />
+          </a>
+        ))}
       </div>
 
       <nav className="flex w-52 shrink-0 flex-col overflow-y-auto pb-4 text-[#ffffffb3]" style={{ background: SIDEBAR }} aria-label="Conversations">
