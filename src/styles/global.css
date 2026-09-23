@@ -1,0 +1,24 @@
+@import "tailwindcss";
+@import "./brands.css";
+
+/* One fixed viewport: screens are stacked and switched by scripts/router.ts, the page never scrolls. */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}
+
+[data-screen] {
+  position: fixed;
+  inset: 0;
+  visibility: hidden;
+  outline: none;
+}
+
+[data-screen][data-shown] {
+  visibility: visible;
+}
+
+[data-screen][data-front] {
+  z-index: 10;
+}

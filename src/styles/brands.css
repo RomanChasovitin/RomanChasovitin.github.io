@@ -1,0 +1,61 @@
+/*
+ * Brand tokens shared by the hero previews and the project screens.
+ * Ex Parte, Mad Devs and Chocolife come from their live sites; Teacherly and bile-bile.kz from archived
+ * screenshots and the bile-bile logo.
+ */
+@theme {
+  --font-times: 'Times New Roman', Times, serif;
+  --font-geist: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-geist-mono: 'Geist Mono Variable', ui-monospace, monospace;
+  --font-inter: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-plex-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-unbounded: 'Unbounded Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-helvetica: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-dancing: 'Dancing Script Variable', cursive;
+  --font-roboto: 'Roboto Variable', ui-sans-serif, system-ui, sans-serif;
+
+  --color-xp-void: #101113;
+  --color-xp-panel: #181a1f;
+  --color-xp-rule: #343640;
+  --color-xp-blue: #0061ff;
+  --color-xp-deep: #0435bb;
+  --color-xp-cyan: #06e8d8;
+  --color-xp-mist: #989daf;
+  --color-xp-slate: #727696;
+
+  --color-md-ink: #111213;
+  --color-md-panel: #1d1d1f;
+  --color-md-grey: #a0a0a1;
+  --color-md-red: #ec1c24;
+  --color-md-yellow: #f7c744;
+
+  --color-bb-navy: #243654;
+  --color-bb-red: #e63445;
+  --color-bb-mist: #f8f4f4;
+  --color-bb-silver: #bdbdbd;
+  --color-bb-muted: #898989;
+  --color-bb-ink: #212121;
+
+  --color-tl-purple: #4e409b;
+  --color-tl-yellow: #f7da49;
+  --color-tl-teal: #65b8be;
+  --color-tl-sky: #aad5ed;
+  --color-tl-pink: #e6a2ba;
+  --color-tl-orange: #f2c979;
+  --color-tl-mist: #f9f7ff;
+  --color-tl-ink: #322d4d;
+
+  --color-cl-yellow: #f7da3b;
+  --color-cl-navy: #2e3a82;
+  --color-cl-red: #e31e24;
+  --color-cl-grey: #f2f2f2;
+  --color-cl-ink: #303030;
+  --color-cl-link: #0064dd;
+  --color-cl-muted: #979797;
+  /* Category backgrounds from the deal feed. */
+  --color-cl-cream: #fffbe7;
+  --color-cl-peach: #fef0e5;
+  --color-cl-ice: #e3f4ff;
+  --color-cl-lilac: #f5ecff;
+  --color-cl-blush: #fdeeee;
+}

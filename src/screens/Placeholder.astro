@@ -1,0 +1,34 @@
+---
+// Stands in for a project screen until that screen's own step replaces it.
+import BackToIntro from '../components/BackToIntro.astro';
+import { formatYears, type Project } from '../content/projects';
+
+type Props = {
+  project: Project;
+  background: string;
+  foreground: string;
+  step: number;
+};
+
+const { project, background, foreground, step } = Astro.props;
+---
+
+<section
+  id={project.id}
+  data-screen
+  class="flex h-svh flex-col justify-center px-[8vw]"
+  style={{ background, color: foreground }}
+>
+  <BackToIntro />
+  <h2 class="text-5xl font-semibold">{project.name}</h2>
+  <ul class="mt-6 space-y-1 opacity-80">
+    {
+      project.roles.map((role) => (
+        <li>
+          {role.title}, {formatYears(role.period)}
+        </li>
+      ))
+    }
+  </ul>
+  <p class="mt-10 text-sm opacity-50">Placeholder. The real screen comes in step {step}.</p>
+</section>

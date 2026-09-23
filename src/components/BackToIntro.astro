@@ -1,0 +1,18 @@
+---
+// Every project screen has one, top left; each screen styles it in its own brand through `class`.
+type Props = { class?: string };
+
+const { class: className } = Astro.props;
+---
+
+<a href="#intro" class:list={['back', className]}>Back to intro</a>
+
+<style>
+  .back {
+    position: absolute;
+    top: 4svh;
+    left: 5vw;
+    z-index: 5;
+    text-decoration: none;
+  }
+</style>
