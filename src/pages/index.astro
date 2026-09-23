@@ -1,18 +1,12 @@
 ---
 import { profile } from '../content/profile';
-import { projects, type ProjectId } from '../content/projects';
 import Base from '../layouts/Base.astro';
 import BileBile from '../screens/bilebile/BileBile.astro';
+import Chocolife from '../screens/chocolife/Chocolife.astro';
 import ExParte from '../screens/exparte/ExParte.astro';
 import Hero from '../screens/Hero.astro';
 import MadDevs from '../screens/maddevs/MadDevs.astro';
-import Placeholder from '../screens/Placeholder.astro';
 import Teacherly from '../screens/teacherly/Teacherly.astro';
-
-// Brand base colors for the screens that are not built yet.
-const placeholders: Partial<Record<ProjectId, { background: string; foreground: string; step: number }>> = {
-  chocolife: { background: '#F2F2F2', foreground: '#303030', step: 6 },
-};
 ---
 
 <Base title={profile.name} description={`${profile.name}, ${profile.headline.toLowerCase()}.`}>
@@ -22,12 +16,7 @@ const placeholders: Partial<Record<ProjectId, { background: string; foreground: 
     <MadDevs />
     <BileBile />
     <Teacherly />
-    {
-      projects.map((project) => {
-        const look = placeholders[project.id];
-        return look && <Placeholder project={project} {...look} />;
-      })
-    }
+    <Chocolife />
   </main>
 </Base>
 

@@ -1,0 +1,312 @@
+---
+// Chocolife and BeSmart, in the Chocolife deal feed: three deal cards with a scratch layer over the picture.
+// Under it is what I did on each platform. Once all three are open, the BeSmart cards merge into Chocolife,
+// the way the platforms did.
+import BackToIntro from '../../components/BackToIntro.astro';
+import { formatYears, projects } from '../../content/projects';
+
+const project = projects.find((item) => item.id === 'chocolife')!;
+const role = project.roles[0];
+
+const deals = [
+  {
+    id: 'besmart-kz',
+    name: 'BeSmart.kz',
+    place: 'Kazakhstan',
+    tag: '2018',
+    price: 'from 1 500 ₸',
+    tint: 'var(--color-cl-cream)',
+    hidden: 'Legacy support and my first real tests with Karma and Jasmine. Responsive pages and email templates from Figma and Zeplin.',
+  },
+  {
+    id: 'besmart-kg',
+    name: 'BeSmart.kg',
+    place: 'Kyrgyzstan',
+    tag: '2018',
+    price: 'from 150 som',
+    tint: 'var(--color-cl-ice)',
+    hidden: 'The same code base on a second domain: one fix shipped to two countries at once.',
+  },
+  {
+    id: 'chocolife',
+    name: 'Chocolife.me',
+    place: 'Almaty',
+    tag: '2019',
+    price: 'from 2 400 ₸',
+    tint: 'var(--color-cl-peach)',
+    hidden: 'A rewrite from scratch on Angular 2+ with TypeScript and RxJS, a React, MobX and GraphQL app, and json-server mocks for local work.',
+  },
+];
+---
+
+<section id="chocolife" data-screen class="overflow-y-auto bg-cl-grey font-roboto text-cl-ink">
+  <BackToIntro class="text-sm font-medium text-cl-link hover:underline" />
+
+  <div class="mx-auto flex h-full max-w-[1060px] flex-col px-6 pt-[9svh] pb-[4svh]">
+    <!-- The Choco family header -->
+    <header class="flex items-center gap-8 rounded-t-[10px] bg-white px-6 py-4 text-sm">
+      <span class="text-2xl font-bold tracking-tight text-cl-navy">chocolife</span>
+      <nav class="flex gap-6 text-cl-ink/80" aria-label="Choco services">
+        <span class="font-medium text-cl-ink">Coupons and deals</span>
+        <span>Flights</span>
+        <span>Food delivery</span>
+        <span>Find a doctor</span>
+      </nav>
+      <span class="ml-auto text-cl-muted">Almaty</span>
+    </header>
+    <div class="h-1 bg-cl-yellow"></div>
+
+    <div class="mt-8 flex items-end justify-between gap-8">
+      <div>
+        <h2 class="text-[clamp(1.8rem,2.8vw,2.6rem)] leading-tight font-bold text-cl-navy">
+          My first projects: {project.name}
+        </h2>
+        <p class="mt-2 max-w-[44em] leading-relaxed">
+          {role.title}, {formatYears(role.period)}, {project.company}. Where I learned the job: legacy code, a rewrite,
+          tests and a lot of new technology.
+        </p>
+      </div>
+      <p class="shrink-0 text-sm text-cl-muted">Scratch the yellow layer on each deal.</p>
+    </div>
+
+    <div class="deals mt-6 grid grid-cols-3 gap-5" data-deals>
+      {
+        deals.map((deal) => (
+          <article class="deal" data-deal={deal.id}>
+            <div class="picture" style={`background: ${deal.tint}`}>
+              <p class="hidden-text">{deal.hidden}</p>
+              <canvas class="scratch" aria-hidden="true" />
+              <span class="tag">{deal.tag}</span>
+            </div>
+            <div class="p-4">
+              <p class="font-medium">{deal.name}</p>
+              <p class="mt-0.5 text-sm text-cl-muted">{deal.place}</p>
+              <p class="mt-3 flex items-center justify-between">
+                <span class="font-bold">{deal.price}</span>
+                <button type="button" class="reveal text-xs text-cl-link hover:underline" data-reveal>
+                  Reveal without scratching
+                </button>
+              </p>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+
+    <div class="merge-note mt-6 flex items-center justify-between gap-6" data-note hidden>
+      <p class="max-w-[46em] leading-relaxed">
+        BeSmart.kz and BeSmart.kg shared one code base. After the merger everything moved to Chocolife, and the team
+        with it.
+      </p>
+      <button type="button" data-again class="shrink-0 rounded-md bg-cl-yellow px-4 py-2 text-sm font-medium text-[#212121]">
+        Scratch again
+      </button>
+    </div>
+
+    <p class="mt-auto pt-6 text-sm text-cl-muted">{project.stack.join(', ')}</p>
+  </div>
+</section>
+
+<style>
+  .deal {
+    overflow: hidden;
+    border-radius: 10px;
+    background: #fff;
+    transition:
+      translate 900ms cubic-bezier(0.6, 0, 0.2, 1),
+      scale 900ms cubic-bezier(0.6, 0, 0.2, 1),
+      opacity 700ms ease 200ms;
+  }
+
+  .picture {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    height: 13.5rem;
+    padding: 1.1rem;
+  }
+
+  .hidden-text {
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.45;
+  }
+
+  .scratch {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    touch-action: none;
+    transition: opacity 500ms ease;
+  }
+
+  .deal[data-open] .scratch {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .deal[data-open] .reveal {
+    visibility: hidden;
+  }
+
+  /* The yellow discount tag of their cards. */
+  .tag {
+    position: absolute;
+    top: 0.9rem;
+    left: 0.9rem;
+    padding: 0.25em 0.6em;
+    border-radius: 4px;
+    background: var(--color-cl-yellow);
+    color: #212121;
+    font-size: 0.85rem;
+    font-weight: 500;
+    box-shadow: 0 0 0 2px #fff;
+  }
+
+  .deals[data-merged] .deal[data-deal^='besmart'] {
+    translate: var(--to-x) 0;
+    scale: 0.6;
+    opacity: 0;
+  }
+
+  .deals[data-merged] [data-deal='chocolife'] {
+    animation: absorb 700ms cubic-bezier(0.34, 1.5, 0.64, 1) 750ms;
+  }
+
+  @keyframes absorb {
+    50% {
+      scale: 1.04;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .deal,
+    .scratch {
+      transition: none;
+    }
+
+    .deals[data-merged] [data-deal='chocolife'] {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const screen = document.getElementById('chocolife')!;
+  const grid = screen.querySelector<HTMLElement>('[data-deals]')!;
+  const note = screen.querySelector<HTMLElement>('[data-note]')!;
+  const cards = Array.from(screen.querySelectorAll<HTMLElement>('[data-deal]'));
+  const YELLOW = '#f7da3b';
+  const NAVY = '#2e3a82';
+  const BRUSH = 24;
+  const OPEN_AT = 0.55;
+  let touched = false;
+
+  function paint(canvas: HTMLCanvasElement) {
+    const ratio = Math.min(devicePixelRatio, 2);
+    canvas.width = canvas.clientWidth * ratio;
+    canvas.height = canvas.clientHeight * ratio;
+    const context = canvas.getContext('2d', { willReadFrequently: true })!;
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    context.globalCompositeOperation = 'source-over';
+    context.fillStyle = YELLOW;
+    context.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+    // A faint repeating "scratch" wordmark, like the foil of a lottery ticket.
+    context.fillStyle = NAVY;
+    context.globalAlpha = 0.16;
+    context.font = '700 15px "Roboto Variable", sans-serif';
+    context.rotate(-0.35);
+    for (let y = -40; y < canvas.clientHeight + 160; y += 34) {
+      for (let x = -120; x < canvas.clientWidth + 120; x += 92) context.fillText('scratch', x + (y % 68 ? 46 : 0), y);
+    }
+    context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    context.globalAlpha = 1;
+  }
+
+  function cleared(canvas: HTMLCanvasElement) {
+    const { data } = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height);
+    let clear = 0;
+    let total = 0;
+    for (let index = 3; index < data.length; index += 4 * 16) {
+      total++;
+      if (data[index] === 0) clear++;
+    }
+    return clear / total;
+  }
+
+  function open(card: HTMLElement) {
+    if (card.hasAttribute('data-open')) return;
+    card.toggleAttribute('data-open', true);
+    if (!cards.every((item) => item.hasAttribute('data-open'))) return;
+    // Every BeSmart card slides into the Chocolife one.
+    const target = cards.find((item) => item.dataset.deal === 'chocolife')!.getBoundingClientRect();
+    for (const item of cards) {
+      const box = item.getBoundingClientRect();
+      item.style.setProperty('--to-x', `${target.left - box.left}px`);
+    }
+    setTimeout(() => {
+      grid.toggleAttribute('data-merged', true);
+      note.hidden = false;
+    }, 500);
+  }
+
+  for (const card of cards) {
+    const canvas = card.querySelector('canvas')!;
+    const context = canvas.getContext('2d', { willReadFrequently: true })!;
+    let last: [number, number] | null = null;
+    let strokes = 0;
+
+    const at = (event: PointerEvent): [number, number] => {
+      const box = canvas.getBoundingClientRect();
+      return [event.clientX - box.left, event.clientY - box.top];
+    };
+    const scratch = (from: [number, number], to: [number, number]) => {
+      context.globalCompositeOperation = 'destination-out';
+      context.lineWidth = BRUSH * 2;
+      context.lineCap = 'round';
+      context.beginPath();
+      context.moveTo(...from);
+      context.lineTo(...to);
+      context.stroke();
+      if (++strokes % 10 === 0 && cleared(canvas) >= OPEN_AT) open(card);
+    };
+
+    canvas.addEventListener('pointerdown', (event) => {
+      touched = true;
+      canvas.setPointerCapture(event.pointerId);
+      last = at(event);
+      scratch(last, last);
+    });
+    canvas.addEventListener('pointermove', (event) => {
+      if (!last) return;
+      const point = at(event);
+      scratch(last, point);
+      last = point;
+    });
+    canvas.addEventListener('pointerup', () => {
+      last = null;
+      if (cleared(canvas) >= OPEN_AT) open(card);
+    });
+    card.querySelector('[data-reveal]')!.addEventListener('click', () => open(card));
+  }
+
+  function reset() {
+    grid.toggleAttribute('data-merged', false);
+    note.hidden = true;
+    for (const card of cards) {
+      card.toggleAttribute('data-open', false);
+      paint(card.querySelector('canvas')!);
+    }
+  }
+
+  screen.querySelector('[data-again]')!.addEventListener('click', reset);
+
+  // Hidden screens keep their layout, so the layer can be painted right away; once the wordmark font is in,
+  // paint again unless someone has started scratching.
+  reset();
+  document.fonts.load('700 15px "Roboto Variable"').finally(() => {
+    if (!touched) reset();
+  });
+</script>
