@@ -1,0 +1,46 @@
+---
+// Mad Devs, after the old maddevs.io hero: a large light headline on the left, a live Slack window on the right.
+import BackToIntro from '../../components/BackToIntro.astro';
+import { formatYears, projects } from '../../content/projects';
+import Slack from './Slack';
+
+const project = projects.find((item) => item.id === 'maddevs')!;
+---
+
+<section id="maddevs" data-screen class="overflow-hidden bg-md-ink font-inter text-white">
+  <BackToIntro class="text-sm text-md-grey transition-colors hover:text-white" />
+
+  <div class="flex h-full items-center gap-[4vw] px-[5vw]">
+    <div class="w-[32vw] shrink-0">
+      <p class="flex items-center gap-2.5 text-sm font-semibold">
+        <img src="/icons/maddevs.png" alt="" width="64" height="64" class="size-7 rounded" />
+        Mad Devs
+      </p>
+      <h2 class="mt-6 text-[clamp(2.4rem,4.2vw,4.6rem)] leading-[1.08] font-normal tracking-[-0.02em]">
+        My home company since 2018
+      </h2>
+      <dl class="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-[0.95rem]">
+        {
+          project.roles.map((role) => (
+            <>
+              <dt class="text-md-grey tabular-nums">{formatYears(role.period)}</dt>
+              <dd>{role.title}</dd>
+            </>
+          ))
+        }
+      </dl>
+      <p class="mt-8 max-w-[34em] leading-relaxed text-md-grey">
+        I lead the internal team behind maddevs.io and a few internal tools, lead the small ITC team and mentor
+        interns. Client work came through Mad Devs too: Teacherly, bile-bile.kz and Ex Parte.
+      </p>
+      <p class="mt-6 font-plex-mono text-sm text-md-grey">{project.stack.join(', ')}</p>
+      <p class="mt-10 border-l-2 border-md-red pl-4 text-sm leading-relaxed">
+        The window on the right works. Open #mad-radiator and type <code class="font-plex-mono">/radiator run</code>.
+      </p>
+    </div>
+
+    <div class="h-[80svh] min-w-0 flex-1">
+      <Slack client:idle />
+    </div>
+  </div>
+</section>
