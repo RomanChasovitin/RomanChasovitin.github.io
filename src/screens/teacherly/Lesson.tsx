@@ -354,8 +354,7 @@ export default function Lesson() {
                 <Board screen={screen} editable selected={selected} onSelect={setSelected} onChange={update} />
               </div>
             </div>
-            <div className="flex items-center justify-between border-t border-[#eeebf7] px-5 py-3 text-sm">
-              <span className="text-tl-ink/60">Drag to move, the corner to resize, double-click text to edit.</span>
+            <div className="flex items-center justify-end border-t border-[#eeebf7] px-5 py-3 text-sm">
               <PrimaryButton onClick={() => go('schedule')}>Next: schedule it</PrimaryButton>
             </div>
           </div>
