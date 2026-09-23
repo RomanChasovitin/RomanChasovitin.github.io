@@ -1,5 +1,5 @@
 ---
-// Every project screen has one, top left; each screen styles it in its own brand through `class`.
+// Every project screen has one, top left: a real button, dressed in each screen's brand through `class`.
 type Props = { class?: string };
 
 const { class: className } = Astro.props;
@@ -10,9 +10,16 @@ const { class: className } = Astro.props;
 <style>
   .back {
     position: absolute;
-    top: 4svh;
+    top: 3.5svh;
     left: 5vw;
     z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.55em 1.15em;
     text-decoration: none;
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease,
+      color 200ms ease;
   }
 </style>
