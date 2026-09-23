@@ -1,5 +1,6 @@
 ---
 import BackToIntro from '../../components/BackToIntro.astro';
+import ExParteLogo from '../../components/ExParteLogo.astro';
 import { projects } from '../../content/projects';
 import { findings } from './data';
 
@@ -19,7 +20,7 @@ const since = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' }).
   <BackToIntro class="font-geist-mono text-sm text-xp-mist transition-colors hover:text-xp-cyan" />
 
   <div data-column class="relative flex h-full w-full flex-col justify-center px-[5vw] min-[900px]:w-[38%]">
-    <h2 class="text-[clamp(3rem,6vw,7rem)] leading-[0.95] font-medium tracking-[-0.045em]">{project.name}</h2>
+    <h2><ExParteLogo class="block h-auto w-[clamp(15rem,26vw,28rem)]" /></h2>
     <p class="mt-5 font-geist-mono text-sm text-xp-mist">{role.title} through Mad Devs, since {since}</p>
     <p class="mt-8 max-w-[30em] text-lg leading-relaxed text-xp-mist">
       Ex Parte models the patent litigation ecosystem to find what decides a case. I keep its portal running and
