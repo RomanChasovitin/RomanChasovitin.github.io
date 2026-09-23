@@ -643,13 +643,14 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
     windowEl.toggleAttribute('data-moving', true);
     const distance = windowEl.clientWidth;
     // Pull away and leave the frame, then come in from the other side and brake at the platform.
+    // Timers drive the sequence, so a background tab that renders no frames still finishes the trip.
     const leave = trainEl.animate([{ transform: 'translateX(0)' }, { transform: `translateX(${distance}px)` }], {
       duration: HALF_MS,
       easing: 'cubic-bezier(0.55, 0, 0.9, 0.4)',
       fill: 'forwards',
     });
     setTimeout(() => (sign.dataset.state = 'swap'), HALF_MS * 0.5);
-    leave.finished.then(() => {
+    setTimeout(() => {
       arrive(to);
       sign.dataset.state = 'swap';
       requestAnimationFrame(() => delete sign.dataset.state);
@@ -659,12 +660,13 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
         fill: 'forwards',
       });
       leave.cancel();
-      enter.finished.then(() => {
+      setTimeout(() => {
         enter.cancel();
+        delete sign.dataset.state;
         windowEl.toggleAttribute('data-moving', false);
         travelling = false;
-      });
-    });
+      }, HALF_MS);
+    }, HALF_MS);
   }
 
   next.addEventListener('click', () => travel(station === stations.length - 1 ? 0 : station + 1));
