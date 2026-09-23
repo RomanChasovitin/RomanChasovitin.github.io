@@ -1,312 +1,606 @@
 ---
-// Chocolife and BeSmart, in the Chocolife deal feed: three deal cards with a scratch layer over the picture.
-// Under it is what I did on each platform. Once all three are open, the BeSmart cards merge into Chocolife,
-// the way the platforms did.
+// Chocolife and BeSmart: the rewrite. One deal page twice in one browser window, the legacy BeSmart build
+// on the left and the Angular 2+ rewrite on the right, split by a line the visitor drags. The same line
+// splits the address bar and the code under the page. Both halves share one cart: one product, two builds.
 import BackToIntro from '../../components/BackToIntro.astro';
 import { formatYears, projects } from '../../content/projects';
 
 const project = projects.find((item) => item.id === 'chocolife')!;
 const role = project.roles[0];
 
-const deals = [
-  {
-    id: 'besmart-kz',
-    name: 'BeSmart.kz',
-    place: 'Kazakhstan',
-    tag: '2018',
-    price: 'from 1 500 ₸',
-    tint: 'var(--color-cl-cream)',
-    hidden: 'Legacy support and my first real tests with Karma and Jasmine. Responsive pages and email templates from Figma and Zeplin.',
-  },
-  {
-    id: 'besmart-kg',
-    name: 'BeSmart.kg',
-    place: 'Kyrgyzstan',
-    tag: '2018',
-    price: 'from 150 som',
-    tint: 'var(--color-cl-ice)',
-    hidden: 'The same code base on a second domain: one fix shipped to two countries at once.',
-  },
-  {
-    id: 'chocolife',
-    name: 'Chocolife.me',
-    place: 'Almaty',
-    tag: '2019',
-    price: 'from 2 400 ₸',
-    tint: 'var(--color-cl-peach)',
-    hidden: 'A rewrite from scratch on Angular 2+ with TypeScript and RxJS, a React, MobX and GraphQL app, and json-server mocks for local work.',
-  },
-];
+const legacyCode = `// deal.js, BeSmart
+$(function () {
+  $.getJSON('/api/deal/' + dealId, function (deal) {
+    var html = '<table class="deal"><tr><td>' +
+      '<b>' + deal.title + '</b><br>' +
+      '<s>' + deal.old + '</s> ' + deal.price + ' ' + currency +
+      '</td></tr></table>';
+    $('#deal').html(html);
+    $('#buy').click(function () { cart.push(deal.id); });
+  });
+});`;
+
+const angularCode = `// deal.component.ts, Chocolife
+@Component({
+  selector: 'cl-deal',
+  templateUrl: './deal.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class DealComponent {
+  @Input() deal!: Deal;
+  readonly total$ = this.quantity.value$.pipe(
+    map((count) => count * this.deal.price),
+  );
+  constructor(private quantity: QuantityService, private cart: CartService) {}
+  buy(): void { this.cart.add(this.deal.id); }
+}`;
+
+// A tiny highlighter for the two snippets: comments, strings, keywords, decorators.
+const TOKENS = /(\/\/.*$|'[^']*'|@\w+|\b(?:function|var|const|readonly|export|class|private|constructor|return|void|this)\b)/gm;
+function highlight(code: string) {
+  return code
+    .split(TOKENS)
+    .map((part, index) => {
+      const safe = part.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+      if (index % 2 === 0) return safe;
+      const kind = part.startsWith('//') ? 'c' : part.startsWith("'") ? 's' : part.startsWith('@') ? 'd' : 'k';
+      return `<span class="${kind}">${safe}</span>`;
+    })
+    .join('');
+}
 ---
 
-<section id="chocolife" data-screen class="overflow-y-auto bg-cl-grey font-roboto text-cl-ink">
+<section id="chocolife" data-screen class="overflow-hidden bg-cl-grey font-roboto text-cl-ink">
   <BackToIntro class="rounded bg-cl-yellow text-sm font-medium text-[#212121] hover:bg-[#fccc22]" />
 
-  <div class="mx-auto flex h-full max-w-[1060px] flex-col px-6 pt-[9svh] pb-[4svh]">
-    <!-- The Choco family header -->
-    <header class="flex items-center gap-8 rounded-t-[10px] bg-white px-6 py-4 text-sm">
-      <span class="text-2xl font-bold tracking-tight text-cl-navy">chocolife</span>
-      <nav class="flex gap-6 text-cl-ink/80" aria-label="Choco services">
-        <span class="font-medium text-cl-ink">Coupons and deals</span>
-        <span>Flights</span>
-        <span>Food delivery</span>
-        <span>Find a doctor</span>
-      </nav>
-      <span class="ml-auto text-cl-muted">Almaty</span>
-    </header>
-    <div class="h-1 bg-cl-yellow"></div>
-
-    <div class="mt-8 flex items-end justify-between gap-8">
+  <div class="mx-auto flex h-full max-w-[1180px] flex-col px-6 pt-[10svh] pb-[3svh]">
+    <div class="flex items-end justify-between gap-10">
       <div>
-        <h2 class="text-[clamp(1.8rem,2.8vw,2.6rem)] leading-tight font-bold text-cl-navy">
-          My first projects: {project.name}
-        </h2>
-        <p class="mt-2 max-w-[44em] leading-relaxed">
-          {role.title}, {formatYears(role.period)}, {project.company}. Where I learned the job: legacy code, a rewrite,
-          tests and a lot of new technology.
+        <div class="flex items-center gap-2.5">
+          <img src="/icons/chocolife.svg" alt="" width="64" height="64" class="size-8" />
+          <img src="/icons/besmart.svg" alt="" width="64" height="64" class="size-8" />
+          <img src="/icons/chocolife-logo.svg" alt="chocolife.me" width="125" height="23" class="ml-2 h-5 w-auto" />
+        </div>
+        <h2 class="mt-4 text-[clamp(1.8rem,2.8vw,2.7rem)] leading-tight font-bold text-cl-navy">From legacy to Angular 2+</h2>
+        <p class="mt-2 max-w-[52em] leading-relaxed">
+          {role.title}, {formatYears(role.period)}, {project.company}. My first job. BeSmart.kz and BeSmart.kg ran on
+          one legacy code base; I kept it alive, then rewrote the product from scratch on Angular 2+ with TypeScript and
+          RxJS, with tests from the start. After the merger everything moved to Chocolife.
         </p>
       </div>
-      <p class="shrink-0 text-sm text-cl-muted">Scratch the yellow layer on each deal.</p>
+      <p class="shrink-0 pb-1 text-sm text-cl-muted">Drag the line to compare. Both sides share one cart.</p>
     </div>
 
-    <div class="deals mt-6 grid grid-cols-3 gap-5" data-deals>
-      {
-        deals.map((deal) => (
-          <article class="deal" data-deal={deal.id}>
-            <div class="picture" style={`background: ${deal.tint}`}>
-              <p class="hidden-text">{deal.hidden}</p>
-              <canvas class="scratch" aria-hidden="true" />
-              <span class="tag">{deal.tag}</span>
+    <div class="split mt-5 flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-white shadow-sm" style="--split: 50%" data-split>
+      <!-- Address bar -->
+      <div class="bar relative h-10 shrink-0 border-b border-[#e1e1e1] bg-[#f7f7f7] text-sm">
+        <div class="half before"><span class="url">http://besmart.kz/deal/1234</span></div>
+        <div class="half after"><span class="url">https://chocolife.me/deal/1234</span></div>
+      </div>
+
+      <!-- The page, twice -->
+      <div class="relative min-h-0 flex-[1.5]">
+        <div class="half before legacy">
+          <div class="l-top">
+            <span class="l-logo">BeSmart</span>
+            <span class="l-domains">
+              Domain:
+              <button type="button" data-domain="kz" aria-pressed="true">besmart.kz</button> |
+              <button type="button" data-domain="kg" aria-pressed="false">besmart.kg</button>
+            </span>
+          </div>
+          <table class="l-table">
+            <tbody>
+              <tr>
+                <td class="l-pic">photo</td>
+                <td class="l-info">
+                  <span class="l-hot">HOT!</span>
+                  <h3><span class="l-link">A day at the aquapark</span></h3>
+                  <p>Old price: <s data-old-legacy>11 376 ₸</s><br />Price: <b class="l-price" data-price-legacy>5 688 ₸</b></p>
+                  <p class="l-qty">
+                    Quantity: <button type="button" data-less>-</button>
+                    <span data-count>1</span>
+                    <button type="button" data-more>+</button>
+                  </p>
+                  <button type="button" class="l-buy" data-buy>BUY NOW!!!</button>
+                  <p class="l-cart">Items in cart: <b data-cart>0</b></p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="half after modern">
+          <div class="m-top">
+            <img src="/icons/chocolife-logo.svg" alt="" width="125" height="23" class="h-5 w-auto" />
+            <span class="text-cl-muted">Almaty</span>
+            <span class="m-cart">Cart <b data-cart>0</b></span>
+          </div>
+          <div class="m-card">
+            <div class="m-pic"></div>
+            <div class="m-info">
+              <span class="m-tag">−50%</span>
+              <h3>A day at the aquapark</h3>
+              <p class="m-old">11 376 ₸</p>
+              <p class="m-price" data-price-modern>5 688 ₸</p>
+              <div class="m-qty">
+                <button type="button" data-less aria-label="One less">−</button>
+                <span data-count>1</span>
+                <button type="button" data-more aria-label="One more">+</button>
+              </div>
+              <button type="button" class="m-buy" data-buy>Buy</button>
+              <p class="m-bought">Bought 1 234 times</p>
             </div>
-            <div class="p-4">
-              <p class="font-medium">{deal.name}</p>
-              <p class="mt-0.5 text-sm text-cl-muted">{deal.place}</p>
-              <p class="mt-3 flex items-center justify-between">
-                <span class="font-bold">{deal.price}</span>
-                <button type="button" class="reveal text-xs text-cl-link hover:underline" data-reveal>
-                  Reveal without scratching
-                </button>
-              </p>
-            </div>
-          </article>
-        ))
-      }
+          </div>
+        </div>
+      </div>
+
+      <!-- The code, split by the same line -->
+      <div class="code relative min-h-0 flex-1 border-t border-[#2a2a2a] bg-[#1e1e1e] font-jetbrains text-[0.78rem] leading-[1.55] text-[#d4d4d4]">
+        <pre class="half before"><code set:html={highlight(legacyCode)} /></pre>
+        <pre class="half after"><code set:html={highlight(angularCode)} /></pre>
+        <div class="tests" data-tests hidden aria-live="polite"></div>
+        <button type="button" class="run" data-run>Run the tests</button>
+      </div>
+
+      <div
+        class="handle"
+        role="slider"
+        tabindex="0"
+        aria-label="Compare the legacy build and the rewrite"
+        aria-valuemin="5"
+        aria-valuemax="95"
+        aria-valuenow="50"
+        data-handle
+      >
+        <span></span>
+      </div>
     </div>
 
-    <div class="merge-note mt-6 flex items-center justify-between gap-6" data-note hidden>
-      <p class="max-w-[46em] leading-relaxed">
-        BeSmart.kz and BeSmart.kg shared one code base. After the merger everything moved to Chocolife, and the team
-        with it.
-      </p>
-      <button type="button" data-again class="shrink-0 rounded-md bg-cl-yellow px-4 py-2 text-sm font-medium text-[#212121]">
-        Scratch again
-      </button>
-    </div>
-
-    <p class="mt-auto pt-6 text-sm text-cl-muted">{project.stack.join(', ')}</p>
+    <p class="mt-3 text-sm text-cl-muted">{project.stack.join(', ')}</p>
   </div>
 </section>
 
 <style>
-  .deal {
+  .split {
+    position: relative;
+  }
+
+  /* Each half is a full-size layer, clipped at the split line. */
+  .half {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .before {
+    clip-path: inset(0 calc(100% - var(--split)) 0 0);
+  }
+
+  .after {
+    clip-path: inset(0 0 0 var(--split));
+  }
+
+  .bar .half {
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+  }
+
+  .bar .after {
+    justify-content: flex-end;
+  }
+
+  .url {
+    padding: 0.2em 0.8em;
+    border-radius: 999px;
+    background: #fff;
+    color: #5f6368;
+  }
+
+  /* One line through the address bar, the page and the code. */
+  .handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--split);
+    z-index: 4;
+    width: 2px;
+    background: var(--color-cl-navy);
+    cursor: ew-resize;
+    translate: -1px 0;
+    touch-action: none;
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0 -10px;
+    }
+
+    & span {
+      position: absolute;
+      top: 38%;
+      left: 50%;
+      width: 1.9rem;
+      height: 1.9rem;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      background: var(--color-cl-navy);
+      translate: -50% -50%;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
+    }
+
+    &:focus-visible span {
+      outline: 3px solid var(--color-cl-yellow);
+    }
+  }
+
+  /* The legacy build, as it looked. */
+  .legacy {
+    background: #e9e9e9;
+    color: #000;
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 12px;
+  }
+
+  .l-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    border-bottom: 2px solid #0d3f86;
+    background: linear-gradient(#3b7dd8, #1f5fb8);
+    color: #fff;
+  }
+
+  .l-logo {
+    font-size: 20px;
+    font-style: italic;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #0d3f86;
+  }
+
+  .l-domains button {
+    color: #fff;
+    text-decoration: underline;
+    cursor: pointer;
+
+    &[aria-pressed='true'] {
+      color: #ffea00;
+      font-weight: bold;
+    }
+  }
+
+  .l-table {
+    width: 640px;
+    margin: 10px;
+    border: 1px solid #999;
+    border-collapse: separate;
+    border-spacing: 4px;
+    background: #fff;
+
+    & td {
+      padding: 6px;
+      border: 1px solid #ccc;
+      vertical-align: top;
+    }
+  }
+
+  .l-pic {
+    width: 240px;
+    height: 160px;
+    background: repeating-linear-gradient(45deg, #ccc 0 10px, #d8d8d8 10px 20px);
+    color: #777;
+    text-align: center;
+    vertical-align: middle !important;
+  }
+
+  .l-info {
+    & p {
+      margin: 6px 0;
+    }
+
+    & .l-qty button {
+      width: 20px;
+      border: 1px outset #999;
+      background: #eee;
+      cursor: pointer;
+    }
+  }
+
+  .l-link {
+    color: #00c;
+    font-size: 15px;
+    text-decoration: underline;
+  }
+
+  .l-hot {
+    float: right;
+    padding: 1px 4px;
+    background: red;
+    color: #ff0;
+    font-weight: bold;
+  }
+
+  .l-price {
+    color: #c00;
+    font-size: 16px;
+  }
+
+  .l-buy {
+    padding: 4px 12px;
+    border: 1px solid #b35900;
+    border-radius: 3px;
+    background: linear-gradient(#ffb347, #ff7f00);
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  /* The rewrite, in the Chocolife look. */
+  .modern {
+    background: var(--color-cl-grey);
+  }
+
+  .m-top {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.8rem 1.5rem;
+    border-bottom: 3px solid var(--color-cl-yellow);
+    background: #fff;
+    font-size: 0.85rem;
+  }
+
+  .m-cart {
+    margin-left: auto;
+    padding: 0.3em 0.8em;
+    border-radius: 4px;
+    background: var(--color-cl-grey);
+
+    & b {
+      margin-left: 0.3em;
+      padding: 0 0.45em;
+      border-radius: 999px;
+      background: var(--color-cl-yellow);
+      color: #212121;
+    }
+  }
+
+  .m-card {
+    position: absolute;
+    top: 4.5rem;
+    right: 1.5rem;
+    display: flex;
+    width: min(620px, 55%);
     overflow: hidden;
     border-radius: 10px;
     background: #fff;
-    transition:
-      translate 900ms cubic-bezier(0.6, 0, 0.2, 1),
-      scale 900ms cubic-bezier(0.6, 0, 0.2, 1),
-      opacity 700ms ease 200ms;
   }
 
-  .picture {
+  .m-pic {
+    flex: 1;
+    background:
+      radial-gradient(circle at 70% 30%, #fff 0 12%, transparent 13%),
+      repeating-linear-gradient(170deg, #9fd4f5 0 14px, #7cc3ef 14px 28px);
+  }
+
+  .m-info {
     position: relative;
-    display: flex;
-    align-items: flex-end;
-    height: 13.5rem;
-    padding: 1.1rem;
+    width: 55%;
+    padding: 1.2rem;
+
+    & h3 {
+      margin-top: 0.5rem;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
   }
 
-  .hidden-text {
-    font-size: 0.95rem;
-    font-weight: 500;
-    line-height: 1.45;
-  }
-
-  .scratch {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    cursor: grab;
-    touch-action: none;
-    transition: opacity 500ms ease;
-  }
-
-  .deal[data-open] .scratch {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .deal[data-open] .reveal {
-    visibility: hidden;
-  }
-
-  /* The yellow discount tag of their cards. */
-  .tag {
-    position: absolute;
-    top: 0.9rem;
-    left: 0.9rem;
-    padding: 0.25em 0.6em;
+  .m-tag {
+    padding: 0.2em 0.5em;
     border-radius: 4px;
     background: var(--color-cl-yellow);
     color: #212121;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 500;
-    box-shadow: 0 0 0 2px #fff;
   }
 
-  .deals[data-merged] .deal[data-deal^='besmart'] {
-    translate: var(--to-x) 0;
-    scale: 0.6;
-    opacity: 0;
+  .m-old {
+    margin-top: 0.6rem;
+    color: var(--color-cl-muted);
+    font-size: 0.8rem;
+    text-decoration: line-through;
   }
 
-  .deals[data-merged] [data-deal='chocolife'] {
-    animation: absorb 700ms cubic-bezier(0.34, 1.5, 0.64, 1) 750ms;
+  .m-price {
+    font-size: 1.4rem;
+    font-weight: 700;
   }
 
-  @keyframes absorb {
-    50% {
-      scale: 1.04;
+  .m-qty {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-top: 0.6rem;
+    padding: 0.2rem;
+    border-radius: 6px;
+    background: var(--color-cl-grey);
+
+    & button {
+      width: 1.8rem;
+      height: 1.8rem;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .deal,
-    .scratch {
-      transition: none;
-    }
+  .m-buy {
+    display: block;
+    margin-top: 0.8rem;
+    padding: 0.6em 2.2em;
+    border-radius: 4px;
+    background: var(--color-cl-yellow);
+    color: #212121;
+    font-weight: 500;
+    cursor: pointer;
+  }
 
-    .deals[data-merged] [data-deal='chocolife'] {
-      animation: none;
-    }
+  .m-bought {
+    margin-top: 0.5rem;
+    color: var(--color-cl-muted);
+    font-size: 0.75rem;
+  }
+
+  .code pre {
+    margin: 0;
+    padding: 0.9rem 1.2rem;
+  }
+
+  .code .after {
+    padding-left: calc(var(--split) + 1.2rem);
+  }
+
+  .code :global(.c) {
+    color: #6a9955;
+  }
+
+  .code :global(.s) {
+    color: #ce9178;
+  }
+
+  .code :global(.k) {
+    color: #569cd6;
+  }
+
+  .code :global(.d) {
+    color: #dcdcaa;
+  }
+
+  /* Karma output, over the rewrite's side. */
+  .tests {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    width: 42%;
+    padding: 0.9rem 1.2rem;
+    overflow: auto;
+    background: #141414;
+    white-space: pre;
+  }
+
+  .run {
+    position: absolute;
+    right: 1rem;
+    bottom: 0.8rem;
+    z-index: 3;
+    padding: 0.4em 1em;
+    border-radius: 4px;
+    background: var(--color-cl-yellow);
+    color: #212121;
+    font-family: var(--font-roboto);
+    font-weight: 500;
+    cursor: pointer;
   }
 </style>
 
 <script>
   const screen = document.getElementById('chocolife')!;
-  const grid = screen.querySelector<HTMLElement>('[data-deals]')!;
-  const note = screen.querySelector<HTMLElement>('[data-note]')!;
-  const cards = Array.from(screen.querySelectorAll<HTMLElement>('[data-deal]'));
-  const YELLOW = '#f7da3b';
-  const NAVY = '#2e3a82';
-  const BRUSH = 24;
-  const OPEN_AT = 0.55;
-  let touched = false;
+  const split = screen.querySelector<HTMLElement>('[data-split]')!;
+  const handle = screen.querySelector<HTMLElement>('[data-handle]')!;
+  const tests = screen.querySelector<HTMLElement>('[data-tests]')!;
+  const run = screen.querySelector<HTMLButtonElement>('[data-run]')!;
 
-  function paint(canvas: HTMLCanvasElement) {
-    const ratio = Math.min(devicePixelRatio, 2);
-    canvas.width = canvas.clientWidth * ratio;
-    canvas.height = canvas.clientHeight * ratio;
-    const context = canvas.getContext('2d', { willReadFrequently: true })!;
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    context.globalCompositeOperation = 'source-over';
-    context.fillStyle = YELLOW;
-    context.fillRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-    // A faint repeating "scratch" wordmark, like the foil of a lottery ticket.
-    context.fillStyle = NAVY;
-    context.globalAlpha = 0.16;
-    context.font = '700 15px "Roboto Variable", sans-serif';
-    context.rotate(-0.35);
-    for (let y = -40; y < canvas.clientHeight + 160; y += 34) {
-      for (let x = -120; x < canvas.clientWidth + 120; x += 92) context.fillText('scratch', x + (y % 68 ? 46 : 0), y);
-    }
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    context.globalAlpha = 1;
+  // The split line.
+  function place(percent: number) {
+    const value = Math.min(95, Math.max(5, percent));
+    split.style.setProperty('--split', `${value}%`);
+    handle.setAttribute('aria-valuenow', String(Math.round(value)));
   }
-
-  function cleared(canvas: HTMLCanvasElement) {
-    const { data } = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height);
-    let clear = 0;
-    let total = 0;
-    for (let index = 3; index < data.length; index += 4 * 16) {
-      total++;
-      if (data[index] === 0) clear++;
-    }
-    return clear / total;
-  }
-
-  function open(card: HTMLElement) {
-    if (card.hasAttribute('data-open')) return;
-    card.toggleAttribute('data-open', true);
-    if (!cards.every((item) => item.hasAttribute('data-open'))) return;
-    // Every BeSmart card slides into the Chocolife one.
-    const target = cards.find((item) => item.dataset.deal === 'chocolife')!.getBoundingClientRect();
-    for (const item of cards) {
-      const box = item.getBoundingClientRect();
-      item.style.setProperty('--to-x', `${target.left - box.left}px`);
-    }
-    setTimeout(() => {
-      grid.toggleAttribute('data-merged', true);
-      note.hidden = false;
-    }, 500);
-  }
-
-  for (const card of cards) {
-    const canvas = card.querySelector('canvas')!;
-    const context = canvas.getContext('2d', { willReadFrequently: true })!;
-    let last: [number, number] | null = null;
-    let strokes = 0;
-
-    const at = (event: PointerEvent): [number, number] => {
-      const box = canvas.getBoundingClientRect();
-      return [event.clientX - box.left, event.clientY - box.top];
-    };
-    const scratch = (from: [number, number], to: [number, number]) => {
-      context.globalCompositeOperation = 'destination-out';
-      context.lineWidth = BRUSH * 2;
-      context.lineCap = 'round';
-      context.beginPath();
-      context.moveTo(...from);
-      context.lineTo(...to);
-      context.stroke();
-      if (++strokes % 10 === 0 && cleared(canvas) >= OPEN_AT) open(card);
-    };
-
-    canvas.addEventListener('pointerdown', (event) => {
-      touched = true;
-      canvas.setPointerCapture(event.pointerId);
-      last = at(event);
-      scratch(last, last);
-    });
-    canvas.addEventListener('pointermove', (event) => {
-      if (!last) return;
-      const point = at(event);
-      scratch(last, point);
-      last = point;
-    });
-    canvas.addEventListener('pointerup', () => {
-      last = null;
-      if (cleared(canvas) >= OPEN_AT) open(card);
-    });
-    card.querySelector('[data-reveal]')!.addEventListener('click', () => open(card));
-  }
-
-  function reset() {
-    grid.toggleAttribute('data-merged', false);
-    note.hidden = true;
-    for (const card of cards) {
-      card.toggleAttribute('data-open', false);
-      paint(card.querySelector('canvas')!);
-    }
-  }
-
-  screen.querySelector('[data-again]')!.addEventListener('click', reset);
-
-  // Hidden screens keep their layout, so the layer can be painted right away; once the wordmark font is in,
-  // paint again unless someone has started scratching.
-  reset();
-  document.fonts.load('700 15px "Roboto Variable"').finally(() => {
-    if (!touched) reset();
+  let dragging = false;
+  handle.addEventListener('pointerdown', (event) => {
+    dragging = true;
+    handle.setPointerCapture(event.pointerId);
   });
+  handle.addEventListener('pointermove', (event) => {
+    if (!dragging) return;
+    const box = split.getBoundingClientRect();
+    place(((event.clientX - box.left) / box.width) * 100);
+  });
+  handle.addEventListener('pointerup', () => (dragging = false));
+  handle.addEventListener('keydown', (event) => {
+    const now = Number(handle.getAttribute('aria-valuenow'));
+    if (event.key === 'ArrowLeft') place(now - 5);
+    else if (event.key === 'ArrowRight') place(now + 5);
+    else return;
+    event.preventDefault();
+  });
+
+  // One cart and one quantity for both builds; the legacy one also serves two domains from one code base.
+  const PRICES = { kz: { price: 5688, old: 11376, unit: '₸' }, kg: { price: 570, old: 1140, unit: 'som' } };
+  let domain: keyof typeof PRICES = 'kz';
+  let count = 1;
+  let cart = 0;
+  const money = (value: number, unit: string) => `${value.toLocaleString('ru-RU')} ${unit}`;
+
+  function render() {
+    const legacy = PRICES[domain];
+    screen.querySelectorAll('[data-count]').forEach((element) => (element.textContent = String(count)));
+    screen.querySelectorAll('[data-cart]').forEach((element) => (element.textContent = String(cart)));
+    screen.querySelector('[data-price-legacy]')!.textContent = money(legacy.price * count, legacy.unit);
+    screen.querySelector('[data-old-legacy]')!.textContent = money(legacy.old * count, legacy.unit);
+    screen.querySelector('[data-price-modern]')!.textContent = money(PRICES.kz.price * count, '₸');
+    screen
+      .querySelectorAll<HTMLButtonElement>('[data-domain]')
+      .forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.domain === domain)));
+  }
+
+  const on = (selector: string, action: (button: HTMLButtonElement) => void) =>
+    screen.querySelectorAll<HTMLButtonElement>(selector).forEach((button) =>
+      button.addEventListener('click', () => {
+        action(button);
+        render();
+      }),
+    );
+  on('[data-less]', () => (count = Math.max(1, count - 1)));
+  on('[data-more]', () => (count = Math.min(9, count + 1)));
+  on('[data-buy]', () => (cart += count));
+  on('[data-domain]', (button) => (domain = button.dataset.domain as typeof domain));
+
+  // Karma with Jasmine, the way the rewrite was tested.
+  const SPECS = [
+    ['DealComponent', ['shows the price in tenge', 'shows the discount tag', 'multiplies the total by the quantity', 'disables Buy when the deal is sold out']],
+    ['CartService', ['adds a coupon', 'keeps the cart after a reload', 'merges the same deal into one line']],
+    ['QuantityService', ['never goes below one', 'stops at the deal limit']],
+  ] as const;
+  run.addEventListener('click', () => {
+    run.disabled = true;
+    tests.hidden = false;
+    const total = SPECS.reduce((sum, [, specs]) => sum + specs.length, 0);
+    const lines = [`Chrome 74.0.3729 (Mac OS X 10.14.4): Executed 0 of ${total}`];
+    for (const [suite, specs] of SPECS) {
+      lines.push(`  ${suite}`);
+      for (const spec of specs) lines.push(`    ✓ ${spec}`);
+    }
+    lines.push('', `Executed ${total} of ${total} SUCCESS (0.412 secs / 0.389 secs)`);
+    tests.textContent = '';
+    lines.forEach((line, index) =>
+      setTimeout(() => {
+        const row = document.createElement('div');
+        row.textContent = line;
+        if (line.includes('✓') || line.includes('SUCCESS')) row.style.color = '#6fcf73';
+        tests.append(row);
+        tests.scrollTop = tests.scrollHeight;
+        if (index === lines.length - 1) {
+          run.disabled = false;
+          run.textContent = 'Run again';
+        }
+      }, index * 140),
+    );
+  });
+
+  render();
 </script>
