@@ -18,9 +18,9 @@ let running: Animation | null = null;
 const byId = (id: string) => screens.find((screen) => screen.id === id);
 const fromHash = () => byId(decodeURIComponent(location.hash.slice(1))) ?? screens[0];
 
-/** The hero strip of a project, as a clip-path inset of the viewport. */
+/** The hero strip a screen opens from, as a clip-path inset of the viewport. */
 function stripInset(id: string) {
-  const strip = document.querySelector(`#intro [data-strip="${id}"]`);
+  const strip = document.querySelector(`#intro [data-strip="${id}"], #intro [data-opens="${id}"]`);
   if (!strip) return null;
   const rect = strip.getBoundingClientRect();
   return `inset(${rect.top}px ${innerWidth - rect.right}px ${innerHeight - rect.bottom}px ${rect.left}px)`;
