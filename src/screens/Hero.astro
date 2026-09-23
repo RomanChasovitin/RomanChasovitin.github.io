@@ -54,7 +54,7 @@ const netEdges = netNodes.flatMap((node, index) =>
       projects.map((project, index) => (
         <li class="strip" data-strip={project.id} style={`--i: ${index + 1}`}>
           <button type="button" class="face" aria-expanded="false" aria-controls={`strip-${project.id}`}>
-            <img class="spine-icon" src={`/icons/${project.id}.png`} alt="" width="64" height="64" />
+            <img class="spine-icon" src={`/icons/${project.id}.svg`} alt="" width="64" height="64" />
             <span class="spine">
               {project.name} <small>{span(project)}</small>
             </span>
@@ -147,7 +147,7 @@ const netEdges = netNodes.flatMap((node, index) =>
             </div>
 
             {project.id !== 'exparte' && (
-              <img class="brand-icon" src={`/icons/${project.id}.png`} alt="" width="64" height="64" />
+              <img class="brand-icon" src={`/icons/${project.id}.svg`} alt="" width="64" height="64" />
             )}
             <p class="years">{span(project)}</p>
             <h2 class="name">
