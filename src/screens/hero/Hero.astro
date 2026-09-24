@@ -173,15 +173,15 @@ const [first, ...rest] = profile.name.split(' ');
   }
 
   .me {
-    width: 34vw;
-    flex-shrink: 0;
+    flex: 1;
+    min-width: 0;
   }
 
   .name {
     display: flex;
     align-items: center;
     gap: 0.22em;
-    font-size: clamp(2.8rem, 4.6vw, 5.5rem);
+    font-size: clamp(2.6rem, 4.2vw, 5rem);
     font-weight: 800;
     font-variation-settings:
       'wdth' 75,
@@ -275,6 +275,7 @@ const [first, ...rest] = profile.name.split(' ');
 
     .agent {
       flex: none;
+      width: auto;
       height: 75svh;
     }
   }
