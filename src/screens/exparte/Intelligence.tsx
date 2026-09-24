@@ -75,7 +75,7 @@ export default function Intelligence({ startedAt, onGenerate, onOpen }: Props) {
   const shownItems = (item: Report) => item.items.filter(([label]) => label.toLowerCase().includes(filter.toLowerCase()));
 
   return (
-    <div className="flex min-h-0 flex-1 gap-3 p-3">
+    <div className="flex min-h-0 min-w-0 flex-1 gap-3 p-3">
       {/* Context */}
       <aside className="flex w-52 shrink-0 flex-col overflow-hidden rounded-lg border border-xpp-line bg-white">
         <p className="px-4 pt-3.5 pb-2 text-[0.95rem] font-medium text-xpp-ink">Context</p>
@@ -120,7 +120,7 @@ export default function Intelligence({ startedAt, onGenerate, onOpen }: Props) {
       </aside>
 
       {/* Reports */}
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-xpp-line bg-white">
+      <div className="@container flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-xpp-line bg-white">
         {startedAt !== null && (
           <div className="flex shrink-0 border-b border-xpp-line text-[0.8rem]" role="tablist">
             {reports.map((item) => {
@@ -168,14 +168,14 @@ export default function Intelligence({ startedAt, onGenerate, onOpen }: Props) {
           <button type="button" aria-label="Zoom in" onClick={() => setZoom((value) => Math.min(1.3, value + 0.1))} className="cursor-pointer rounded border border-xpp-line p-1">
             <Icon.plus className="size-3.5" />
           </button>
-          <span className="mx-1 h-5 w-px bg-xpp-line" />
-          <span className="flex gap-1 text-xpp-text" aria-hidden="true">
+          <span className="mx-1 hidden h-5 w-px bg-xpp-line @xl:block" />
+          <span className="hidden gap-1 text-xpp-text @xl:flex" aria-hidden="true">
             <Icon.link className="size-7 rounded border border-xpp-line p-1.5" />
             <Icon.word className="size-7 rounded border border-xpp-line p-1.5" />
             <Icon.pdf className="size-7 rounded border border-xpp-line p-1.5" />
           </span>
           <button type="button" onClick={() => onOpen({ kind: 'engineer', id: 'roman' })} className="ml-auto flex cursor-pointer items-center gap-2 text-[0.75rem] text-xpp-text hover:text-xpp-ink">
-            Requested by
+            <span className="hidden @2xl:inline">Requested by</span>
             <span className="flex size-6 items-center justify-center rounded-full bg-xpp-soft text-[0.65rem] font-medium text-xpp-blue">RC</span>
           </button>
           <span className="ml-2 flex rounded-md bg-xpp-line/70 p-0.5">

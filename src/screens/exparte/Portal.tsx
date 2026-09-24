@@ -176,13 +176,13 @@ export default function Portal() {
             </div>
           )}
 
-          <div className={showing === 'intelligence' ? 'flex min-h-0 flex-1' : 'hidden'}>
+          <div className={showing === 'intelligence' ? 'flex min-h-0 min-w-0 flex-1' : 'hidden'}>
             <Intelligence startedAt={startedAt} onGenerate={generate} onOpen={open} />
           </div>
-          <div className={showing === 'assistant' ? 'flex min-h-0 flex-1' : 'hidden'}>
+          <div className={showing === 'assistant' ? 'flex min-h-0 min-w-0 flex-1' : 'hidden'}>
             <CaseAnalysis onOpen={open} />
           </div>
-          <div className={showing === 'search' ? 'flex min-h-0 flex-1' : 'hidden'}>
+          <div className={showing === 'search' ? 'flex min-h-0 min-w-0 flex-1' : 'hidden'}>
             <Search onOpen={open} />
           </div>
           {entity && showing === 'entity' && <EntityPage key={`${entity.kind}:${entity.id}`} entity={entity} onOpen={open} onWorkflow={setCurrent} />}
