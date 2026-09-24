@@ -107,6 +107,7 @@ export default function Portal() {
 
   return (
     <Window
+      dark
       tabs={WORKFLOWS.map((workflow) => ({ id: workflow.id, label: title(tabs[workflow.id].at(-1)!), icon: workflow.icon('text-xpp-blue') }))}
       active={current}
       onTab={(id) => setCurrent(id as Workflow)}
