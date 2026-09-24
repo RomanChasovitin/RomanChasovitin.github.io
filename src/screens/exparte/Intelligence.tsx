@@ -56,7 +56,9 @@ export default function Intelligence({ startedAt, onGenerate, onOpen }: Props) {
   }, [running]);
 
   // The clock stands still between runs; a new run starts from the time of the click.
-  useEffect(() => setNow(Date.now()), [startedAt]);
+  useEffect(() => {
+    setNow(Date.now());
+  }, [startedAt]);
 
   const report = reports.find((item) => item.id === active)!;
   const current = state(report);
