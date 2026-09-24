@@ -1,9 +1,10 @@
 // Screens sit on top of each other in one fixed viewport; the page never scrolls.
 // The URL hash names the open screen, so links (`#exparte`, `#intro`), the browser's back button and shared
-// URLs all work. Opening a project grows its screen out of the hero strip it came from; "Back to intro"
-// folds it back into that strip.
+// URLs all work. Opening a project grows its screen out of its button in the hero; "Back to intro" folds it
+// back into that button.
 //
-// Sets `data-active-screen` and `data-theme` on <html> and fires `screen:change` on document.
+// Sets `data-active-screen` and `data-theme` on <html> and fires `screen:change` on document. A
+// `screen:open` event on document opens a screen, for the agent in the hero.
 
 const OPEN_MS = 850;
 const EASE = 'cubic-bezier(0.7, 0, 0.2, 1)';
@@ -18,11 +19,11 @@ let running: Animation | null = null;
 const byId = (id: string) => screens.find((screen) => screen.id === id);
 const fromHash = () => byId(decodeURIComponent(location.hash.slice(1))) ?? screens[0];
 
-/** The hero strip a screen opens from, as a clip-path inset of the viewport. */
-function stripInset(id: string) {
-  const strip = document.querySelector(`#intro [data-strip="${id}"], #intro [data-opens="${id}"]`);
-  if (!strip) return null;
-  const rect = strip.getBoundingClientRect();
+/** The hero button a screen opens from, as a clip-path inset of the viewport. */
+function buttonInset(id: string) {
+  const button = document.querySelector(`#intro [data-opens="${id}"]`);
+  if (!button) return null;
+  const rect = button.getBoundingClientRect();
   return `inset(${rect.top}px ${innerWidth - rect.right}px ${innerHeight - rect.bottom}px ${rect.left}px)`;
 }
 
@@ -58,12 +59,12 @@ function show(next: HTMLElement, animate: boolean) {
   const intro = screens[0];
   let moving: HTMLElement;
   let keyframes: Keyframe[];
-  if (previous === intro && stripInset(next.id)) {
+  if (previous === intro && buttonInset(next.id)) {
     moving = next;
-    keyframes = [{ clipPath: stripInset(next.id)! }, { clipPath: 'inset(0px 0px 0px 0px)' }];
-  } else if (next === intro && stripInset(previous.id)) {
+    keyframes = [{ clipPath: buttonInset(next.id)! }, { clipPath: 'inset(0px 0px 0px 0px)' }];
+  } else if (next === intro && buttonInset(previous.id)) {
     moving = previous;
-    keyframes = [{ clipPath: 'inset(0px 0px 0px 0px)' }, { clipPath: stripInset(previous.id)! }];
+    keyframes = [{ clipPath: 'inset(0px 0px 0px 0px)' }, { clipPath: buttonInset(previous.id)! }];
   } else {
     moving = next;
     keyframes = [{ opacity: 0 }, { opacity: 1 }];
@@ -97,6 +98,8 @@ addEventListener('keydown', (event) => {
   if (event.key !== 'Escape' || event.defaultPrevented || current === screens[0]) return;
   go(screens[0].id);
 });
+
+document.addEventListener('screen:open', (event) => go((event as CustomEvent<{ id: string }>).detail.id));
 
 addEventListener('popstate', () => show(fromHash(), true));
 

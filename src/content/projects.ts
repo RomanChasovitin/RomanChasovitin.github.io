@@ -15,9 +15,9 @@ export type Project = {
   url: string | null;
   /** Latest role first. */
   roles: Role[];
-  /** Key technologies, most important first. The hero shows all of them, so keep it to about seven. */
+  /** Key technologies, most important first. The project screen shows all of them, so keep it to about seven. */
   stack: string[];
-  /** One sentence for the hero strip. */
+  /** One sentence, for the agent's list of projects. */
   summary: string;
   highlights: string[];
 };
