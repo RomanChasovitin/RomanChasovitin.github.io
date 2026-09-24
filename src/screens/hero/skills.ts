@@ -185,6 +185,7 @@ const KNOWN: [label: string, pattern: RegExp][] = [
   ['Angular 2+', /\bangular\b/i],
   ['Node.js', /\bnode(\.js)?\b/i],
   ['Express', /\bExpress(\.js)?\b/],
+  ['NestJS', /\bnest\.?js\b/i],
   ['Python', /\bpython\b/i],
   ['Go', /\bgolang\b|\bGo\b/],
   ['PostgreSQL', /\bpostgres(ql)?\b/i],

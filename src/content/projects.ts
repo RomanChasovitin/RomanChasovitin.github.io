@@ -29,14 +29,12 @@ export const projects: Project[] = [
     name: 'Ex Parte',
     url: 'https://exparte.com',
     roles: [{ title: 'Lead Full-Stack Engineer', period: { start: '2022-05', end: null } }],
-    stack: ['Next.js', 'TypeScript', 'Databricks', 'Azure', 'n8n', 'Python', 'Go'],
+    stack: ['Next.js', 'NestJS', 'TypeScript', 'Databricks', 'Azure', 'n8n', 'Python', 'Go'],
     summary:
       'Litigation intelligence for patent lawyers. I keep its B2B portal running and growing, from the interface down to the data.',
     highlights: [
       'Maintain and grow the B2B portal, front end and back end',
       'Back end on Databricks, Azure databases and auth, and n8n',
-      'AI microservices in Python and TypeScript',
-      'Classic microservices in Go, Python and TypeScript',
       'Work deep in the business side of patent litigation',
     ],
   },
