@@ -4,8 +4,8 @@
 // `opens` tells the router. The colors follow --nav-ink and --nav-paper; `dark` sets them for dark screens.
 // On a marked button an icon may change: the Mad Devs M turns white on its red.
 //
-// On a project screen the row starts with Intro, the way back to the hero. Below 1024px the row stays one line
-// and scrolls sideways; it always starts at Intro, so the way back is in view.
+// The row starts with Intro, the way back to the hero; in the hero it is the marked one. Below 1024px the row
+// stays one line and scrolls sideways; it always starts at Intro, so the way back is in view.
 import { brandIcon } from '../content/icons';
 import { projects, type ProjectId } from '../content/projects';
 
@@ -16,14 +16,10 @@ const markedIcon: Partial<Record<ProjectId, string>> = { maddevs: '/icons/maddev
 ---
 
 <nav class:list={['projects', { dark }]} aria-label="Projects">
-  {
-    !opens && (
-      <a class="project intro" href="#intro">
-        <img src="/avatar.jpg" alt="" width="64" height="64" />
-        Intro
-      </a>
-    )
-  }
+  <a class="project intro" href="#intro" aria-current={current ? undefined : 'page'}>
+    <img src="/avatar.jpg" alt="" width="64" height="64" />
+    Intro
+  </a>
   {
     projects.map((project) => (
       <a
