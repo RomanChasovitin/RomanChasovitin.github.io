@@ -122,27 +122,6 @@
     }
   }
 
-  /*
-   * The page of a window is never narrower than it is on a 1440px laptop (a 806px window less its outline).
-   * In a narrower window the bar stays put and the page scrolls sideways under it, inside the window.
-   */
-  .mac-scroll {
-    position: relative;
-    display: flex;
-    flex: 1;
-    min-height: 0;
-    overflow: auto hidden;
-    overscroll-behavior-x: contain;
-  }
-
-  .mac-page {
-    position: relative;
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    min-width: 804px;
-  }
-
   /* A narrow browser keeps the icons of its tabs and the name of the open one only. */
   @container window (width < 560px) {
     .mac-tab:not([aria-selected='true']) {
