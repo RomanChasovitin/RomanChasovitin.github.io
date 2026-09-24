@@ -1,7 +1,7 @@
 /*
  * Every window on the site is a macOS window: three lights and a title in the bar, like the terminal in the
  * hero. A browser window puts its tabs in the bar and an address bar under it. The hero sets the --window-*
- * colors for its two themes; every other window is light.
+ * colors for its two themes; on the dark screens a window has `dark`, and on the light ones it is light.
  */
 @layer components {
   .mac {
@@ -117,6 +117,41 @@
     &:disabled {
       cursor: default;
       opacity: 0.45;
+    }
+  }
+
+  /* The dark frame: macOS in dark mode, and a browser as Chrome draws itself there. */
+  .mac.dark {
+    --window-rule: rgb(255 255 255 / 0.1);
+    --window-bar: #1d1d20;
+    --window-title: #8d8d8d;
+    box-shadow: 0 40px 80px -30px rgb(0 0 0 / 0.8);
+
+    & .mac-bar.tabs {
+      background: #1f2023;
+    }
+
+    & .mac-tab {
+      color: #c4c7c5;
+
+      &:hover:not([aria-selected='true'], :disabled) {
+        background: rgb(255 255 255 / 0.08);
+      }
+
+      &[aria-selected='true'] {
+        background: #35363a;
+        color: #fff;
+      }
+    }
+
+    & .mac-address {
+      border-bottom-color: rgb(255 255 255 / 0.08);
+      background: #35363a;
+    }
+
+    & .mac-url {
+      background: #202124;
+      color: #bdc1c6;
     }
   }
 

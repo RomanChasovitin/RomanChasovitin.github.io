@@ -1,12 +1,14 @@
 import type { ReactNode } from 'react';
 
 // A macOS window around a working piece of a screen, from styles/window.css. With `tabs` it is a browser:
-// the tabs sit in the bar and `url` shows under them; without, the bar carries `title`.
+// the tabs sit in the bar and `url` shows under them; without, the bar carries `title`. `dark` is the frame
+// for the dark screens.
 
 export type WindowTab = { id: string; label: string; icon: ReactNode; disabled?: boolean; badge?: ReactNode };
 
 type Props = {
   title?: string;
+  dark?: boolean;
   tabs?: WindowTab[];
   active?: string;
   onTab?: (id: string) => void;
@@ -26,9 +28,9 @@ export function Lights() {
   );
 }
 
-export default function Window({ title, tabs, active, onTab, url, tools, children }: Props) {
+export default function Window({ title, dark = false, tabs, active, onTab, url, tools, children }: Props) {
   return (
-    <div className="mac h-full">
+    <div className={`mac h-full ${dark ? 'dark' : ''}`}>
       {tabs ? (
         <div className="mac-bar tabs" role="tablist">
           <Lights />
