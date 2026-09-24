@@ -125,6 +125,8 @@
     --window-rule: rgb(255 255 255 / 0.1);
     --window-bar: #1d1d20;
     --window-title: #8d8d8d;
+    /* The whole outline is dark too, not only the bar: a light hairline would glow on a dark screen. */
+    border-color: #2a2b2f;
     box-shadow: 0 40px 80px -30px rgb(0 0 0 / 0.8);
 
     & .mac-bar.tabs {
