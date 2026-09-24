@@ -93,7 +93,7 @@ function list(): Step[] {
   ];
 }
 
-// Spaces, dots and case do not matter: "Ex Parte", "bile-bile.kz" and "teach" all find their project.
+// Spaces, dots and case do not matter: "Ex Parte", "Bile-Bile", "bile-bile.kz" and "teach" all find their project.
 function find(input: string): ProjectId | undefined {
   const key = input.toLowerCase().replace(/[^a-z]/g, '');
   if (key.includes('besmart')) return 'chocolife';

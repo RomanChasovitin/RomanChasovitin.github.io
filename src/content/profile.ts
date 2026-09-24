@@ -35,7 +35,7 @@ const tech = {
 const company = {
   exparte: { label: 'Ex Parte', href: 'https://exparte.com', icon: 'exparte' },
   maddevs: { label: 'Mad Devs', href: 'https://maddevs.io', icon: 'maddevs' },
-  bilebile: { label: 'bile-bile.kz', href: '#bilebile', icon: 'bilebile' },
+  bilebile: { label: 'Bile-Bile', href: '#bilebile', icon: 'bilebile' },
   teacherly: { label: 'Teacherly', href: '#teacherly', icon: 'teacherly' },
   chocolife: { label: 'Chocolife', href: 'https://chocolife.me', icon: 'chocolife' },
   besmart: { label: 'BeSmart', href: '#chocolife', icon: 'besmart' },

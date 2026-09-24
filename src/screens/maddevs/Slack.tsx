@@ -20,7 +20,7 @@ const MUTED = '#616061';
 const PICKER = ['👍', '🎉', '🔥', '👀', '🙌', '🚀'];
 const PROJECTS = [
   { id: 'exparte', name: 'Ex Parte', color: '#0061ff' },
-  { id: 'bilebile', name: 'bile-bile.kz', color: '#e63445' },
+  { id: 'bilebile', name: 'Bile-Bile', color: '#e63445' },
   { id: 'teacherly', name: 'Teacherly', color: '#4e409b' },
 ] as const;
 
