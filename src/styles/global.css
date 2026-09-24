@@ -16,6 +16,17 @@ body {
   outline: none;
 }
 
+/*
+ * Below 1024px the sides of a screen stack (.split in window.css) and the screen scrolls inside itself. These
+ * rules sit outside the Tailwind layers, so they win over the overflow-hidden of a screen.
+ */
+@media (width < 1024px) {
+  [data-screen] {
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+  }
+}
+
 [data-screen][data-shown] {
   visibility: visible;
 }

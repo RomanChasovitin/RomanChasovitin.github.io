@@ -8,6 +8,8 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    /* What is inside a window fits the width of the window, not of the screen. */
+    container: window / inline-size;
     border: 1px solid var(--window-rule, rgb(0 0 0 / 0.1));
     border-radius: 0.75rem;
     background: var(--window-bg, #fff);
@@ -120,6 +122,17 @@
     }
   }
 
+  /* A narrow browser keeps the icons of its tabs and the name of the open one only. */
+  @container window (width < 560px) {
+    .mac-tab:not([aria-selected='true']) {
+      flex: none;
+
+      & > span {
+        display: none;
+      }
+    }
+  }
+
   /* The dark frame: macOS in dark mode, and a browser as Chrome draws itself there. */
   .mac.dark {
     --window-rule: rgb(255 255 255 / 0.1);
@@ -188,6 +201,26 @@
   }
 
   /*
+   * Every screen is split in two: the text on the left, the stage on the right. Below 1024px the two sides
+   * stack, the text on top, and the screen scrolls; global.css lets it.
+   */
+  .split {
+    display: flex;
+    align-items: center;
+    gap: var(--split-gap, 4vw);
+    height: 100%;
+    padding: 0 5vw;
+
+    @media (width < 1024px) {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 2.5rem;
+      height: auto;
+      padding: 2.5rem 5vw 1.5rem;
+    }
+  }
+
+  /*
    * The right side of every screen: a window over the row of projects, the same size everywhere, the
    * terminal of the hero included. The text on the left takes the rest of the width.
    */
@@ -199,10 +232,21 @@
     width: 56vw;
     height: 84svh;
 
+    /*
+     * The window leaves room for one line of the row. When the row wraps, as with Intro in it on a project
+     * screen, the second line hangs into the margin under the stage, and the window keeps the size of the
+     * terminal.
+     */
     & > .mac,
     & > .stage-window {
-      flex: 1;
-      min-height: 0;
+      flex: none;
+      height: calc(100% - 3.4rem);
+    }
+
+    /* Stacked, the stage takes the whole width and about a screen of height, so the window fits in view. */
+    @media (width < 1024px) {
+      width: auto;
+      height: min(56rem, max(24rem, calc(100svh - 3rem)));
     }
   }
 }

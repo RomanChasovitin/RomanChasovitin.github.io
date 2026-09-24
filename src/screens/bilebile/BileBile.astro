@@ -3,7 +3,6 @@
 // On the site, a window on the Aktobe to Mangystau line with the train in it. The train stops at four
 // stations; each one shows a working piece of what I built: search, the seat map, checkout, the ticket. The
 // four stations are also the four tabs of the browser.
-import BackToIntro from '../../components/BackToIntro.astro';
 import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
 
@@ -43,9 +42,8 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
   data-paths={JSON.stringify(steps.map((step) => step.path))}
   class="overflow-hidden bg-[#16223a] font-inter text-white"
 >
-  <BackToIntro class="rounded-lg bg-white/10 text-sm font-bold text-white hover:bg-bb-red" />
 
-  <div class="flex h-full items-center gap-[4vw] px-[5vw]">
+  <div class="split">
     <ProjectIntro id="bilebile" slogan="Train tickets across Kazakhstan" body="text-white/75" muted="text-bb-silver" dim="text-bb-silver">
       A private railway in Kazakhstan sells its tickets here: find a train, pick a berth on the seat map of a car,
       pay for everyone in one order and get the ticket. On busy days the site has to hold high traffic, and it

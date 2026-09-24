@@ -26,7 +26,7 @@ const years = formatYears({ start: project.roles.at(-1)!.period.start, end: role
 const via = id === 'maddevs' ? null : (project.company ?? 'through Mad Devs');
 ---
 
-<div class="min-w-0 flex-1 font-['Bricolage_Grotesque_Variable']">
+<div class="min-w-0 lg:flex-1 font-['Bricolage_Grotesque_Variable']">
   <p class="flex items-center gap-2.5 text-sm font-semibold">
     <img src={brandIcon[id]} alt="" width="64" height="64" class="size-7 rounded" />
     {also && <img src={also} alt="" width="64" height="64" class="size-7 rounded" />}
