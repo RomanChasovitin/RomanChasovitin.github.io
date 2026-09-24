@@ -75,9 +75,9 @@ export default function Intelligence({ startedAt, onGenerate, onOpen }: Props) {
   const shownItems = (item: Report) => item.items.filter(([label]) => label.toLowerCase().includes(filter.toLowerCase()));
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 gap-3 p-3">
-      {/* Context */}
-      <aside className="flex w-52 shrink-0 flex-col overflow-hidden rounded-lg border border-xpp-line bg-white">
+    <div className="flex min-h-0 min-w-0 flex-1 gap-3 p-3 @max-lg/window:p-2">
+      {/* Context; a narrow window leaves it out, the table of contents does its job there */}
+      <aside className="@max-lg/window:hidden flex w-52 shrink-0 flex-col overflow-hidden rounded-lg border border-xpp-line bg-white">
         <p className="px-4 pt-3.5 pb-2 text-[0.95rem] font-medium text-xpp-ink">Context</p>
         <label className="mx-3 mb-2 flex items-center gap-2 border-b border-xpp-line pb-2 text-xpp-muted">
           <Icon.search className="size-3.5" />
@@ -122,7 +122,7 @@ export default function Intelligence({ startedAt, onGenerate, onOpen }: Props) {
       {/* Reports */}
       <div className="@container flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-xpp-line bg-white">
         {startedAt !== null && (
-          <div className="flex shrink-0 border-b border-xpp-line text-[0.8rem]" role="tablist">
+          <div className="flex shrink-0 border-b border-xpp-line text-[0.8rem] @max-md:overflow-x-auto" role="tablist">
             {reports.map((item) => {
               const itemState = state(item)!;
               const selected = item.id === active;
@@ -133,7 +133,7 @@ export default function Intelligence({ startedAt, onGenerate, onOpen }: Props) {
                   role="tab"
                   aria-selected={selected}
                   onClick={() => setActive(item.id)}
-                  className={`flex min-w-0 flex-1 cursor-pointer items-center gap-2 border-r border-b-2 border-r-xpp-line px-3 py-2.5 text-left ${selected ? 'border-b-xpp-blue text-xpp-ink' : 'border-b-transparent text-xpp-text'}`}
+                  className={`flex min-w-0 flex-1 cursor-pointer items-center gap-2 border-r border-b-2 border-r-xpp-line px-3 py-2.5 text-left @max-md:flex-none @max-md:gap-1.5 @max-md:px-2.5 ${selected ? 'border-b-xpp-blue text-xpp-ink' : 'border-b-transparent text-xpp-text'}`}
                 >
                   <Icon.sparkle className="size-3.5 shrink-0 text-xpp-blue" />
                   <span className="truncate">{item.tab}</span>
@@ -149,10 +149,10 @@ export default function Intelligence({ startedAt, onGenerate, onOpen }: Props) {
         {/* Toolbar */}
         <div className="relative flex shrink-0 items-center gap-1.5 border-b border-xpp-line px-2.5 py-1.5 text-[0.8rem] text-xpp-ink">
           <button type="button" disabled={current?.stage !== 'ready'} onClick={() => setToc((value) => !value)} className="flex cursor-pointer items-center gap-1.5 rounded bg-xpp-line/70 px-2.5 py-1 font-medium disabled:cursor-default disabled:opacity-50">
-            <Icon.toc className="size-3.5" /> Table of Contents
+            <Icon.toc className="size-3.5" /> <span className="@max-md:hidden">Table of Contents</span>
           </button>
           {toc && (
-            <div className="absolute top-full left-2.5 z-10 mt-1 w-64 rounded-lg border border-xpp-line bg-white p-1.5 shadow-lg">
+            <div className="absolute top-full left-2.5 z-10 mt-1 w-64 max-w-[calc(100%-1.25rem)] rounded-lg border border-xpp-line bg-white p-1.5 shadow-lg">
               {report.sections.map((section) => (
                 <button key={section.id} type="button" onClick={() => openSection(report.id, section.id)} className="block w-full cursor-pointer rounded px-2.5 py-1.5 text-left hover:bg-xpp-soft">
                   {section.heading}
@@ -160,12 +160,12 @@ export default function Intelligence({ startedAt, onGenerate, onOpen }: Props) {
               ))}
             </div>
           )}
-          <span className="mx-1 h-5 w-px bg-xpp-line" />
-          <button type="button" aria-label="Zoom out" onClick={() => setZoom((value) => Math.max(0.8, value - 0.1))} className="cursor-pointer rounded border border-xpp-line p-1">
+          <span className="mx-1 h-5 w-px bg-xpp-line @max-md:hidden" />
+          <button type="button" aria-label="Zoom out" onClick={() => setZoom((value) => Math.max(0.8, value - 0.1))} className="cursor-pointer rounded border border-xpp-line p-1 @max-md:hidden">
             <Icon.minus className="size-3.5" />
           </button>
-          <span className="w-12 rounded border border-xpp-line py-0.5 text-center tabular-nums">{zoom === 1 ? 'Auto' : `${Math.round(zoom * 100)}%`}</span>
-          <button type="button" aria-label="Zoom in" onClick={() => setZoom((value) => Math.min(1.3, value + 0.1))} className="cursor-pointer rounded border border-xpp-line p-1">
+          <span className="w-12 rounded border border-xpp-line py-0.5 text-center tabular-nums @max-md:hidden">{zoom === 1 ? 'Auto' : `${Math.round(zoom * 100)}%`}</span>
+          <button type="button" aria-label="Zoom in" onClick={() => setZoom((value) => Math.min(1.3, value + 0.1))} className="cursor-pointer rounded border border-xpp-line p-1 @max-md:hidden">
             <Icon.plus className="size-3.5" />
           </button>
           <span className="mx-1 hidden h-5 w-px bg-xpp-line @xl:block" />
@@ -178,7 +178,7 @@ export default function Intelligence({ startedAt, onGenerate, onOpen }: Props) {
             <span className="hidden @2xl:inline">Requested by</span>
             <span className="flex size-6 items-center justify-center rounded-full bg-xpp-soft text-[0.65rem] font-medium text-xpp-blue">RC</span>
           </button>
-          <span className="ml-2 flex rounded-md bg-xpp-line/70 p-0.5">
+          <span className="ml-2 flex shrink-0 rounded-md bg-xpp-line/70 p-0.5">
             {(['report', 'critique'] as const).map((value) => (
               <button
                 key={value}
@@ -186,7 +186,7 @@ export default function Intelligence({ startedAt, onGenerate, onOpen }: Props) {
                 disabled={current?.stage !== 'ready'}
                 aria-pressed={mode === value}
                 onClick={() => setMode(value)}
-                className="cursor-pointer rounded px-3 py-1 font-medium text-xpp-ink disabled:cursor-default disabled:opacity-50 aria-pressed:bg-white aria-pressed:text-xpp-blue"
+                className="cursor-pointer rounded px-3 py-1 font-medium text-xpp-ink @max-md:px-2 disabled:cursor-default disabled:opacity-50 aria-pressed:bg-white aria-pressed:text-xpp-blue"
               >
                 {value === 'report' ? 'Report' : 'Critique™'}
               </button>
@@ -195,7 +195,7 @@ export default function Intelligence({ startedAt, onGenerate, onOpen }: Props) {
         </div>
 
         {/* The page */}
-        <div ref={area} className="min-h-0 flex-1 overflow-y-auto bg-xpp-line/70 p-5">
+        <div ref={area} className="min-h-0 flex-1 overflow-y-auto bg-xpp-line/70 p-5 @max-md:p-2">
           {startedAt === null || !current ? (
             <div className="mx-auto mt-[10%] flex max-w-sm flex-col items-center text-center">
               <Icon.sparkle className="size-9 text-xpp-blue" />
@@ -228,7 +228,7 @@ function Run({ report, stage, progress, onOpen }: { report: Report; stage: Stage
   const sentToReview = report.triage.filter((check) => check.verdict === 'review').length;
   return (
     <div className="mx-auto max-w-[44rem]">
-      <ol className="mb-4 flex items-center gap-2 text-[0.8rem]">
+      <ol className="mb-4 flex flex-wrap items-center gap-2 text-[0.8rem]">
         {STAGES.map((item, index) => (
           <li key={item.id} className="flex items-center gap-2">
             <span
@@ -238,7 +238,7 @@ function Run({ report, stage, progress, onOpen }: { report: Report; stage: Stage
               {index === reached && <Spinner className="size-3 border-white/30 border-t-white" />}
               {item.label}
             </span>
-            {index < STAGES.length - 1 && <span className="h-px w-6 bg-xpp-muted/50" />}
+            {index < STAGES.length - 1 && <span className="h-px w-6 bg-xpp-muted/50 @max-md:w-2" />}
           </li>
         ))}
       </ol>
@@ -270,8 +270,8 @@ function Run({ report, stage, progress, onOpen }: { report: Report; stage: Stage
           <p className="text-[0.85rem] font-medium text-xpp-ink">Reviewers panel</p>
           {report.reviews.slice(0, stage === 'review' ? count(progress, report.reviews.length) : undefined).map((review) => (
             <div key={review.reviewer} className="rounded-lg bg-white p-3.5 text-[0.8rem]">
-              <div className="flex items-center justify-between gap-2">
-                <p>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="min-w-[10rem] flex-1">
                   <b className="font-medium text-xpp-ink">{review.reviewer}</b>
                   <span className="ml-2 text-xpp-muted">{review.focus}</span>
                 </p>

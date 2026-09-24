@@ -5,6 +5,8 @@ import { users } from './chat';
 // enji.ai, the Mad Devs platform for teams: my page in it, as an employee sees their own. I helped build the
 // first version of this employee interface. The profile and the current project come from my real page;
 // the logged hours are a demo: eight hours on every past workday, four so far today.
+//
+// In a narrow window the menu turns into a row of icons on top, the cards stack and wide tables scroll.
 
 const BLUE = '#4350f0';
 const INK = '#121218';
@@ -50,8 +52,8 @@ const NAV: { id: Nav | null; label: string; path: string }[] = [
 
 function Card({ title, aside, children }: { title: ReactNode; aside?: ReactNode; children: ReactNode }) {
   return (
-    <section className="rounded-xl bg-white p-4">
-      <header className="mb-3 flex items-center gap-3">
+    <section className="min-w-0 rounded-xl bg-white p-4 @max-lg/window:p-3">
+      <header className="mb-3 flex flex-wrap items-center gap-3 gap-y-2">
         <h3 className="text-[0.95rem] font-semibold" style={{ color: INK }}>
           {title}
         </h3>
@@ -119,7 +121,8 @@ export default function Enji() {
           </span>
         }
       >
-        <table className="w-full text-left text-[0.75rem]">
+        <div className="overflow-x-auto">
+        <table className="w-full text-left text-[0.75rem] @max-lg/window:min-w-[30rem]">
           <thead>
             <tr className="border-b border-[#e4e4e9]" style={{ color: INK }}>
               <th className="py-2 font-semibold">Project / Date</th>
@@ -146,9 +149,10 @@ export default function Enji() {
             </tr>
           </tbody>
         </table>
+        </div>
       </Card>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 @max-lg/window:grid-cols-1">
         <Card title="Worklogs by SoW projects" aside={<span className="text-[0.7rem]" style={{ color: MUTED }}>{long(monthStart)} – {long(monthEnd)}</span>}>
           <div className="flex items-center gap-3 text-[0.8rem]" style={{ color: INK }}>
             <ProjectName id="exparte" name="Ex Parte" />
@@ -283,7 +287,7 @@ export default function Enji() {
     ),
     Statistics: (
       <Card title="Hours by month">
-        <div className="flex h-40 items-end gap-3">
+        <div className="flex h-40 items-end gap-3 @max-lg/window:gap-1.5">
           {Array.from({ length: today.getMonth() + 1 }, (_, index) => {
             const value = index === today.getMonth() ? month : MONTHLY;
             return (
@@ -302,44 +306,45 @@ export default function Enji() {
   const team = Object.values(users).filter((user) => !user.bot);
 
   return (
-    <div className="flex min-h-0 flex-1 font-inter text-[0.85rem]" style={{ background: PAGE, color: INK }}>
-      <aside className="flex w-48 shrink-0 flex-col bg-white">
-        <p className="flex items-center gap-2 px-4 pt-4 pb-6 text-[0.95rem] leading-none font-black tracking-tight">
+    <div className="flex min-h-0 flex-1 font-inter text-[0.85rem] @max-lg/window:flex-col" style={{ background: PAGE, color: INK }}>
+      <aside className="flex w-48 shrink-0 flex-col bg-white @max-lg/window:w-auto @max-lg/window:flex-row @max-lg/window:items-center @max-lg/window:border-b @max-lg/window:border-[#eeeef1]">
+        <p className="flex items-center gap-2 px-4 pt-4 pb-6 text-[0.95rem] leading-none font-black tracking-tight @max-lg/window:p-2.5">
           <img src="/icons/maddevs.svg" alt="" width="64" height="64" className="size-7 rounded" />
-          MAD DEVS
+          <span className="@max-lg/window:hidden">MAD DEVS</span>
         </p>
-        <nav className="flex flex-col gap-0.5 px-2" aria-label="enji.ai">
+        <nav className="flex flex-col gap-0.5 px-2 @max-lg/window:flex-row @max-lg/window:px-0" aria-label="enji.ai">
           {NAV.map((item) =>
             item.id ? (
               <button
                 key={item.label}
                 type="button"
                 aria-current={nav === item.id ? 'page' : undefined}
+                aria-label={item.label}
                 onClick={() => setNav(item.id!)}
-                className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-[#f5f5f6]"
+                className="flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left hover:bg-[#f5f5f6] @max-lg/window:px-2.5"
                 style={{ color: nav === item.id ? BLUE : INK }}
               >
                 {icon(item.path)}
-                {item.label}
+                <span className="@max-lg/window:hidden">{item.label}</span>
               </button>
             ) : (
-              <span key={item.label} className="flex items-center gap-3 px-3 py-2 opacity-45">
+              <span key={item.label} className="flex items-center gap-3 px-3 py-2 opacity-45 @max-lg/window:hidden">
                 {icon(item.path)}
                 {item.label}
               </span>
             ),
           )}
         </nav>
-        <p className="mx-4 mt-3 flex items-center justify-between border-t border-[#eeeef1] pt-3 text-[0.8rem]">
+        <p className="mx-4 mt-3 flex items-center justify-between border-t border-[#eeeef1] pt-3 text-[0.8rem] @max-lg/window:hidden">
           HR <span style={{ color: MUTED }}>▾</span>
         </p>
-        <p className="mt-auto flex items-center gap-2 border-t border-[#eeeef1] px-3 py-3 text-[0.8rem]">
+        <p className="mt-auto flex items-center gap-2 border-t border-[#eeeef1] px-3 py-3 text-[0.8rem] @max-lg/window:mt-0 @max-lg/window:ml-auto @max-lg/window:border-t-0 @max-lg/window:px-2.5 @max-lg/window:py-0">
           <img src="/avatar.jpg" alt="" width="330" height="330" className="size-8 rounded-full object-cover" />
-          Roman Chasovitin
+          <span className="@max-lg/window:hidden">Roman Chasovitin</span>
         </p>
       </aside>
 
-      <div className="min-w-0 flex-1 overflow-y-auto px-5 py-4">
+      <div className="min-h-0 min-w-0 flex-1 overflow-y-auto px-5 py-4 @max-lg/window:px-3 @max-lg/window:py-3">
         {nav === 'work' && (
           <>
             <header className="flex items-center gap-3">
@@ -361,7 +366,7 @@ export default function Enji() {
                 {more ? 'Less' : `+${MORE.length}`}
               </button>
             </div>
-            <div className="mt-3 flex gap-5 border-b border-[#e4e4e9]" role="tablist">
+            <div className="mt-3 flex gap-5 border-b border-[#e4e4e9] @max-lg/window:gap-4 @max-lg/window:overflow-x-auto" role="tablist">
               {TABS.map((item) => (
                 <button
                   key={item}
@@ -369,7 +374,7 @@ export default function Enji() {
                   role="tab"
                   aria-selected={tab === item}
                   onClick={() => setTab(item)}
-                  className="-mb-px cursor-pointer border-b-2 pb-2 text-[0.8rem]"
+                  className="-mb-px shrink-0 cursor-pointer border-b-2 pb-2 text-[0.8rem] @max-lg/window:mb-0"
                   style={{ borderColor: tab === item ? BLUE : 'transparent', color: tab === item ? BLUE : MUTED }}
                 >
                   {item}
@@ -382,7 +387,7 @@ export default function Enji() {
 
         {nav === 'projects' && (
           <Card title="Projects">
-            <p className="flex items-center justify-between text-[0.8rem]">
+            <p className="flex flex-wrap items-center justify-between gap-2 text-[0.8rem]">
               <ProjectName id="exparte" name="Ex Parte" />
               <span style={{ color: MUTED }}>{MONTHLY} hours a month, since 05 Jan 2026</span>
             </p>
@@ -391,7 +396,7 @@ export default function Enji() {
 
         {nav === 'colleagues' && (
           <Card title="Colleagues">
-            <ul className="grid grid-cols-2 gap-2">
+            <ul className="grid grid-cols-2 gap-2 @max-lg/window:grid-cols-1">
               {team.map((user) => (
                 <li key={user.name} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5" style={{ background: PAGE }}>
                   <span className="flex size-8 shrink-0 items-center justify-center rounded-full text-[0.7rem] font-bold text-white" style={{ background: user.color }}>

@@ -192,7 +192,7 @@ export default function Terminal() {
         <span className="mac-title">roman — agent</span>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col px-6 pt-5 pb-4">
+      <div className="flex min-h-0 flex-1 flex-col px-6 pt-5 pb-4 @max-lg/window:px-4 @max-lg/window:pt-4 @max-lg/window:text-[0.8rem]">
         <div className="border-b border-(--rule) pb-5">
           <p>
             <span className="font-bold">✻ roman</span>

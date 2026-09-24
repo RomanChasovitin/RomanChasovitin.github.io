@@ -5,7 +5,8 @@ import { CATEGORIES, deals, MARKETS, money, soldBefore, type Brand, type Categor
 // The life of a coupon, in one browser window whose five tabs are its five steps: pick a deal in the feed,
 // choose an option, pay, get the coupon by email, and redeem it in the partner cabinet at the venue. The two
 // icons over the top left corner of the window run the same loop in the other brand: Chocolife or BeSmart,
-// and BeSmart in two countries. The device button in the address bar shows every page at phone width, email included.
+// and BeSmart in two countries. The device button in the address bar shows every page at phone width, email included;
+// a narrow window is at phone width already and has no such button.
 
 type Order = {
   id: number;
@@ -229,7 +230,7 @@ export default function Shop() {
               aria-pressed={mobile}
               aria-label={mobile ? 'Show at desktop width' : 'Show at phone width'}
               onClick={() => setMobile((value) => !value)}
-              className="flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.75rem] text-[#5f6368] hover:bg-[#f1f3f4] aria-pressed:bg-cl-navy aria-pressed:text-white"
+              className="flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.75rem] text-[#5f6368] hover:bg-[#f1f3f4] aria-pressed:bg-cl-navy aria-pressed:text-white @max-lg/window:hidden"
             >
               <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                 {mobile ? <rect x="3" y="5" width="18" height="12" rx="1.5" /> : <rect x="7" y="2.5" width="10" height="19" rx="2" />}
@@ -240,7 +241,7 @@ export default function Shop() {
           }
         >
           <div ref={scroller} className={`min-h-0 flex-1 overflow-y-auto ${mobile ? 'bg-[#e9e9ec] py-4' : ''}`}>
-            <div className={`@container min-h-full ${mobile ? 'mx-auto w-[390px] overflow-hidden rounded-[1.6rem] border-[6px] border-[#1f1f1f] bg-white' : ''}`}>
+            <div className={`@container min-h-full ${mobile ? 'mx-auto w-[390px] max-w-full overflow-hidden rounded-[1.6rem] border-[6px] border-[#1f1f1f] bg-white' : ''}`}>
               {step === 'coupon' ? (
                 <Mail orders={orders} selected={mail} onSelect={openMail} />
               ) : step === 'redeem' ? (
