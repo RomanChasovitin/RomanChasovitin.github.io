@@ -2,12 +2,14 @@
 // One button per project: under the terminal in the hero, and under the window of every project screen,
 // where the current project is marked. In the hero each button is also where its screen opens from, which
 // `opens` tells the router. The colors follow --nav-ink and --nav-paper; `dark` sets them for dark screens.
+// On a marked button an icon may change: the Mad Devs M turns white on its red.
 import { brandIcon } from '../content/icons';
 import { projects, type ProjectId } from '../content/projects';
 
 type Props = { current?: ProjectId; opens?: boolean; dark?: boolean };
 
 const { current, opens = false, dark = false } = Astro.props;
+const markedIcon: Partial<Record<ProjectId, string>> = { maddevs: '/icons/maddevs-active.svg' };
 ---
 
 <nav class:list={['projects', { dark }]} aria-label="Projects">
@@ -19,7 +21,7 @@ const { current, opens = false, dark = false } = Astro.props;
         data-opens={opens ? project.id : undefined}
         aria-current={project.id === current ? 'page' : undefined}
       >
-        <img src={brandIcon[project.id]} alt="" width="64" height="64" />
+        <img src={(project.id === current && markedIcon[project.id]) || brandIcon[project.id]} alt="" width="64" height="64" />
         {project.name}
       </a>
     ))

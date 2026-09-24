@@ -43,9 +43,11 @@ const STEP_ICONS: Record<Stage, ReactNode> = {
   redeem: stepIcon('M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M8 12l3 3 5-6'),
 };
 
-const SKIN: Record<Brand, { name: string; accent: string; onAccent: string; ink: string; badge: string; font: string; partnerBar: string }> = {
-  chocolife: { name: 'Chocolife', accent: '#f7da3b', onAccent: '#212121', ink: '#2e3a82', badge: '#e31e24', font: 'font-roboto', partnerBar: '#2e3a82' },
-  besmart: { name: 'BeSmart', accent: '#2f9e6e', onAccent: '#ffffff', ink: '#1f6f4d', badge: '#ff7f00', font: 'font-lato', partnerBar: '#1f6f4d' },
+// BeSmart takes the blue and the yellow of its logo. `bar` is the color of the top of its emails, and for
+// BeSmart of the store header too.
+const SKIN: Record<Brand, { name: string; accent: string; onAccent: string; ink: string; badge: string; bar: string; font: string; partnerBar: string }> = {
+  chocolife: { name: 'Chocolife', accent: '#f7da3b', onAccent: '#212121', ink: '#2e3a82', badge: '#e31e24', bar: '#f7da3b', font: 'font-roboto', partnerBar: '#2e3a82' },
+  besmart: { name: 'BeSmart', accent: '#eab825', onAccent: '#10284a', ink: '#104780', badge: '#104780', bar: '#104780', font: 'font-lato', partnerBar: '#0b3563' },
 };
 
 const domain = (brand: Brand, market: Market) => (brand === 'chocolife' ? 'chocolife.me' : `besmart.${MARKETS[market].domain}`);
@@ -330,15 +332,15 @@ function Logo({ brand }: { brand: Brand }) {
 }
 
 function StoreHeader({ brand, market, onMarket, onHome, orders }: { brand: Brand; market: Market; onMarket: (market: Market) => void; onHome: () => void; orders: number }) {
-  const green = brand === 'besmart';
+  const blue = brand === 'besmart';
   return (
-    <header className={`flex items-center gap-3 px-4 py-3 @2xl:px-6 ${green ? 'text-white' : 'border-b border-[#eee]'}`} style={green ? { background: SKIN.besmart.accent } : undefined}>
+    <header className={`flex items-center gap-3 px-4 py-3 @2xl:px-6 ${blue ? 'text-white' : 'border-b border-[#eee]'}`} style={blue ? { background: SKIN.besmart.bar } : undefined}>
       <button type="button" onClick={onHome} className="cursor-pointer" aria-label="All deals">
         <Logo brand={brand} />
       </button>
       <select
         aria-label="City"
-        className={`rounded border px-2 py-1 text-sm ${green ? 'border-white/40 bg-transparent text-white' : 'border-[#ddd] bg-white text-cl-ink'}`}
+        className={`rounded border px-2 py-1 text-sm ${blue ? 'border-white/40 bg-transparent text-white' : 'border-[#ddd] bg-white text-cl-ink'}`}
         defaultValue={MARKETS[market].cities[0]}
         key={market}
       >
@@ -348,18 +350,18 @@ function StoreHeader({ brand, market, onMarket, onHome, orders }: { brand: Brand
           </option>
         ))}
       </select>
-      {green && (
+      {blue && (
         <span className="hidden rounded border border-white/40 text-xs @xl:flex">
           {(['kz', 'kg'] as Market[]).map((value) => (
-            <button key={value} type="button" aria-pressed={market === value} onClick={() => onMarket(value)} className="cursor-pointer px-2 py-1 aria-pressed:bg-white aria-pressed:text-[#1f6f4d]">
+            <button key={value} type="button" aria-pressed={market === value} onClick={() => onMarket(value)} className="cursor-pointer px-2 py-1 aria-pressed:bg-white aria-pressed:text-[#104780]">
               besmart.{value}
             </button>
           ))}
         </span>
       )}
-      <span className={`ml-auto hidden flex-1 items-center rounded-md px-3 py-1.5 text-sm @3xl:flex ${green ? 'bg-white/15 text-white/80' : 'bg-cl-grey text-cl-muted'}`}>Search deals</span>
+      <span className={`ml-auto hidden flex-1 items-center rounded-md px-3 py-1.5 text-sm @3xl:flex ${blue ? 'bg-white/15 text-white/80' : 'bg-cl-grey text-cl-muted'}`}>Search deals</span>
       <span className="ml-auto text-sm @3xl:ml-0">
-        My coupons <b className="ml-1 rounded px-1.5 py-0.5 text-xs" style={{ background: green ? '#fff' : SKIN.chocolife.accent, color: green ? SKIN.besmart.ink : '#212121' }}>{orders}</b>
+        My coupons <b className="ml-1 rounded px-1.5 py-0.5 text-xs" style={{ background: blue ? SKIN.besmart.accent : SKIN.chocolife.accent, color: blue ? SKIN.besmart.onAccent : '#212121' }}>{orders}</b>
       </span>
     </header>
   );
@@ -645,7 +647,7 @@ function Letter({ order }: { order: Order }) {
   return (
     <div className={`bg-[#f4f4f4] px-3 py-5 ${skin.font}`}>
       <div className="mx-auto max-w-[34rem] overflow-hidden rounded-lg bg-white text-sm text-cl-ink">
-        <div className="flex items-center px-5 py-4" style={{ background: skin.accent }}>
+        <div className="flex items-center px-5 py-4" style={{ background: skin.bar }}>
           {order.brand === 'chocolife' ? <img src="/icons/chocolife-logo.svg" alt="Chocolife.me" className="h-5 w-auto" /> : <Logo brand="besmart" />}
         </div>
         <div className="px-5 py-5">
