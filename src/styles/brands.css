@@ -25,6 +25,23 @@
   --color-xp-mist: #989daf;
   --color-xp-slate: #727696;
 
+  /*
+   * The Ex Parte portal, sampled from screenshots of the product. It is set in Accord, which is not a free
+   * font; Ubuntu is the closest free match.
+   */
+  --font-ubuntu: 'Ubuntu', ui-sans-serif, system-ui, sans-serif;
+  --color-xpp-blue: #2860f6;
+  --color-xpp-page: #f4f6f8;
+  --color-xpp-line: #ecedf0;
+  --color-xpp-soft: #eaf1fe;
+  --color-xpp-ink: #262a33;
+  --color-xpp-text: #5f6168;
+  --color-xpp-muted: #9ba5b8;
+  --color-xpp-dct: #faf1b8;
+  --color-xpp-ptab: #bdd2fb;
+  --color-xpp-cafc: #cee3db;
+  --color-xpp-loss: #fae3e3;
+
   --color-md-ink: #111213;
   --color-md-panel: #1d1d1f;
   --color-md-grey: #a0a0a1;

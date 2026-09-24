@@ -1,68 +1,70 @@
 ---
+// Ex Parte, laid out like Mad Devs: the story on the left in the dark brand of exparte.com, the product on
+// the right in its own light look. The three workflows on the left switch the portal window.
 import BackToIntro from '../../components/BackToIntro.astro';
 import ExParteLogo from '../../components/ExParteLogo.astro';
 import { projects } from '../../content/projects';
-import { findings } from './data';
+import Portal from './Portal';
 
 const project = projects.find((item) => item.id === 'exparte')!;
 const role = project.roles[0];
 const since = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' }).format(
   new Date(`${role.period.start}-01T00:00:00Z`),
 );
+
+const workflows = [
+  { id: 'intelligence', title: 'Patent intelligence', body: 'Three AI reports on one patent, each checked by triage and a panel of reviewers.' },
+  { id: 'search', title: 'Search', body: 'Judges, attorneys, cases, law firms and experts, linked to each other.' },
+  { id: 'assistant', title: 'Assistant', body: 'A chat about a case, with your own documents in its context.' },
+];
 ---
 
-<section id="exparte" data-screen class="relative h-svh overflow-hidden bg-xp-void font-geist text-white">
-  <div
-    class="pointer-events-none absolute inset-0 bg-[radial-gradient(55%_65%_at_68%_45%,rgb(0_97_255/0.14),transparent_70%)]"
-  >
-  </div>
-  <canvas class="absolute inset-0 size-full" aria-hidden="true"></canvas>
+<section id="exparte" data-screen class="overflow-hidden bg-xp-void font-geist text-white">
+  <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_60%_at_72%_50%,rgb(0_97_255/0.16),transparent_70%)]"></div>
   <BackToIntro class="rounded-md border border-xp-rule bg-xp-panel font-geist-mono text-sm text-xp-mist hover:border-xp-cyan hover:text-white" />
 
-  <div data-column class="relative flex h-full w-full flex-col justify-center px-[5vw] pt-[10svh] pb-[4svh] min-[900px]:w-[38%]">
-    <h2><ExParteLogo class="block h-auto w-[clamp(15rem,26vw,28rem)]" /></h2>
-    <p class="mt-5 font-geist-mono text-sm text-xp-mist">{role.title} through Mad Devs, since {since}</p>
-    <p class="mt-8 max-w-[30em] text-lg leading-relaxed text-xp-mist">
-      Ex Parte models the patent litigation ecosystem to find what decides a case. I keep its portal running and
-      growing, from the interface down to the data.
-    </p>
-    <p class="mt-6 font-geist-mono text-sm text-xp-slate">{project.stack.join(', ')}</p>
+  <div class="relative flex h-full items-center gap-[3.5vw] px-[5vw]">
+    <div class="w-[27vw] shrink-0">
+      <h2><ExParteLogo class="block h-auto w-[clamp(11rem,17vw,18rem)]" /></h2>
+      <p class="mt-6 text-[clamp(1.7rem,2.5vw,2.7rem)] leading-[1.1] font-medium tracking-[-0.03em]">
+        Litigation intelligence for patent lawyers
+      </p>
+      <p class="mt-4 font-geist-mono text-sm text-xp-mist">{role.title} through Mad Devs, since {since}</p>
+      <p class="mt-6 leading-relaxed text-xp-mist">
+        Ex Parte shows patent lawyers what decides a case: the judge, the lawyers and experts on the other side,
+        the weak points of a patent. I build the whole front end of its portal and the BFF on NestJS behind it.
+      </p>
 
-    <ul class="mt-12 flex flex-col border-t border-xp-rule">
-      {
-        findings.map((finding) => (
-          <li class="border-b border-xp-rule" data-item={finding.id}>
-            <button
-              type="button"
-              data-finding={finding.id}
-              aria-expanded="false"
-              aria-controls={`finding-${finding.id}`}
-              class="finding flex w-full cursor-pointer items-center py-3 text-left text-xp-mist transition-colors hover:text-white aria-expanded:text-white"
-            >
-              {finding.title}
-            </button>
-            <div id={`finding-${finding.id}`} class="detail" aria-live="polite">
-              <div class="min-h-0 overflow-hidden">
-                <p data-path class="font-geist-mono text-xs leading-relaxed text-xp-cyan" />
-                <div class="result">
-                  <p class="mt-3 max-w-[32em] leading-relaxed text-xp-mist">{finding.body}</p>
-                  {finding.stack.length > 0 && (
-                    <p class="mt-3 font-geist-mono text-xs text-xp-slate">{finding.stack.join(', ')}</p>
-                  )}
-                </div>
-                <div class="h-4" />
-              </div>
-            </div>
-          </li>
-        ))
-      }
-    </ul>
+      <ul class="mt-8 flex flex-col border-t border-xp-rule">
+        {
+          workflows.map((workflow) => (
+            <li class="border-b border-xp-rule">
+              <button
+                type="button"
+                data-workflow={workflow.id}
+                aria-pressed={workflow.id === 'intelligence' ? 'true' : 'false'}
+                class="workflow flex w-full cursor-pointer flex-col py-3 text-left text-xp-mist transition-colors hover:text-white aria-pressed:text-white"
+              >
+                <span class="flex items-center">{workflow.title}</span>
+                <span class="mt-1 text-sm text-xp-slate">{workflow.body}</span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+
+      <p class="mt-6 font-geist-mono text-sm text-xp-slate">{project.stack.join(', ')}</p>
+    </div>
+
+    <div class="h-[82svh] min-w-0 flex-1">
+      <Portal client:idle />
+    </div>
   </div>
 </section>
 
 <style>
-  /* The open finding gets the same short rule the nav uses on this screen. */
-  .finding::before {
+  /* The open workflow gets a short cyan rule, as the nav of exparte.com does. */
+  .workflow > span:first-child::before {
     content: '';
     display: inline-block;
     width: 0;
@@ -74,114 +76,24 @@ const since = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' }).
       margin-right 300ms ease;
   }
 
-  .finding[aria-expanded='true']::before {
+  .workflow[aria-pressed='true'] > span:first-child::before {
     width: 1.25em;
     margin-right: 0.6em;
-  }
-
-  .detail {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-
-  [data-item][data-open] .detail {
-    grid-template-rows: 1fr;
-  }
-
-  .result {
-    opacity: 0;
-    translate: 0 0.4rem;
-    transition:
-      opacity 400ms ease,
-      translate 400ms ease;
-  }
-
-  [data-item][data-state='done'] .result {
-    opacity: 1;
-    translate: 0 0;
   }
 </style>
 
 <script>
-  import { findings, nodes } from './data';
-  import type { Graph } from './graph';
-
-  const root = document.documentElement;
-  const screen = document.getElementById('exparte')!;
-  const canvas = screen.querySelector('canvas')!;
-  const column = screen.querySelector<HTMLElement>('[data-column]')!;
-  const items = new Map(
-    Array.from(screen.querySelectorAll<HTMLElement>('[data-item]')).map((item) => [item.dataset.item!, item]),
-  );
-  const buttons = Array.from(screen.querySelectorAll<HTMLButtonElement>('[data-finding]'));
-  const labels = new Map(nodes.map((node) => [node.id, node.label]));
-  const isActive = () => root.dataset.activeScreen === 'exparte';
-  let opened = false;
-
-  const route = (path: string[]) => path.map((id) => labels.get(id)).join(' → ');
-
-  function open(id: string) {
-    opened = true;
-    for (const [itemId, item] of items) {
-      const isOpen = itemId === id;
-      item.toggleAttribute('data-open', isOpen);
-      if (!isOpen) delete item.dataset.state;
-      item.querySelector('button')!.setAttribute('aria-expanded', String(isOpen));
-    }
-  }
-
-  function showStep(path: string[], reached: number) {
-    const item = items.get(path.at(-1)!)!;
-    item.dataset.state = 'running';
-    item.querySelector('[data-path]')!.textContent =
-      route(path.slice(0, reached + 1)) + (reached < path.length - 1 ? ' → …' : '');
-  }
-
-  function showFinding(id: string) {
-    const item = items.get(id)!;
-    item.dataset.state = 'done';
-    item.querySelector('[data-path]')!.textContent = route(findings.find((finding) => finding.id === id)!.path);
-  }
-
-  // The graph and d3-force load only when the screen comes near.
-  let loading: Promise<Graph> | undefined;
-  function load() {
-    loading ??= Promise.all([import('./graph'), document.fonts.load('11px "Geist Mono Variable"')]).then(
-      ([{ createGraph }]) =>
-        createGraph(canvas, {
-          reducedMotion: matchMedia('(prefers-reduced-motion: reduce)').matches,
-          // Between the text column and the right padding of the screen.
-          zone: () => ({ left: column.getBoundingClientRect().right, right: screen.clientWidth * 0.95 }),
-          onRun: open,
-          onStep: showStep,
-          onArrive: showFinding,
-        }),
-    );
-    return loading;
-  }
-
-  let introduced = false;
-  async function activate() {
-    const graph = await load();
-    if (!isActive()) return;
-    graph.start();
-    if (introduced) return;
-    introduced = true;
-    await graph.whenAssembled;
-    // One agent run shows what the graph is for, unless the visitor already sent one.
-    if (isActive() && !opened) graph.run(findings[0].id);
-  }
+  const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('#exparte [data-workflow]'));
 
   for (const button of buttons) {
-    button.addEventListener('click', async () => (await load()).run(button.dataset.finding!));
+    button.addEventListener('click', () =>
+      document.dispatchEvent(new CustomEvent('exparte:workflow', { detail: { workflow: button.dataset.workflow } })),
+    );
   }
 
-  document.addEventListener('screen:change', async (event) => {
-    if ((event as CustomEvent<{ id: string }>).detail.id === 'exparte') activate();
-    else (await loading)?.stop();
+  // The portal says which workflow it shows, including after a click inside it.
+  document.addEventListener('exparte:view', (event) => {
+    const { workflow } = (event as CustomEvent<{ workflow: string }>).detail;
+    for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.workflow === workflow));
   });
-
-  new IntersectionObserver(([entry]) => entry.isIntersecting && load(), { rootMargin: '100% 0px' }).observe(screen);
-  if (isActive()) activate();
 </script>
