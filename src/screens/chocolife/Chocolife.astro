@@ -2,8 +2,8 @@
 // Chocolife and BeSmart, the product: what a coupon goes through, from the deal feed to the venue. Laid out
 // like Mad Devs: the story on the left, a working browser window on the right.
 //
-// The whole screen wears the brand picked over the window: warm yellow Chocolife, or BeSmart in the deep blue
-// and yellow of its logo. The shop sets `data-brand` on the screen, and the backdrops cross-fade.
+// The whole screen wears the brand picked over the window: Chocolife in light pink and white, or BeSmart in
+// the blue and white of its logo. The shop sets `data-brand` on the screen, and the backdrops cross-fade.
 import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
 import Shop from './Shop';
@@ -32,10 +32,10 @@ import Shop from './Shop';
 
 <style>
   .chocolife {
-    --cl-bg: #fbf4d9;
+    --cl-bg: #fff4f7;
     --cl-heading: var(--color-cl-navy);
     --cl-body: var(--color-cl-ink);
-    --cl-muted: #7d7766;
+    --cl-muted: #8a7b81;
     --nav-ink: #1d2352;
     --nav-paper: #fff;
     transition:
@@ -44,12 +44,12 @@ import Shop from './Shop';
   }
 
   .chocolife[data-brand='besmart'] {
-    --cl-bg: #0a2c52;
-    --cl-heading: #eab825;
-    --cl-body: rgb(255 255 255 / 0.84);
-    --cl-muted: rgb(255 255 255 / 0.6);
+    --cl-bg: #1a6bc6;
+    --cl-heading: #fff;
+    --cl-body: rgb(255 255 255 / 0.9);
+    --cl-muted: rgb(255 255 255 / 0.7);
     --nav-ink: #fff;
-    --nav-paper: #0a2c52;
+    --nav-paper: #1a6bc6;
   }
 
   /* Fixed, so a stacked screen scrolls over it. */
@@ -60,21 +60,21 @@ import Shop from './Shop';
     transition: opacity 500ms ease;
   }
 
-  /* Chocolife: the yellow of the brand spilled from a corner, a navy glow, and a coupon-like dot grid. */
+  /* Chocolife: light pink running into white, under a coupon-like dot grid. */
   .choco {
     background:
-      radial-gradient(42vmax 42vmax at 4% -6%, rgb(247 218 59 / 0.8), transparent 70%),
-      radial-gradient(36vmax 36vmax at 104% 106%, rgb(46 58 130 / 0.16), transparent 70%),
-      radial-gradient(rgb(46 58 130 / 0.1) 1.2px, transparent 1.5px) 0 0 / 22px 22px;
+      radial-gradient(rgb(46 58 130 / 0.1) 1.2px, transparent 1.5px) 0 0 / 22px 22px,
+      radial-gradient(48vmax 48vmax at 0% 0%, rgb(255 190 210 / 0.75), transparent 70%),
+      linear-gradient(135deg, #ffe4ec 0%, #fff 60%);
   }
 
-  /* BeSmart: deep blue with the yellow of the bulb glowing from a corner, and fine diagonal lines. */
+  /* BeSmart: the blue of its logo, a white light from a corner, and fine white diagonal lines. */
   .besmart {
     opacity: 0;
     background:
-      radial-gradient(38vmax 38vmax at 96% -4%, rgb(234 184 37 / 0.34), transparent 70%),
-      radial-gradient(48vmax 48vmax at -6% 106%, rgb(16 71 128 / 0.95), transparent 70%),
-      repeating-linear-gradient(135deg, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 22px);
+      repeating-linear-gradient(135deg, rgb(255 255 255 / 0.06) 0 1px, transparent 1px 22px),
+      radial-gradient(44vmax 44vmax at 100% 0%, rgb(255 255 255 / 0.28), transparent 70%),
+      linear-gradient(160deg, #1a6bc6 0%, #1560b4 100%);
   }
 
   .chocolife[data-brand='besmart'] {
