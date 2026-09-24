@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./brands.css";
+@import "./window.css";
 
 /* One fixed viewport: screens are stacked and switched by scripts/router.ts, the page never scrolls. */
 html,
