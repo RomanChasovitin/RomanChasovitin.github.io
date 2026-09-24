@@ -45,7 +45,26 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
   data-paths={JSON.stringify(steps.map((step) => step.path))}
   class="overflow-hidden bg-[#080d18] font-inter text-white"
 >
-  <!-- Darker than the site in the window, so the window stands out; a red glow of the brand behind it. -->
+  <!-- Darker than the site in the window, so the window stands out; a red glow of the brand behind it, and
+       the line itself, from Aktobe-1 to Mangystau as on a railway map, up the left edge and along the top,
+       where the text, the window and the row of projects leave room. -->
+  <svg class="line-map" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <path class="branch" d="M0 520C400 470 800 560 1600 430M1100 0c50 300 200 500 500 620" />
+    <path class="route" d="M60 950C20 600 120 250 180 70s340-50 620-20 740 40 740 10" />
+    {
+      [
+        { name: 'Aktobe-1', x: 60, y: 950, dx: 20, dy: 6, anchor: 'start' },
+        { name: 'Kandyagash', x: 180, y: 70, dx: 20, dy: 6, anchor: 'start' },
+        { name: 'Beyneu', x: 800, y: 50, dx: 0, dy: -20, anchor: 'middle' },
+        { name: 'Mangystau', x: 1540, y: 60, dx: -18, dy: -20, anchor: 'end' },
+      ].map((stop) => (
+        <g>
+          <circle cx={stop.x} cy={stop.y} r="7" />
+          <text x={stop.x + stop.dx} y={stop.y + stop.dy} text-anchor={stop.anchor}>{stop.name}</text>
+        </g>
+      ))
+    }
+  </svg>
   <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_60%_at_72%_50%,rgb(230_52_69/0.13),transparent_70%)]"></div>
   <div class="split relative">
     <ProjectIntro id="bilebile" slogan="Train tickets across Kazakhstan" body="text-white/75" muted="text-bb-silver" dim="text-bb-silver">
@@ -216,6 +235,42 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
 </section>
 
 <style>
+  /* Fixed, so a stacked screen scrolls over it. */
+  .line-map {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+
+    & .route {
+      fill: none;
+      stroke: rgb(166 180 205 / 0.3);
+      stroke-width: 2;
+      stroke-dasharray: 10 8;
+    }
+
+    & .branch {
+      fill: none;
+      stroke: rgb(255 255 255 / 0.05);
+      stroke-width: 1.5;
+    }
+
+    & circle {
+      fill: #080d18;
+      stroke: rgb(230 52 69 / 0.6);
+      stroke-width: 3;
+    }
+
+    & text {
+      fill: rgb(255 255 255 / 0.3);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+  }
+
   /* The site, as the browser shows it. */
   .page {
     display: flex;

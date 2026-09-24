@@ -1,13 +1,15 @@
 ---
 // Mad Devs, after the old maddevs.io hero: the company on the left, and on the right a browser with the team
-// Slack and my page in enji.ai.
+// Slack and my page in enji.ai. Behind it all, a grid of Slack channel marks, one in four in the red of the
+// brand.
 import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
 import Workspace from './Workspace';
 ---
 
 <section id="maddevs" data-screen class="overflow-hidden bg-md-ink font-inter text-white">
-  <div class="split">
+  <div class="hashes" aria-hidden="true"></div>
+  <div class="split relative">
     <ProjectIntro id="maddevs" slogan="My home company since 2018" body="text-md-grey" muted="text-md-grey" dim="text-md-grey">
       I lead the internal team behind maddevs.io and a few internal tools, lead the small ITC team and mentor
       interns, and I helped build the first employee interface of enji.ai. Client work came through Mad Devs too:
@@ -22,3 +24,14 @@ import Workspace from './Workspace';
     </div>
   </div>
 </section>
+
+<style>
+  /* Fixed, so a stacked screen scrolls over it; a little lighter under the text. */
+  .hashes {
+    position: fixed;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cg fill='none' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath transform='translate(20 20)' stroke='%23fff' stroke-opacity='.08' d='M5 1 3.5 13M10.5 1 9 13M1.5 4.8h11.5M1 9.4h11.5'/%3E%3Cpath transform='translate(80 20)' stroke='%23fff' stroke-opacity='.08' d='M5 1 3.5 13M10.5 1 9 13M1.5 4.8h11.5M1 9.4h11.5'/%3E%3Cpath transform='translate(20 80)' stroke='%23fff' stroke-opacity='.08' d='M5 1 3.5 13M10.5 1 9 13M1.5 4.8h11.5M1 9.4h11.5'/%3E%3Cpath transform='translate(80 80)' stroke='%23ec1c24' stroke-opacity='.35' d='M5 1 3.5 13M10.5 1 9 13M1.5 4.8h11.5M1 9.4h11.5'/%3E%3C/g%3E%3C/svg%3E") 0 0 / 120px 120px;
+    mask-image: linear-gradient(90deg, rgb(0 0 0 / 0.55), #000 55%);
+    pointer-events: none;
+  }
+</style>
