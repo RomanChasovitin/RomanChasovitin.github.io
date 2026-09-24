@@ -1,7 +1,10 @@
 ---
-// bile-bile.kz: a window on the Aktobe to Mangystau line, with the train in it. The train stops at four
-// stations; each one shows a working piece of what I built: search, the seat map, checkout, the ticket.
+// bile-bile.kz, laid out like Mad Devs: the product on the left, the site on the right in a browser window.
+// On the site, a window on the Aktobe to Mangystau line with the train in it. The train stops at four
+// stations; each one shows a working piece of what I built: search, the seat map, checkout, the ticket. The
+// four stations are also the four tabs of the browser.
 import BackToIntro from '../../components/BackToIntro.astro';
+import ProjectNav from '../../components/ProjectNav.astro';
 import { formatYears, projects } from '../../content/projects';
 
 const project = projects.find((item) => item.id === 'bilebile')!;
@@ -13,6 +16,14 @@ const stations = [
   { name: 'Kandyagash', time: '20:55', title: 'The seat map', body: 'Every car drawn from live back-end data: free and taken berths, upper and lower, the price of each.' },
   { name: 'Beyneu', time: '04:10', title: 'Checkout', body: 'Order forms for several passengers at once, each one checked before it reaches billing.' },
   { name: 'Mangystau', time: '09:25', title: 'Built to hold', body: 'Tests and fault tolerance for the days when everyone buys tickets at once.' },
+];
+
+// The browser tab and the address of each station's page.
+const steps = [
+  { tab: 'Search', path: 'search?from=aktobe-1&to=mangystau', icon: 'M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15ZM21 21l-5.2-5.2' },
+  { tab: 'Seat map', path: 'train/7a/car/7', icon: 'M5 11V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v5M3 11h18v5H3zM6 16v4M18 16v4' },
+  { tab: 'Checkout', path: 'checkout', icon: 'M3 6h18v12H3zM3 10h18M7 15h4' },
+  { tab: 'Ticket', path: 'ticket', icon: 'M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4zM12 7v12' },
 ];
 
 // A compartment car: 9 compartments of 4 berths. Odd numbers are lower berths.
@@ -32,166 +43,214 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
   id="bilebile"
   data-screen
   data-stations={JSON.stringify(stations)}
-  class="overflow-hidden bg-bb-navy font-inter text-white"
+  data-paths={JSON.stringify(steps.map((step) => step.path))}
+  class="overflow-hidden bg-[#16223a] font-inter text-white"
 >
   <BackToIntro class="rounded-lg bg-white/10 text-sm font-bold text-white hover:bg-bb-red" />
 
-  <div class="flex h-full flex-col px-[5vw] pt-[9svh] pb-[4svh]">
-    <header class="flex items-end justify-between gap-8">
-      <div class="flex items-center gap-4">
-        <img src="/icons/bilebile.png" alt="" width="64" height="64" class="size-11 rounded-lg" />
-        <div>
-          <h2 class="text-2xl font-extrabold tracking-tight">{project.name}</h2>
-          <p class="text-sm text-bb-silver">{role.title}, {formatYears(role.period)}, through Mad Devs</p>
-        </div>
-      </div>
-      <p class="text-sm text-bb-silver">{project.stack.join(', ')}</p>
-    </header>
-
-    <!-- The window -->
-    <div class="window mt-5 h-[40svh] shrink-0" aria-hidden="true">
-      <div class="sky"></div>
-      <div class="sun"></div>
-      <div class="layer mountains"></div>
-      <div class="layer hills"></div>
-      <div class="layer poles"></div>
-      <div class="layer ground"></div>
-      <div class="rails"></div>
-      <div class="sign"><span data-sign>{stations[0].name}</span></div>
-      <svg class="train-set" viewBox="0 0 1000 120">
-        {
-          cars.map((x) => (
-            <g>
-              <rect x={x} y="20" width="230" height="70" rx="10" fill="#fff" />
-              <rect x={x + 8} y="10" width="214" height="13" rx="6" fill="#1b2a44" />
-              <rect x={x} y="64" width="230" height="8" fill="#e63445" />
-              {[0, 1, 2, 3, 4, 5].map((index) => (
-                <rect x={x + 14 + index * 35} y="32" width="24" height="20" rx="3" fill="#243654" />
-              ))}
-              <rect x={x + 230} y="70" width="20" height="6" fill="#0f1a2d" />
-            </g>
-          ))
-        }
-        <path d="M750 20h170q62 0 76 46v24H750z" fill="#e63445" />
-        <path d="M904 30h26l27 30h-53z" fill="#243654" />
-        <rect x="750" y="64" width="246" height="8" fill="#fff" />
-        <rect x="770" y="32" width="24" height="20" rx="3" fill="#243654" />
-        <rect x="805" y="32" width="24" height="20" rx="3" fill="#243654" />
-        {
-          [...cars, 750].flatMap((x) =>
-            wheels(x).map((cx) => (
-              <g class="wheel">
-                <circle cx={cx} cy="98" r="12" fill="#0f1a2d" />
-                <path d={`M${cx - 10} 98h20M${cx} 88v20`} stroke="#5a6782" stroke-width="2.5" />
-              </g>
-            )),
-          )
-        }
-      </svg>
-      <div class="curtain left"></div>
-      <div class="curtain right"></div>
+  <div class="flex h-full items-center gap-[4vw] px-[5vw]">
+    <div class="w-[27vw] shrink-0">
+      <p class="flex items-center gap-3 text-sm font-semibold">
+        <img src="/icons/bilebile.png" alt="" width="64" height="64" class="size-8 rounded-lg" />
+        {project.name}
+      </p>
+      <h2 class="mt-6 text-[clamp(2rem,3vw,3.2rem)] leading-[1.08] font-extrabold tracking-tight">Train tickets across Kazakhstan</h2>
+      <p class="mt-4 text-sm text-bb-silver">{role.title}, {formatYears(role.period)}, through Mad Devs</p>
+      <p class="mt-6 leading-relaxed text-white/75">
+        A private railway in Kazakhstan sells its tickets here: find a train, pick a berth on the seat map of a car, pay
+        for everyone in one order and get the ticket.
+      </p>
+      <p class="mt-6 text-sm text-bb-silver">{project.stack.join(', ')}</p>
     </div>
 
-    <!-- The route -->
-    <ol class="route mt-6 grid grid-cols-4" style={`--progress: 0`}>
-      {
-        stations.map((station, index) => (
-          <li>
-            <button type="button" data-station={index} class="stop" aria-current={index === 0 ? 'step' : undefined}>
-              <span class="dot" />
-              <span class="font-bold">{station.name}</span>
-              <span class="text-xs text-bb-silver tabular-nums">{station.time}</span>
-            </button>
-          </li>
-        ))
-      }
-      <span class="train" aria-hidden="true"></span>
-    </ol>
+    <div class="stage">
+      <div class="mac">
+        <div class="mac-bar tabs" role="tablist">
+          <span class="mac-lights" aria-hidden="true"><i></i><i></i><i></i></span>
+          {
+            steps.map((step, index) => (
+              <button type="button" role="tab" class="mac-tab" data-tab={index} aria-selected={index === 0 ? 'true' : 'false'}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="#e63445" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d={step.icon} />
+                </svg>
+                <span>{step.tab}</span>
+              </button>
+            ))
+          }
+        </div>
+        <div class="mac-address"><span class="mac-url" data-url>bile-bile.kz/{steps[0].path}</span></div>
 
-    <!-- What this station is about -->
-    <div class="mt-6 grid min-h-0 flex-1 grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-[4vw]">
-      <div aria-live="polite">
-        <p class="text-sm text-bb-silver" data-at>Station 1 of 4: {stations[0].name}</p>
-        <h3 class="mt-2 text-[clamp(1.8rem,3vw,3rem)] leading-tight font-extrabold tracking-tight" data-title>
-          {stations[0].title}
-        </h3>
-        <p class="mt-3 max-w-[30em] leading-relaxed text-white/75" data-body>{stations[0].body}</p>
-        <button type="button" data-next class="next mt-6">Next station</button>
-      </div>
+        <div class="page">
+          <header class="flex items-center justify-between gap-4 text-sm">
+            <span class="flex items-center gap-2 font-extrabold">
+              <img src="/icons/bilebile.png" alt="" width="64" height="64" class="size-6 rounded" />
+              bile-bile.kz
+            </span>
+            <span class="text-bb-silver">Aktobe-1 → Mangystau · 10 December · 1 passenger</span>
+          </header>
 
-      <div class="panel min-h-0">
-        <!-- 1. Search -->
-        <form data-widget="0" class="search" onsubmit="return false">
-          <label><span>From</span><input value="Aktobe-1" readonly /></label>
-          <label><span>To</span><input value="Mangystau" readonly /></label>
-          <label><span>Departure</span><input value="10 December" readonly /></label>
-          <label><span>Passengers</span><input value="1 passenger" readonly /></label>
-          <button type="submit" data-find class="find">Find tickets</button>
-        </form>
+          <!-- The window of the carriage -->
+          <div class="scene" aria-hidden="true">
+            <div class="sky"></div>
+            <div class="sun"></div>
+            <div class="layer mountains"></div>
+            <div class="layer hills"></div>
+            <div class="layer poles"></div>
+            <div class="layer ground"></div>
+            <div class="rails"></div>
+            <div class="sign"><span data-sign>{stations[0].name}</span></div>
+            <svg class="train-set" viewBox="0 0 1000 120">
+              {
+                cars.map((x) => (
+                  <g>
+                    <rect x={x} y="20" width="230" height="70" rx="10" fill="#fff" />
+                    <rect x={x + 8} y="10" width="214" height="13" rx="6" fill="#1b2a44" />
+                    <rect x={x} y="64" width="230" height="8" fill="#e63445" />
+                    {[0, 1, 2, 3, 4, 5].map((index) => (
+                      <rect x={x + 14 + index * 35} y="32" width="24" height="20" rx="3" fill="#243654" />
+                    ))}
+                    <rect x={x + 230} y="70" width="20" height="6" fill="#0f1a2d" />
+                  </g>
+                ))
+              }
+              <path d="M750 20h170q62 0 76 46v24H750z" fill="#e63445" />
+              <path d="M904 30h26l27 30h-53z" fill="#243654" />
+              <rect x="750" y="64" width="246" height="8" fill="#fff" />
+              <rect x="770" y="32" width="24" height="20" rx="3" fill="#243654" />
+              <rect x="805" y="32" width="24" height="20" rx="3" fill="#243654" />
+              {
+                [...cars, 750].flatMap((x) =>
+                  wheels(x).map((cx) => (
+                    <g class="wheel">
+                      <circle cx={cx} cy="98" r="12" fill="#0f1a2d" />
+                      <path d={`M${cx - 10} 98h20M${cx} 88v20`} stroke="#5a6782" stroke-width="2.5" />
+                    </g>
+                  )),
+                )
+              }
+            </svg>
+            <div class="curtain left"></div>
+            <div class="curtain right"></div>
+          </div>
 
-        <!-- 2. Seat map -->
-        <div data-widget="1" hidden class="seats">
-          <p class="text-sm font-bold">Car 7, compartment</p>
-          <div class="car" role="group" aria-label="Seats in car 7">
+          <!-- The route -->
+          <ol class="route grid shrink-0 grid-cols-4" style={`--progress: 0`}>
             {
-              compartments.map((seats) => (
-                <div class="compartment">
-                  {seats.map((seat) => (
-                    <button
-                      type="button"
-                      class="seat"
-                      data-seat={seat}
-                      disabled={taken.has(seat)}
-                      aria-label={`Seat ${seat}, ${seat % 2 ? 'lower' : 'upper'} berth, ${taken.has(seat) ? 'taken' : `${price(seat)} tenge`}`}
-                    >
-                      {seat}
-                    </button>
-                  ))}
-                </div>
+              stations.map((station, index) => (
+                <li>
+                  <button type="button" data-station={index} class="stop" aria-current={index === 0 ? 'step' : undefined}>
+                    <span class="dot" />
+                    <span class="text-sm font-bold">{station.name}</span>
+                    <span class="text-xs text-bb-silver tabular-nums">{station.time}</span>
+                  </button>
+                </li>
               ))
             }
-          </div>
-          <p class="legend">
-            <span><i class="free"></i>Free</span><span><i class="taken"></i>Taken</span><span
-              ><i class="mine"></i>Your seat</span
-            >
-          </p>
-          <p class="mt-3 text-sm" data-choice>No seat chosen yet.</p>
-        </div>
+            <span class="train" aria-hidden="true"></span>
+          </ol>
 
-        <!-- 3. Checkout -->
-        <form data-widget="2" hidden class="checkout" novalidate>
-          <label><span>Full name</span><input data-name placeholder="As in the ID card" autocomplete="off" /></label>
-          <label>
-            <span>IIN</span>
-            <input data-iin inputmode="numeric" maxlength="12" placeholder="12 digits" autocomplete="off" />
-          </label>
-          <p class="hint" data-iin-hint>The IIN has 12 digits.</p>
-          <button type="submit" data-pay class="find" disabled>Pay</button>
-        </form>
+          <!-- What this station is about -->
+          <div class="grid min-h-0 flex-1 grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-5">
+            <div aria-live="polite" class="min-h-0 overflow-y-auto">
+              <p class="text-xs text-bb-silver" data-at>Station 1 of 4: {stations[0].name}</p>
+              <h3 class="mt-1.5 text-[clamp(1.3rem,1.8vw,2rem)] leading-tight font-extrabold tracking-tight" data-title>
+                {stations[0].title}
+              </h3>
+              <p class="mt-2 text-sm leading-relaxed text-white/75" data-body>{stations[0].body}</p>
+              <button type="button" data-next class="next mt-4">Next station</button>
+            </div>
 
-        <!-- 4. Ticket -->
-        <div data-widget="3" hidden class="ticket">
-          <div>
-            <p class="text-xs text-bb-muted">Electronic ticket</p>
-            <p class="mt-1 text-lg font-extrabold">Aktobe-1 → Mangystau</p>
-            <p class="mt-1 text-sm">10 December, 18:40</p>
-            <p class="mt-3 text-sm" data-ticket-seat>Car 7, seat 14, upper berth</p>
-            <p class="text-sm" data-ticket-name>Passenger</p>
+            <div class="panel min-h-0">
+              <!-- 1. Search -->
+              <form data-widget="0" class="search" onsubmit="return false">
+                <label><span>From</span><input value="Aktobe-1" readonly /></label>
+                <label><span>To</span><input value="Mangystau" readonly /></label>
+                <label><span>Departure</span><input value="10 December" readonly /></label>
+                <label><span>Passengers</span><input value="1 passenger" readonly /></label>
+                <button type="submit" data-find class="find">Find tickets</button>
+              </form>
+
+              <!-- 2. Seat map -->
+              <div data-widget="1" hidden class="seats">
+                <p class="text-sm font-bold">Car 7, compartment</p>
+                <div class="car" role="group" aria-label="Seats in car 7">
+                  {
+                    compartments.map((seats) => (
+                      <div class="compartment">
+                        {seats.map((seat) => (
+                          <button
+                            type="button"
+                            class="seat"
+                            data-seat={seat}
+                            disabled={taken.has(seat)}
+                            aria-label={`Seat ${seat}, ${seat % 2 ? 'lower' : 'upper'} berth, ${taken.has(seat) ? 'taken' : `${price(seat)} tenge`}`}
+                          >
+                            {seat}
+                          </button>
+                        ))}
+                      </div>
+                    ))
+                  }
+                </div>
+                <p class="legend">
+                  <span><i class="free"></i>Free</span><span><i class="taken"></i>Taken</span><span
+                    ><i class="mine"></i>Your seat</span
+                  >
+                </p>
+                <p class="mt-3 text-sm" data-choice>No seat chosen yet.</p>
+              </div>
+
+              <!-- 3. Checkout -->
+              <form data-widget="2" hidden class="checkout" novalidate>
+                <label><span>Full name</span><input data-name placeholder="As in the ID card" autocomplete="off" /></label>
+                <label>
+                  <span>IIN</span>
+                  <input data-iin inputmode="numeric" maxlength="12" placeholder="12 digits" autocomplete="off" />
+                </label>
+                <p class="hint" data-iin-hint>The IIN has 12 digits.</p>
+                <button type="submit" data-pay class="find" disabled>Pay</button>
+              </form>
+
+              <!-- 4. Ticket -->
+              <div data-widget="3" hidden class="ticket">
+                <div>
+                  <p class="text-xs text-bb-muted">Electronic ticket</p>
+                  <p class="mt-1 text-lg font-extrabold">Aktobe-1 → Mangystau</p>
+                  <p class="mt-1 text-sm">10 December, 18:40</p>
+                  <p class="mt-3 text-sm" data-ticket-seat>Car 7, seat 14, upper berth</p>
+                  <p class="text-sm" data-ticket-name>Passenger</p>
+                </div>
+                <div class="code" aria-hidden="true"></div>
+              </div>
+            </div>
           </div>
-          <div class="code" aria-hidden="true"></div>
         </div>
       </div>
+      <ProjectNav current="bilebile" dark />
     </div>
   </div>
 </section>
 
 <style>
-  .window {
+  /* The site, as the browser shows it. */
+  .page {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 0.9rem;
+    min-height: 0;
+    padding: 1rem 1.25rem 1.25rem;
+    background: var(--color-bb-navy);
+    color: #fff;
+  }
+
+  .scene {
     position: relative;
+    flex: 0 0 34%;
+    min-height: 0;
     overflow: hidden;
-    border: 14px solid #1b2a44;
-    border-radius: 28px;
+    border: 10px solid #1b2a44;
+    border-radius: 20px;
     box-shadow:
       inset 0 0 0 1px rgb(255 255 255 / 0.06),
       inset 0 20px 60px rgb(0 0 0 / 0.35);
@@ -207,7 +266,7 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
     position: absolute;
     top: 34%;
     right: 18%;
-    width: 7vw;
+    width: 5vw;
     aspect-ratio: 1;
     border-radius: 50%;
     background: var(--color-bb-red);
@@ -287,7 +346,7 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
     transform-origin: center;
   }
 
-  .window[data-moving] .wheel {
+  .scene[data-moving] .wheel {
     animation: spin 420ms linear infinite;
   }
 
@@ -306,7 +365,7 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
     border-radius: 4px;
     background: #1b4f9c;
     color: #fff;
-    font-size: clamp(1rem, 1.6vw, 1.6rem);
+    font-size: clamp(0.85rem, 1.2vw, 1.25rem);
     font-weight: 800;
     letter-spacing: 0.02em;
     translate: -50% 0;
@@ -318,7 +377,7 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
       position: absolute;
       top: 100%;
       width: 5px;
-      height: 3vw;
+      height: 2vw;
       background: #0f1a2d;
     }
 
@@ -591,7 +650,10 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
 
 <script>
   const screen = document.getElementById('bilebile')!;
-  const windowEl = screen.querySelector<HTMLElement>('.window')!;
+  const windowEl = screen.querySelector<HTMLElement>('.scene')!;
+  const tabs = Array.from(screen.querySelectorAll<HTMLButtonElement>('[data-tab]'));
+  const url = screen.querySelector<HTMLElement>('[data-url]')!;
+  const paths: string[] = JSON.parse(screen.dataset.paths!);
   const sign = screen.querySelector<HTMLElement>('.sign')!;
   const signText = screen.querySelector<HTMLElement>('[data-sign]')!;
   const route = screen.querySelector<HTMLElement>('.route')!;
@@ -613,6 +675,12 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
   const trainEl = screen.querySelector<SVGElement>('.train-set')!;
   /** Each half of a trip: leaving the frame to the right, then coming in from the left. */
   const HALF_MS = 2300;
+
+  // The browser moves to the next page at once; the train takes its time to get there.
+  function select(to: number) {
+    tabs.forEach((tab, index) => tab.setAttribute('aria-selected', String(index === to)));
+    url.textContent = `bile-bile.kz/${paths[to]}`;
+  }
 
   function render() {
     stops.forEach((stop, index) => {
@@ -637,6 +705,7 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
 
   function travel(to: number) {
     if (travelling || to === station) return;
+    select(to);
     route.style.setProperty('--progress', String(to / (stations.length - 1)));
     if (reduced) return arrive(to);
     travelling = true;
@@ -671,6 +740,7 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
 
   next.addEventListener('click', () => travel(station === stations.length - 1 ? 0 : station + 1));
   stops.forEach((stop, index) => stop.addEventListener('click', () => travel(index)));
+  tabs.forEach((tab, index) => tab.addEventListener('click', () => travel(index)));
   screen.querySelector('[data-find]')!.addEventListener('click', () => travel(1));
 
   // Seat map
