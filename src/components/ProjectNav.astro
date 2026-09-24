@@ -1,0 +1,77 @@
+---
+// One button per project: under the terminal in the hero, and under the window of every project screen,
+// where the current project is marked. In the hero each button is also where its screen opens from, which
+// `opens` tells the router. The colors follow --nav-ink and --nav-paper; `dark` sets them for dark screens.
+import { brandIcon } from '../content/icons';
+import { projects, type ProjectId } from '../content/projects';
+
+type Props = { current?: ProjectId; opens?: boolean; dark?: boolean };
+
+const { current, opens = false, dark = false } = Astro.props;
+---
+
+<nav class:list={['projects', { dark }]} aria-label="Projects">
+  {
+    projects.map((project) => (
+      <a
+        class="project"
+        href={`#${project.id}`}
+        data-opens={opens ? project.id : undefined}
+        aria-current={project.id === current ? 'page' : undefined}
+      >
+        <img src={brandIcon[project.id]} alt="" width="64" height="64" />
+        {project.name}
+      </a>
+    ))
+  }
+</nav>
+
+<style>
+  .projects {
+    display: flex;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .dark {
+    --nav-ink: #fff;
+    --nav-paper: #111;
+  }
+
+  .project {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    padding: 0.4em 1em 0.4em 0.45em;
+    border: 1px solid color-mix(in srgb, var(--nav-ink, #000) 16%, transparent);
+    border-radius: 999px;
+    color: var(--nav-ink, #000);
+    font-family: 'Bricolage Grotesque Variable', var(--font-geist);
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease,
+      color 200ms ease;
+
+    & img {
+      width: 1.6em;
+      height: 1.6em;
+      border-radius: 0.4em;
+    }
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--nav-ink, #000);
+      background: color-mix(in srgb, var(--nav-ink, #000) 8%, transparent);
+    }
+
+    &[aria-current='page'] {
+      border-color: var(--nav-ink, #000);
+      background: var(--nav-ink, #000);
+      color: var(--nav-paper, #fff);
+    }
+  }
+</style>

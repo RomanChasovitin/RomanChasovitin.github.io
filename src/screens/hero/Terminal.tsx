@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { Lights } from '../../components/Window';
 import { run, skills, type Line, type Step } from './skills';
 
 // A terminal window with an agent that answers from the site's own data. Enter runs a command,
@@ -185,16 +186,10 @@ export default function Terminal() {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-(--rule) bg-(--window) font-jetbrains text-[0.9rem] leading-[1.5] text-(--ink) shadow-[0_30px_70px_-35px_rgb(0_0_0/0.35)] transition-colors duration-300">
-      <div className="relative flex h-9 shrink-0 items-center border-b border-(--rule) bg-(--bar) px-4 transition-colors duration-300" aria-hidden="true">
-        <span className="flex gap-2">
-          <i className="size-3 rounded-full bg-[#ff5f57]" />
-          <i className="size-3 rounded-full bg-[#febc2e]" />
-          <i className="size-3 rounded-full bg-[#28c840]" />
-        </span>
-        <span className="absolute inset-x-0 text-center text-xs" style={{ color: DIM }}>
-          roman — agent
-        </span>
+    <div className="mac h-full font-jetbrains text-[0.9rem] leading-[1.5] text-(--ink)">
+      <div className="mac-bar" aria-hidden="true">
+        <Lights />
+        <span className="mac-title">roman — agent</span>
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col px-6 pt-5 pb-4">

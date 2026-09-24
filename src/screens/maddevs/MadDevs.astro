@@ -1,6 +1,7 @@
 ---
 // Mad Devs, after the old maddevs.io hero: a large light headline on the left, a live Slack window on the right.
 import BackToIntro from '../../components/BackToIntro.astro';
+import ProjectNav from '../../components/ProjectNav.astro';
 import { formatYears, projects } from '../../content/projects';
 import Slack from './Slack';
 
@@ -36,8 +37,17 @@ const project = projects.find((item) => item.id === 'maddevs')!;
       <p class="mt-6 font-plex-mono text-sm text-md-grey">{project.stack.join(', ')}</p>
     </div>
 
-    <div class="h-[80svh] min-w-0 flex-1">
-      <Slack client:idle />
+    <div class="stage">
+      <div class="mac">
+        <div class="mac-bar" aria-hidden="true">
+          <span class="mac-lights"><i></i><i></i><i></i></span>
+          <span class="mac-title">Slack — Mad Devs</span>
+        </div>
+        <div class="min-h-0 flex-1">
+          <Slack client:idle />
+        </div>
+      </div>
+      <ProjectNav current="maddevs" dark />
     </div>
   </div>
 </section>

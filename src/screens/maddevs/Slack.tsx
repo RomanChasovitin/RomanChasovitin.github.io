@@ -345,7 +345,7 @@ export default function Slack() {
       onClick={(event) => {
         if (profile && !(event.target as Element).closest('[data-profile], [data-profile-trigger]')) setProfile(null);
       }}
-      className="relative flex h-full w-full overflow-hidden rounded-lg bg-white font-lato text-[0.9rem] text-[#1d1c1d] shadow-[0_40px_80px_-30px_rgb(0_0_0/0.8)]"
+      className="relative flex h-full w-full overflow-hidden bg-white font-lato text-[0.9rem] text-[#1d1c1d]"
     >
       <div className="flex w-14 shrink-0 flex-col items-center gap-3 pt-3" style={{ background: RAIL }}>
         <span className="flex size-9 items-center justify-center rounded-lg bg-[#ec1c24] text-sm font-black text-white ring-2 ring-white ring-offset-2 ring-offset-[#261c25]">
