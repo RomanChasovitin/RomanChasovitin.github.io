@@ -61,7 +61,7 @@ export const projects: Project[] = [
   },
   {
     id: 'bilebile',
-    name: 'bile-bile.kz',
+    name: 'Bile-Bile',
     url: null,
     roles: [{ title: 'Main Front-End Developer', period: { start: '2021-09', end: '2022-05' } }],
     stack: ['React', 'Next.js', 'Python'],
