@@ -1,6 +1,6 @@
 ---
 // The landing screen: me on the left, an agent that knows my work on the right, and under it one button per
-// project. A project screen grows out of its button and folds back into it.
+// project.
 //
 // The hero has a light and a dark theme, and only the hero: project screens keep their brands. The theme
 // follows the system until the visitor picks one with the button in the corner or /theme in the terminal.
@@ -34,7 +34,6 @@ const [first, ...rest] = profile.name.split(' ');
       <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
     </svg>
   </button>
-
   <div class="split">
     <div class="me">
       <h1 class="name">
@@ -60,7 +59,7 @@ const [first, ...rest] = profile.name.split(' ');
       <div class="stage-window">
         <Terminal client:idle />
       </div>
-      <ProjectNav opens />
+      <ProjectNav />
     </div>
   </div>
 </section>

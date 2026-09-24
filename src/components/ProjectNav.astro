@@ -1,7 +1,7 @@
 ---
 // One button per project: under the terminal in the hero, and under the window of every project screen,
-// where the current project is marked. In the hero each button is also where its screen opens from, which
-// `opens` tells the router. The colors follow --nav-ink and --nav-paper; `dark` sets them for dark screens.
+// where the current project is marked. The colors follow --nav-ink and --nav-paper; `dark` sets them for
+// dark screens.
 // On a marked button an icon may change: the Mad Devs M turns white on its red.
 //
 // The row starts with Intro, the way back to the hero; in the hero it is the marked one. Below 1024px the row
@@ -9,9 +9,9 @@
 import { brandIcon } from '../content/icons';
 import { projects, type ProjectId } from '../content/projects';
 
-type Props = { current?: ProjectId; opens?: boolean; dark?: boolean };
+type Props = { current?: ProjectId; dark?: boolean };
 
-const { current, opens = false, dark = false } = Astro.props;
+const { current, dark = false } = Astro.props;
 const markedIcon: Partial<Record<ProjectId, string>> = { maddevs: '/icons/maddevs-active.svg' };
 ---
 
@@ -25,7 +25,6 @@ const markedIcon: Partial<Record<ProjectId, string>> = { maddevs: '/icons/maddev
       <a
         class="project"
         href={`#${project.id}`}
-        data-opens={opens ? project.id : undefined}
         aria-current={project.id === current ? 'page' : undefined}
       >
         <img src={(project.id === current && markedIcon[project.id]) || brandIcon[project.id]} alt="" width="64" height="64" />
