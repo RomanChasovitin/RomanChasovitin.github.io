@@ -5,7 +5,8 @@
 // On a marked button an icon may change: the Mad Devs M turns white on its red.
 //
 // The row starts with Intro, the way back to the hero; in the hero it is the marked one. Below 1024px the row
-// stays one line and scrolls sideways; it always starts at Intro, so the way back is in view.
+// stays one line, scrolls sideways and sits over the window; it always starts at Intro, so the way back is in
+// view.
 import { brandIcon } from '../content/icons';
 import { projects, type ProjectId } from '../content/projects';
 
@@ -49,6 +50,7 @@ const markedIcon: Partial<Record<ProjectId, string>> = { maddevs: '/icons/maddev
       padding-inline: 5vw;
       overflow-x: auto;
       scrollbar-width: none;
+      order: -1;
     }
 
     .project {

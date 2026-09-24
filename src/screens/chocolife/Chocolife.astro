@@ -14,9 +14,9 @@ import Shop from './Shop';
       job: Chocolife on Angular 2+, BeSmart on React, MobX and GraphQL.
     </ProjectIntro>
 
-    <!-- Stacked, the brand icons over the window need room under the text. -->
-    <div class="stage max-lg:mt-4">
-      <div class="stage-window">
+    <!-- Stacked, the row of projects is over the window, and the brand icons need room under it. -->
+    <div class="stage max-lg:gap-[3.4rem]">
+      <div class="stage-window max-lg:h-[calc(100%-5.8rem)]">
         <Shop client:idle />
       </div>
       <ProjectNav current="chocolife" />
