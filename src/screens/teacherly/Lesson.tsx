@@ -4,6 +4,9 @@ import Window from '../../components/Window';
 // Teacherly, the product, end to end: create a lesson on a free canvas, split it into screens, put it in the
 // timetable for a class, teach it on a call, then grade the class. Student names are placeholders for the
 // five front-end developers of the team.
+//
+// A narrow window stacks every stage: the screens of a lesson run in a row above the canvas, the class sits
+// under the timetable, the video tiles line up under the board and the chat covers the call.
 
 type Kind = 'text' | 'image' | 'video' | 'shape';
 type Shape = 'circle' | 'star' | 'arrow';
@@ -287,7 +290,7 @@ export default function Lesson() {
       url={`teacherly.com/${STAGE_PATHS[stage]}`}
     >
       <div onKeyDown={onKeyDown} className="flex min-h-0 flex-1 flex-col bg-white font-helvetica text-tl-ink">
-        <header className="flex items-center gap-5 border-b border-[#eeebf7] px-5 py-3">
+        <header className="flex items-center gap-5 border-b border-[#eeebf7] px-5 py-3 @max-lg/window:gap-3 @max-lg/window:px-3 @max-lg/window:py-2">
           <span className="font-dancing text-2xl font-bold text-tl-purple">
             Teacher<span className="text-tl-teal">ly</span>
           </span>
@@ -300,8 +303,8 @@ export default function Lesson() {
         </header>
 
         {stage === 'create' && (
-          <div className="flex min-h-0 flex-1">
-            <aside className="flex w-40 shrink-0 flex-col gap-2 overflow-y-auto border-r border-[#eeebf7] bg-tl-mist p-3" aria-label="Screens">
+          <div className="flex min-h-0 flex-1 @max-lg/window:flex-col">
+            <aside className="flex w-40 shrink-0 flex-col gap-2 overflow-y-auto border-r border-[#eeebf7] bg-tl-mist p-3 @max-lg/window:w-auto @max-lg/window:flex-row @max-lg/window:overflow-x-auto @max-lg/window:overflow-y-hidden @max-lg/window:border-r-0 @max-lg/window:border-b @max-lg/window:p-2" aria-label="Screens">
               {screens.map((item, index) => (
                 <button
                   key={item.id}
@@ -311,7 +314,7 @@ export default function Lesson() {
                     setSelected(null);
                   }}
                   aria-current={index === current || undefined}
-                  className="cursor-pointer rounded-lg border-2 border-transparent p-1 text-left text-xs aria-[current=true]:border-tl-purple"
+                  className="cursor-pointer rounded-lg border-2 border-transparent p-1 text-left text-xs aria-[current=true]:border-tl-purple @max-lg/window:w-24 @max-lg/window:shrink-0"
                 >
                   <div className="pointer-events-none">
                     <Board screen={item} />
@@ -325,26 +328,26 @@ export default function Lesson() {
                   setScreens((all) => [...all, { id: nextId++, elements: [] }]);
                   setCurrent(screens.length);
                 }}
-                className="cursor-pointer rounded-lg border-2 border-dashed border-[#d9d4ee] py-3 text-xs font-bold text-tl-purple"
+                className="cursor-pointer rounded-lg border-2 border-dashed border-[#d9d4ee] py-3 text-xs font-bold text-tl-purple @max-lg/window:w-20 @max-lg/window:shrink-0"
               >
                 + Add screen
               </button>
             </aside>
 
             <div className="flex min-w-0 flex-1 flex-col">
-              <div className="flex items-center gap-2 border-b border-[#eeebf7] px-5 py-2.5">
+              <div className="flex items-center gap-2 border-b border-[#eeebf7] px-5 py-2.5 @max-lg/window:flex-wrap @max-lg/window:gap-1.5 @max-lg/window:px-3 @max-lg/window:py-2">
                 <input
                   value={title}
                   onChange={(event) => setTitle(event.target.value)}
                   aria-label="Lesson title"
-                  className="mr-auto min-w-0 flex-1 rounded-md px-2 py-1 font-bold outline-none focus:bg-tl-mist"
+                  className="mr-auto min-w-0 flex-1 rounded-md px-2 py-1 font-bold outline-none focus:bg-tl-mist @max-lg/window:basis-full"
                 />
                 {(['text', 'image', 'video', 'shape'] as Kind[]).map((kind) => (
                   <button
                     key={kind}
                     type="button"
                     onClick={() => add(kind)}
-                    className="cursor-pointer rounded-full border border-[#d9d4ee] px-3 py-1 text-sm capitalize hover:border-tl-purple hover:text-tl-purple"
+                    className="cursor-pointer rounded-full border border-[#d9d4ee] px-3 py-1 text-sm capitalize hover:border-tl-purple hover:text-tl-purple @max-lg/window:px-2.5 @max-lg/window:text-xs"
                   >
                     + {kind === 'shape' ? 'Shape' : kind}
                   </button>
@@ -353,17 +356,17 @@ export default function Lesson() {
                   type="button"
                   onClick={remove}
                   disabled={selected === null}
-                  className="cursor-pointer rounded-full px-3 py-1 text-sm text-[#c2410c] disabled:cursor-default disabled:text-tl-ink/30"
+                  className="cursor-pointer rounded-full px-3 py-1 text-sm text-[#c2410c] disabled:cursor-default disabled:text-tl-ink/30 @max-lg/window:px-2 @max-lg/window:text-xs"
                 >
                   Delete
                 </button>
               </div>
-              <div className="flex min-h-0 flex-1 items-center justify-center bg-tl-mist p-5">
+              <div className="flex min-h-0 flex-1 items-center justify-center bg-tl-mist p-5 @max-lg/window:p-2">
                 <div className="w-full max-w-[min(100%,calc((82svh-9rem)*16/9))]">
                   <Board screen={screen} editable selected={selected} onSelect={setSelected} onChange={update} />
                 </div>
               </div>
-              <div className="flex items-center justify-end border-t border-[#eeebf7] px-5 py-3 text-sm">
+              <div className="flex items-center justify-end border-t border-[#eeebf7] px-5 py-3 text-sm @max-lg/window:px-3 @max-lg/window:py-2">
                 <PrimaryButton onClick={() => go('schedule')}>Next: schedule it</PrimaryButton>
               </div>
             </div>
@@ -371,12 +374,12 @@ export default function Lesson() {
         )}
 
         {stage === 'schedule' && (
-          <div className="flex min-h-0 flex-1 gap-5 p-5">
-            <div className="min-w-0 flex-1">
+          <div className="flex min-h-0 flex-1 gap-5 p-5 @max-3xl/window:flex-col @max-3xl/window:gap-3 @max-3xl/window:overflow-y-auto @max-lg/window:p-3">
+            <div className="min-w-0 flex-1 @max-3xl/window:flex-none">
               <p className="mb-3 text-sm">
                 Pick a free period for <span className="font-bold">{title}</span> ({screens.length} screens).
               </p>
-              <div className="grid grid-cols-[4rem_repeat(5,minmax(0,1fr))] gap-1.5 text-sm">
+              <div className="grid grid-cols-[4rem_repeat(5,minmax(0,1fr))] gap-1.5 text-sm @max-lg/window:grid-cols-[2.6rem_repeat(5,minmax(0,1fr))] @max-lg/window:gap-1">
                 <span />
                 {DAYS.map((day) => (
                   <span key={day} className="text-center font-bold">
@@ -388,10 +391,10 @@ export default function Lesson() {
                 ))}
               </div>
             </div>
-            <aside className="flex w-64 shrink-0 flex-col rounded-xl bg-tl-mist p-4" aria-label="Class">
+            <aside className="flex w-64 shrink-0 flex-col rounded-xl bg-tl-mist p-4 @max-3xl/window:w-auto @max-lg/window:p-3" aria-label="Class">
               <p className="font-bold">Front-end team</p>
               <p className="text-xs text-tl-ink/60">{assigned.length} of {STUDENTS.length} students</p>
-              <ul className="mt-3 space-y-2">
+              <ul className="mt-3 space-y-2 @max-lg/window:grid @max-lg/window:grid-cols-2 @max-lg/window:gap-2 @max-lg/window:space-y-0">
                 {STUDENTS.map((student) => (
                   <li key={student.name}>
                     <label className="flex cursor-pointer items-center gap-2.5">
@@ -409,7 +412,7 @@ export default function Lesson() {
                   </li>
                 ))}
               </ul>
-              <div className="mt-auto">
+              <div className="mt-auto @max-3xl/window:mt-3">
                 {scheduled && slotLabel && (
                   <p className="mb-3 text-sm text-[#2e7d6f]">
                     Assigned to {assigned.length} students for {slotLabel}.
@@ -431,12 +434,13 @@ export default function Lesson() {
         )}
 
         {stage === 'grade' && (
-          <div className="flex min-h-0 flex-1 flex-col p-5">
+          <div className="flex min-h-0 flex-1 flex-col p-5 @max-lg/window:overflow-y-auto @max-lg/window:p-3">
             <p className="text-sm">
               <span className="font-bold">{title}</span>
               {slotLabel && `, ${slotLabel}`}. Grade the class.
             </p>
-            <table className="mt-4 w-full border-separate border-spacing-y-1.5 text-sm">
+            <div className="mt-4 overflow-x-auto">
+            <table className="w-full border-separate border-spacing-y-1.5 text-sm @max-lg/window:min-w-[30rem]">
               <thead className="text-left text-tl-ink/60">
                 <tr>
                   <th className="px-3 font-normal">Student</th>
@@ -477,7 +481,8 @@ export default function Lesson() {
                 })}
               </tbody>
             </table>
-            <div className="mt-auto flex items-center justify-between pt-4 text-sm">
+            </div>
+            <div className="mt-auto flex items-center justify-between pt-4 text-sm @max-lg/window:flex-wrap @max-lg/window:gap-3">
               <span className="text-tl-ink/60">
                 {published ? 'Grades are in the students’ reports.' : 'Grades go to each student’s report when you publish them.'}
               </span>
@@ -508,7 +513,7 @@ function PeriodRow({ time, period, slot, onPick, title }: { time: string; period
             type="button"
             disabled={Boolean(busy)}
             onClick={() => onPick(key)}
-            className="h-12 cursor-pointer truncate rounded-lg border-2 px-2 text-left text-xs disabled:cursor-default"
+            className="h-12 cursor-pointer truncate rounded-lg border-2 px-2 text-left text-xs disabled:cursor-default @max-lg/window:h-10 @max-lg/window:px-1 @max-lg/window:text-[0.6rem]"
             style={
               busy
                 ? { borderColor: 'transparent', background: '#f1eff8', color: '#322d4d99' }
@@ -614,9 +619,9 @@ function Call({ screens, students, onEnd }: { screens: Screen[]; students: typeo
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-[#1f1b33] text-white">
-      <div className="flex min-h-0 flex-1 gap-3 p-3">
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <div className="relative flex min-h-0 flex-1 items-center justify-center rounded-xl bg-[#2b2645] p-3">
+      <div className="relative flex min-h-0 flex-1 gap-3 p-3 @max-lg/window:flex-col @max-lg/window:gap-2 @max-lg/window:p-2">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2">
+          <div className="relative flex min-h-0 flex-1 items-center justify-center rounded-xl bg-[#2b2645] p-3 @max-lg/window:p-2">
             <div className="relative w-full max-w-[min(100%,calc((82svh-12rem)*16/9))]">
               <Board screen={screens[slide]} />
               <canvas
@@ -655,7 +660,7 @@ function Call({ screens, students, onEnd }: { screens: Screen[]; students: typeo
           </div>
         </div>
 
-        <div className="grid w-56 shrink-0 auto-rows-fr grid-cols-2 gap-2">
+        <div className="grid w-56 shrink-0 auto-rows-fr grid-cols-2 gap-2 @max-lg/window:flex @max-lg/window:w-auto @max-lg/window:gap-1.5 @max-lg/window:overflow-x-auto">
           <Tile name="Roman (teacher)" color={PURPLE} speaking={speaking === 0 && mic} muted={!mic} camera={camera} hand={hand} wide />
           {students.map((student, index) => (
             <Tile key={student.name} name={student.name} color={student.color} speaking={speaking === index + 1} muted={speaking !== index + 1} camera />
@@ -663,7 +668,7 @@ function Call({ screens, students, onEnd }: { screens: Screen[]; students: typeo
         </div>
 
         {chatOpen && (
-          <aside className="flex w-60 shrink-0 flex-col rounded-xl bg-white text-tl-ink" aria-label="Chat">
+          <aside className="flex w-60 shrink-0 flex-col rounded-xl bg-white text-tl-ink @max-3xl/window:absolute @max-3xl/window:inset-y-3 @max-3xl/window:right-3 @max-3xl/window:z-10 @max-3xl/window:shadow-xl @max-lg/window:inset-2 @max-lg/window:w-auto" aria-label="Chat">
             <p className="border-b border-[#eeebf7] px-3 py-2 text-sm font-bold">Class chat</p>
             <div className="flex-1 space-y-2 overflow-y-auto p-3 text-sm">
               {chat.map((message, index) => (
@@ -687,7 +692,7 @@ function Call({ screens, students, onEnd }: { screens: Screen[]; students: typeo
         )}
       </div>
 
-      <div className="flex items-center justify-center gap-2 border-t border-white/10 px-4 py-3">
+      <div className="flex items-center justify-center gap-2 border-t border-white/10 px-4 py-3 @max-lg/window:flex-wrap @max-lg/window:gap-1.5 @max-lg/window:px-2 @max-lg/window:py-2">
         <Control active={mic} onClick={() => setMic(!mic)} label={mic ? 'Mute' : 'Unmute'} />
         <Control active={camera} onClick={() => setCamera(!camera)} label={camera ? 'Stop video' : 'Start video'} />
         <Control active={pen !== null} onClick={() => setPen(pen ? null : PENS[0])} label="Annotate" />
@@ -703,7 +708,7 @@ function Call({ screens, students, onEnd }: { screens: Screen[]; students: typeo
         )}
         <Control active={hand} onClick={() => setHand(!hand)} label={hand ? 'Lower hand' : 'Raise hand'} />
         <Control active={chatOpen} onClick={() => setChatOpen(!chatOpen)} label="Chat" />
-        <button type="button" onClick={onEnd} className="ml-3 cursor-pointer rounded-full bg-[#e5484d] px-4 py-2 text-sm font-bold">
+        <button type="button" onClick={onEnd} className="ml-3 cursor-pointer rounded-full bg-[#e5484d] px-4 py-2 text-sm font-bold @max-lg/window:ml-0 @max-lg/window:px-3 @max-lg/window:py-1.5 @max-lg/window:text-xs">
           End lesson and grade
         </button>
       </div>
@@ -717,7 +722,7 @@ function Control({ active, onClick, label }: { active: boolean; onClick: () => v
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`cursor-pointer rounded-full px-3.5 py-2 text-sm transition-colors ${active ? 'bg-white/15' : 'bg-white/5 text-white/60'} hover:bg-white/25`}
+      className={`cursor-pointer rounded-full px-3.5 py-2 text-sm transition-colors @max-lg/window:px-2.5 @max-lg/window:py-1.5 @max-lg/window:text-xs ${active ? 'bg-white/15' : 'bg-white/5 text-white/60'} hover:bg-white/25`}
     >
       {label}
     </button>
@@ -735,10 +740,10 @@ function Tile({ name, color, speaking, muted, camera, hand = false, wide = false
 }) {
   return (
     <div
-      className={`relative flex items-center justify-center overflow-hidden rounded-lg transition-shadow ${wide ? 'col-span-2' : ''}`}
+      className={`relative flex items-center justify-center overflow-hidden rounded-lg transition-shadow @max-lg/window:h-16 @max-lg/window:w-20 @max-lg/window:shrink-0 ${wide ? 'col-span-2 @max-lg/window:w-28' : ''}`}
       style={{ background: camera ? `${color}33` : '#2b2645', boxShadow: speaking ? 'inset 0 0 0 3px #65b8be' : undefined }}
     >
-      <span className="flex size-11 items-center justify-center rounded-full text-sm font-bold" style={{ background: color, color: color === PURPLE ? '#fff' : '#322d4d' }}>
+      <span className="flex size-11 items-center justify-center rounded-full text-sm font-bold @max-lg/window:size-8" style={{ background: color, color: color === PURPLE ? '#fff' : '#322d4d' }}>
         {name[0]}
       </span>
       {hand && (
@@ -746,9 +751,9 @@ function Tile({ name, color, speaking, muted, camera, hand = false, wide = false
           ✋
         </span>
       )}
-      <span className="absolute bottom-1 left-2 text-xs">
+      <span className="absolute bottom-1 left-2 text-xs @max-lg/window:left-1.5 @max-lg/window:text-[0.6rem]">
         {name}
-        {muted && <span className="ml-1 text-white/50">(muted)</span>}
+        {muted && <span className="ml-1 text-white/50 @max-lg/window:hidden">(muted)</span>}
       </span>
     </div>
   );

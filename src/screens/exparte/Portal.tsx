@@ -13,6 +13,9 @@ import { CourtBadge, Demo, Icon, type Open } from './ui';
 //
 // The three workflows stay mounted while hidden, so a report in progress, the search filters and the chat
 // all survive a trip to another page.
+//
+// In a narrow window (a phone) every view keeps working in one column: side panels step aside, toolbars keep
+// their icons, tables scroll sideways inside their cards.
 
 type View = { kind: 'search' } | { kind: 'entity'; ref: Ref; tab: 'overview' | 'analysis' };
 
@@ -135,7 +138,7 @@ export default function Portal() {
         </nav>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="flex shrink-0 items-center gap-3 border-b border-xpp-line bg-white px-4 py-2.5">
+          <header className="flex shrink-0 items-center gap-3 border-b border-xpp-line bg-white px-4 py-2.5 @max-lg/window:gap-2 @max-lg/window:px-3">
             {history.length > 1 && (
               <button type="button" aria-label="Back" onClick={back} className="cursor-pointer rounded p-1 text-xpp-text hover:bg-xpp-page">
                 <Icon.back className="size-4" />
@@ -143,14 +146,14 @@ export default function Portal() {
             )}
             {entity ? (
               <>
-                <span className="rounded bg-xpp-page p-1.5 text-xpp-text" aria-hidden="true">
+                <span className="rounded bg-xpp-page p-1.5 text-xpp-text @max-lg/window:hidden" aria-hidden="true">
                   <Icon.bookmark className="size-3.5" />
                 </span>
                 {entity.kind === 'case' && <CourtBadge court={cases[entity.id].court} />}
-                {entity.kind === 'case' && <span className="text-xpp-muted">{cases[entity.id].number}</span>}
+                {entity.kind === 'case' && <span className="text-xpp-muted @max-lg/window:hidden">{cases[entity.id].number}</span>}
                 <h3 className="truncate text-[1.05rem] font-medium">{name(entity)}</h3>
-                {entity.kind === 'patent' && <span className="truncate text-xpp-muted">{patents[entity.id].title}</span>}
-                {KIND_LABEL[entity.kind] && <span className="text-xpp-muted">{KIND_LABEL[entity.kind]}</span>}
+                {entity.kind === 'patent' && <span className="truncate text-xpp-muted @max-lg/window:hidden">{patents[entity.id].title}</span>}
+                {KIND_LABEL[entity.kind] && <span className="text-xpp-muted @max-lg/window:hidden">{KIND_LABEL[entity.kind]}</span>}
               </>
             ) : (
               <h3 className="text-[1.05rem] font-medium">Advanced Search</h3>
@@ -161,7 +164,7 @@ export default function Portal() {
           </header>
 
           {entity && hasAnalysis(entity) && (
-            <div className="flex shrink-0 gap-2 border-b border-xpp-line bg-white px-6 text-[0.85rem]" role="tablist">
+            <div className="flex shrink-0 gap-2 border-b border-xpp-line bg-white px-6 text-[0.85rem] @max-lg/window:px-2" role="tablist">
               {(['overview', 'analysis'] as const).map((tab) => (
                 <button
                   key={tab}

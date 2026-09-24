@@ -11,6 +11,9 @@ import {
 import { brandIcon } from '../../content/icons';
 
 // Classic Slack colors, taken from an archived maddevs.io screenshot where the hero had a Slack window.
+//
+// A narrow window works as Slack on a phone: the list of conversations is a screen of its own, a thread
+// covers the chat, and a tap on a message shows its actions.
 const RAIL = '#261c25';
 const SIDEBAR = '#533f4c';
 const ACTIVE = '#4e9689';
@@ -64,6 +67,8 @@ export default function Slack() {
   const [typing, setTyping] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const [threadDraft, setThreadDraft] = useState('');
+  // Only a narrow window shows the list on its own.
+  const [listed, setListed] = useState(false);
   const delivered = useRef(new Set<string>());
   const runs = useRef(0);
   const list = useRef<HTMLDivElement>(null);
@@ -90,6 +95,7 @@ export default function Slack() {
 
   function open(id: string) {
     setActiveId(id);
+    setListed(false);
     setThread(null);
     setPicker(null);
     setProfile(null);
@@ -247,7 +253,7 @@ export default function Slack() {
     const messageReactions = reactions[messageKey] ?? {};
     const user = users[message.user];
     return (
-      <div key={message.id} className="group relative flex gap-2.5 px-5 py-2 hover:bg-[#f8f8f8]">
+      <div key={message.id} tabIndex={-1} className="group relative flex gap-2.5 px-5 py-2 outline-none hover:bg-[#f8f8f8] focus-within:bg-[#f8f8f8] @max-lg/window:px-3">
         {avatar(message.user)}
         <div className="min-w-0 flex-1">
           <p className="flex items-baseline gap-2">
@@ -314,7 +320,7 @@ export default function Slack() {
           )}
         </div>
         {!compact && (
-          <div className="absolute -top-3 right-5 hidden gap-0.5 rounded-md border border-[#dddddd] bg-white p-0.5 shadow-sm group-hover:flex group-focus-within:flex">
+          <div className="absolute -top-3 right-5 hidden gap-0.5 @max-lg/window:right-3 rounded-md border border-[#dddddd] bg-white p-0.5 shadow-sm group-hover:flex group-focus-within:flex">
             <button
               type="button"
               onClick={() => setPicker(picker === messageKey ? null : messageKey)}
@@ -336,6 +342,7 @@ export default function Slack() {
   }
 
   const channels = conversations.filter((conversation) => conversation.kind === 'channel');
+  const unreadTotal = Object.entries(unread).reduce((sum, [id, count]) => sum + (id === activeId ? 0 : count), 0);
   const dms = conversations.filter((conversation) => conversation.kind === 'dm');
 
   return (
@@ -347,7 +354,7 @@ export default function Slack() {
       }}
       className="relative flex h-full w-full overflow-hidden bg-white font-lato text-[0.9rem] text-[#1d1c1d]"
     >
-      <div className="flex w-14 shrink-0 flex-col items-center gap-3 pt-3" style={{ background: RAIL }}>
+      <div className={`flex w-14 shrink-0 flex-col items-center gap-3 pt-3 ${listed ? '' : '@max-lg/window:hidden'}`} style={{ background: RAIL }}>
         <span className="flex size-9 items-center justify-center rounded-lg bg-[#ec1c24] text-sm font-black text-white ring-2 ring-white ring-offset-2 ring-offset-[#261c25]">
           MD
         </span>
@@ -366,7 +373,7 @@ export default function Slack() {
         ))}
       </div>
 
-      <nav className="flex w-52 shrink-0 flex-col overflow-y-auto pb-4 text-[#ffffffb3]" style={{ background: SIDEBAR }} aria-label="Conversations">
+      <nav className={`flex w-52 shrink-0 flex-col overflow-y-auto pb-4 text-[#ffffffb3] ${listed ? '@max-lg/window:w-auto @max-lg/window:flex-1' : '@max-lg/window:hidden'}`} style={{ background: SIDEBAR }} aria-label="Conversations">
         <div className="border-b border-white/10 px-4 py-3">
           <p className="font-black text-white">Mad Devs</p>
           <p className="mt-0.5 flex items-center gap-1.5 text-xs">
@@ -403,9 +410,15 @@ export default function Slack() {
         </ul>
       </nav>
 
-      <section className="flex min-w-0 flex-1 flex-col" aria-label={title}>
-        <header className="flex items-center gap-3 border-b border-[#e8e8e8] px-5 py-2.5">
-          <h3 className="font-black">{title}</h3>
+      <section className={`flex min-w-0 flex-1 flex-col ${listed ? '@max-lg/window:hidden' : ''}`} aria-label={title}>
+        <header className="flex items-center gap-3 border-b border-[#e8e8e8] px-5 py-2.5 @max-lg/window:gap-2 @max-lg/window:px-3">
+          <button type="button" onClick={() => setListed(true)} aria-label="All conversations" className="-ml-1 hidden cursor-pointer items-center gap-1 rounded px-1 py-0.5 hover:bg-[#f0f0f0] @max-lg/window:flex">
+            <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 5l-7 7 7 7" />
+            </svg>
+            {unreadTotal > 0 && <span className="rounded-full bg-[#e01e5a] px-1.5 text-xs font-bold text-white">{unreadTotal}</span>}
+          </button>
+          <h3 className="shrink-0 font-black">{title}</h3>
           <p className="truncate text-xs" style={{ color: MUTED }}>
             {active.topic}
           </p>
@@ -413,11 +426,11 @@ export default function Slack() {
         <div ref={list} className="flex-1 overflow-y-auto py-2">
           {active.messages.map((message) => messageRow(message))}
         </div>
-        <p className="h-5 px-5 text-xs" style={{ color: MUTED }} aria-live="polite">
+        <p className="h-5 px-5 text-xs @max-lg/window:px-3" style={{ color: MUTED }} aria-live="polite">
           {typing === activeId && `${users[active.name as UserId].name} is typing…`}
         </p>
         <form
-          className="mx-5 mb-4 rounded-md border border-[#bbbbbb] focus-within:border-[#616061]"
+          className="mx-5 mb-4 rounded-md border border-[#bbbbbb] focus-within:border-[#616061] @max-lg/window:mx-3 @max-lg/window:mb-3"
           onSubmit={(event) => {
             event.preventDefault();
             send();
@@ -434,7 +447,7 @@ export default function Slack() {
       </section>
 
       {threadMessage && (
-        <aside className="flex w-72 shrink-0 flex-col border-l border-[#e8e8e8]" aria-label="Thread">
+        <aside className="flex w-72 shrink-0 flex-col border-l border-[#e8e8e8] bg-white @max-3xl/window:absolute @max-3xl/window:inset-y-0 @max-3xl/window:right-0 @max-3xl/window:z-[5] @max-3xl/window:shadow-xl @max-lg/window:left-0 @max-lg/window:w-auto @max-lg/window:border-l-0" aria-label="Thread">
           <header className="flex items-center justify-between border-b border-[#e8e8e8] px-4 py-2.5">
             <p>
               <span className="font-black">Thread</span>{' '}

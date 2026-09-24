@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from 'react';
+import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import type { Court, Kind, Ref, Rating, Report, Review, Section, Trend } from './data';
 
 // The pieces of the Ex Parte portal that every view uses: badges, cards, tables, links into the record,
@@ -48,19 +48,19 @@ export function Card({ title, aside, children, className = '' }: { title?: React
   return (
     <section className={`rounded-lg border border-xpp-line bg-white ${className}`}>
       {title && (
-        <header className="flex items-baseline gap-2 border-b border-xpp-line px-5 py-3">
+        <header className="flex items-baseline gap-2 border-b border-xpp-line px-5 py-3 @max-lg/window:px-3">
           <h3 className="text-[0.95rem] font-medium text-xpp-ink">{title}</h3>
           {aside && <span className="text-[0.85rem] text-xpp-muted">{aside}</span>}
         </header>
       )}
-      <div className="px-5 py-4">{children}</div>
+      <div className="px-5 py-4 @max-lg/window:px-3">{children}</div>
     </section>
   );
 }
 
 export function Stats({ items, cols = 3 }: { items: [string, ReactNode][]; cols?: number }) {
   return (
-    <dl className="grid gap-x-6 gap-y-4" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+    <dl className="grid grid-cols-[repeat(var(--cols),minmax(0,1fr))] gap-x-6 gap-y-4 @max-lg/window:grid-cols-2 @max-lg/window:gap-x-4" style={{ '--cols': cols } as CSSProperties}>
       {items.map(([label, value]) => (
         <div key={label}>
           <dt className="text-[0.75rem] font-medium text-xpp-muted">{label}</dt>
@@ -73,7 +73,7 @@ export function Stats({ items, cols = 3 }: { items: [string, ReactNode][]; cols?
 
 export function Table({ head, rows, onRow }: { head: string[]; rows: ReactNode[][]; onRow?: (index: number) => void }) {
   return (
-    <table className="w-full border-collapse text-left">
+    <table className="w-full border-collapse text-left @max-lg/window:min-w-[36rem]">
       <thead>
         <tr className="bg-xpp-line/70 text-[0.75rem] text-xpp-muted">
           {head.map((cell) => (
@@ -105,7 +105,7 @@ export function Table({ head, rows, onRow }: { head: string[]; rows: ReactNode[]
 /** A share of cases or a win rate, on a light track; `loss` tints the track red, as the portal does for win rates. */
 export function Bar({ value, loss = false }: { value: number; loss?: boolean }) {
   return (
-    <span className={`block h-1.5 w-24 overflow-hidden rounded-full ${loss ? 'bg-xpp-loss' : 'bg-xpp-page'}`}>
+    <span className={`block h-1.5 w-24 overflow-hidden rounded-full @max-lg/window:w-12 ${loss ? 'bg-xpp-loss' : 'bg-xpp-page'}`}>
       <span className="block h-full rounded-full bg-xpp-blue" style={{ width: `${value}%` }} />
     </span>
   );
@@ -172,7 +172,7 @@ function Blocks({ section, onOpen }: { section: Section; onOpen: Open }) {
       {section.blocks.map((block, index) => {
         if (block.kind === 'table') {
           return (
-            <div key={index} className="mt-4 overflow-hidden rounded border border-xpp-line text-[0.85em]">
+            <div key={index} className="mt-4 overflow-x-auto rounded border border-xpp-line text-[0.85em]">
               <Table head={block.head} rows={block.rows.map((row) => row.map((cell) => <Rich text={cell} onOpen={onOpen} />))} />
             </div>
           );
@@ -184,7 +184,7 @@ function Blocks({ section, onOpen }: { section: Section; onOpen: Open }) {
                 <span className="mt-[0.55em] size-1.5 shrink-0 bg-xpp-ink" />
                 {block.label}:
               </p>
-              <ul className="mt-1.5 flex flex-col gap-1.5 pl-9">
+              <ul className="mt-1.5 flex flex-col gap-1.5 pl-9 @max-lg/window:pl-4">
                 {block.rows.map(([label, value]) => (
                   <li key={label} className="flex gap-3">
                     <span className="mt-[0.6em] size-1 shrink-0 bg-xpp-muted" />
@@ -198,7 +198,7 @@ function Blocks({ section, onOpen }: { section: Section; onOpen: Open }) {
           );
         }
         return (
-          <p key={index} className="mt-3 flex gap-3 text-justify">
+          <p key={index} className="mt-3 flex gap-3 text-justify @max-lg/window:text-left">
             <span className="mt-[0.55em] size-1.5 shrink-0 bg-xpp-ink" />
             <span>
               {block.label && <b className="font-medium text-xpp-ink">{block.label}: </b>}
@@ -218,10 +218,10 @@ function Blocks({ section, onOpen }: { section: Section; onOpen: Open }) {
 export function Doc({ report, onOpen, zoom = 1, shown, highlight }: { report: Report; onOpen: Open; zoom?: number; shown?: number; highlight?: string | null }) {
   const sections = shown === undefined ? report.sections : report.sections.slice(0, shown);
   return (
-    <article className="mx-auto max-w-[44rem] rounded-lg bg-white px-[8%] py-10 leading-relaxed text-xpp-text shadow-[0_1px_3px_rgb(0_0_0/0.06)]" style={{ fontSize: `${0.88 * zoom}rem` }}>
-      <header className="flex items-center justify-between">
+    <article className="mx-auto w-full max-w-[44rem] rounded-lg bg-white px-[8%] py-10 leading-relaxed @max-lg/window:px-4 @max-lg/window:py-6 text-xpp-text shadow-[0_1px_3px_rgb(0_0_0/0.06)]" style={{ fontSize: `${0.88 * zoom}rem` }}>
+      <header className="flex items-center justify-between gap-3">
         <Wordmark className="h-3.5 w-auto text-xpp-ink" />
-        <span className="text-[0.75em] tracking-wide text-xpp-ink uppercase">{report.title}</span>
+        <span className="text-right text-[0.75em] tracking-wide text-xpp-ink uppercase">{report.title}</span>
       </header>
       {sections.map((section, index) => (
         <section key={section.id} id={`doc-${report.id}-${section.id}`} className={`mt-8 scroll-mt-4 rounded transition-colors duration-500 ${highlight === section.id ? 'bg-xpp-soft/70' : ''}`}>
@@ -253,8 +253,8 @@ export function Critique({ report, onSection }: { report: Report; onSection?: (s
       </p>
       {report.reviews.map((review) => (
         <div key={review.reviewer} className="rounded-lg border border-xpp-line bg-white p-3.5">
-          <div className="flex items-center justify-between gap-2">
-            <p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="min-w-[10rem] flex-1">
               <b className="font-medium text-xpp-ink">{review.reviewer}</b>
               <span className="ml-2 text-[0.75rem] text-xpp-muted">{review.focus}</span>
             </p>

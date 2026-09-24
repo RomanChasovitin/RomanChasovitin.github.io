@@ -6,6 +6,9 @@ import { Critique, Doc, Icon, Rich, Spinner, type Open } from './ui';
 // upload a document of their own; the agent reads it and links what it finds to the record. For every
 // question the agent builds its context in front of the visitor: which documents it takes, which it drops
 // and why, and how much of the token budget they use. The answer cites the documents it kept.
+//
+// A window narrower than a laptop's has room for one of the two: the chat or the critique takes the whole
+// window, and Report brings the document back.
 
 type Message =
   | { id: number; role: 'user'; text: string; file?: string }
@@ -90,7 +93,7 @@ export default function CaseAnalysis({ onOpen }: { onOpen: Open }) {
   const next = (uploaded ? suggestions.after : suggestions.before).filter((key) => !asked.has(answerFor(key)));
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col p-3">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col p-3 @max-lg/window:p-2">
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-xpp-line bg-white">
         <div className="flex shrink-0 border-b border-xpp-line text-[0.8rem]" role="tablist">
           {(
@@ -105,19 +108,19 @@ export default function CaseAnalysis({ onOpen }: { onOpen: Open }) {
               role="tab"
               aria-selected={doc === id}
               onClick={() => setDoc(id)}
-              className={`flex w-56 cursor-pointer items-center gap-2 border-r border-b-2 border-r-xpp-line px-3 py-2.5 ${doc === id ? 'border-b-xpp-blue text-xpp-ink' : 'border-b-transparent text-xpp-text'}`}
+              className={`flex w-56 min-w-0 cursor-pointer items-center gap-2 border-r border-b-2 border-r-xpp-line px-3 py-2.5 @max-lg/window:w-auto @max-lg/window:flex-1 ${doc === id ? 'border-b-xpp-blue text-xpp-ink' : 'border-b-transparent text-xpp-text'}`}
             >
-              {id === 'intelligence' ? <Icon.sparkle className="size-3.5 text-xpp-blue" /> : <Icon.doc className="size-3.5 text-xpp-blue" />}
-              {label}
+              {id === 'intelligence' ? <Icon.sparkle className="size-3.5 shrink-0 text-xpp-blue" /> : <Icon.doc className="size-3.5 shrink-0 text-xpp-blue" />}
+              <span className="truncate">{label}</span>
             </button>
           ))}
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5 border-b border-xpp-line px-2.5 py-1.5 text-[0.8rem] text-xpp-ink">
           <span className="flex items-center gap-1.5 rounded bg-xpp-line/70 px-2.5 py-1 font-medium">
-            <Icon.toc className="size-3.5" /> Table of Contents
+            <Icon.toc className="size-3.5" /> <span className="@max-lg/window:hidden">Table of Contents</span>
           </span>
-          <span className="flex gap-1 text-xpp-text" aria-hidden="true">
+          <span className="flex gap-1 text-xpp-text @max-lg/window:hidden" aria-hidden="true">
             <Icon.link className="size-7 rounded border border-xpp-line p-1.5" />
             <Icon.word className="size-7 rounded border border-xpp-line p-1.5" />
             <Icon.pdf className="size-7 rounded border border-xpp-line p-1.5" />
@@ -129,7 +132,7 @@ export default function CaseAnalysis({ onOpen }: { onOpen: Open }) {
                 type="button"
                 aria-pressed={mode === value}
                 onClick={() => setMode(value)}
-                className="cursor-pointer rounded px-3 py-1 font-medium text-xpp-ink aria-pressed:bg-white aria-pressed:text-xpp-blue"
+                className="cursor-pointer rounded px-3 py-1 font-medium text-xpp-ink @max-lg/window:px-2 aria-pressed:bg-white aria-pressed:text-xpp-blue"
               >
                 {value === 'report' ? 'Report' : value === 'critique' ? 'Critique™' : 'Assistant'}
               </button>
@@ -138,11 +141,11 @@ export default function CaseAnalysis({ onOpen }: { onOpen: Open }) {
         </div>
 
         <div className="flex min-h-0 flex-1">
-          <div className="min-w-0 flex-1 overflow-y-auto bg-xpp-line/70 p-5">
+          <div className={`min-w-0 flex-1 overflow-y-auto bg-xpp-line/70 p-5 @max-lg/window:p-2 ${mode === 'report' ? '' : '@max-3xl/window:hidden'}`}>
             {doc === 'intelligence' ? (
               <Doc report={complaintReport} onOpen={onOpen} zoom={0.95} />
             ) : (
-              <article className="mx-auto max-w-[44rem] rounded-lg bg-white px-[8%] py-10 text-[0.85rem] leading-relaxed text-xpp-text">
+              <article className="mx-auto max-w-[44rem] rounded-lg bg-white px-[8%] py-10 text-[0.85rem] leading-relaxed text-xpp-text @max-lg/window:px-4 @max-lg/window:py-6">
                 <p className="text-center text-[0.75rem] tracking-wide text-xpp-ink uppercase">In the United States District Court for the Eastern District of Texas</p>
                 <p className="mt-4 text-center font-medium text-xpp-ink">Northwind Acoustics LLC v. Kestrel Devices Inc.</p>
                 <p className="text-center">Case No. 2:26-cv-04817 · Complaint for Patent Infringement</p>
@@ -157,7 +160,7 @@ export default function CaseAnalysis({ onOpen }: { onOpen: Open }) {
           </div>
 
           {mode !== 'report' && (
-            <aside className="flex w-[21rem] shrink-0 flex-col border-l border-xpp-line bg-white">
+            <aside className="flex w-[21rem] shrink-0 flex-col border-l border-xpp-line bg-white @max-3xl/window:w-auto @max-3xl/window:min-w-0 @max-3xl/window:flex-1 @max-3xl/window:border-l-0">
               {mode === 'critique' ? (
                 <div className="min-h-0 flex-1 overflow-y-auto p-4 text-[0.85rem]">
                   <p className="mb-3 text-[0.95rem] font-medium text-xpp-ink">Critique™</p>

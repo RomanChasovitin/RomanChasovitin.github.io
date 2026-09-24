@@ -150,8 +150,8 @@ export function Search({ onOpen }: { onOpen: Open }) {
   );
 
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
-      <div className="rounded-lg border border-xpp-line bg-white p-5">
+    <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5 @max-lg/window:px-2 @max-lg/window:py-3">
+      <div className="rounded-lg border border-xpp-line bg-white p-5 @max-lg/window:p-3">
         <div className="mx-auto flex w-fit rounded-md border border-xpp-line p-0.5 text-[0.8rem]" role="tablist">
           {(Object.keys(TABS) as SearchTab[]).map((key) => (
             <button
@@ -163,7 +163,7 @@ export function Search({ onOpen }: { onOpen: Open }) {
                 setTab(key);
                 setValues({});
               }}
-              className="cursor-pointer rounded px-5 py-1 font-medium text-xpp-ink aria-selected:bg-xpp-soft aria-selected:text-xpp-blue"
+              className="cursor-pointer rounded px-5 py-1 font-medium text-xpp-ink @max-lg/window:px-2.5 aria-selected:bg-xpp-soft aria-selected:text-xpp-blue"
             >
               {TABS[key].label}
             </button>
@@ -171,7 +171,7 @@ export function Search({ onOpen }: { onOpen: Open }) {
         </div>
 
         <form
-          className="mt-4 grid grid-cols-2 gap-3"
+          className="mt-4 grid grid-cols-2 gap-3 @max-lg/window:grid-cols-1"
           onSubmit={(event) => {
             event.preventDefault();
             results.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -195,7 +195,7 @@ export function Search({ onOpen }: { onOpen: Open }) {
               </div>
             </fieldset>
           ))}
-          <div className="col-span-2 flex items-center justify-end gap-5 text-[0.8rem]">
+          <div className="col-span-2 flex items-center justify-end gap-5 text-[0.8rem] @max-lg/window:col-span-1">
             <button type="button" onClick={() => setValues({})} className="cursor-pointer text-xpp-ink hover:underline">
               Clear filters
             </button>
@@ -210,7 +210,7 @@ export function Search({ onOpen }: { onOpen: Open }) {
         <p className="mb-2.5 text-[1rem] font-medium text-xpp-ink">
           {config.label} search results <span className="ml-1 text-xpp-muted">{found.length}</span>
         </p>
-        <div className="overflow-hidden rounded-lg border border-xpp-line bg-white text-[0.8rem]">
+        <div className="overflow-x-auto rounded-lg border border-xpp-line bg-white text-[0.8rem]">
           {found.length ? (
             <Table head={config.head} rows={found.map((row) => row.cells)} onRow={(index) => onOpen(found[index].ref)} />
           ) : (
@@ -224,14 +224,14 @@ export function Search({ onOpen }: { onOpen: Open }) {
 
 // Entity pages.
 
-/** A page with its own section menu on the left, as every entity page of the portal has. */
+/** A page with its own section menu on the left, as every entity page of the portal has; on top in a narrow window. */
 function Page({ sections }: { sections: [string, ReactNode][] }) {
   const [active, setActive] = useState(sections[0][0]);
   const scroller = useRef<HTMLDivElement>(null);
   const idOf = (title: string) => `xp-section-${title.toLowerCase().replace(/\W+/g, '-')}`;
   return (
-    <div className="flex min-h-0 flex-1">
-      <nav className="w-36 shrink-0 pt-5 pl-5 text-[0.8rem]">
+    <div className="flex min-h-0 flex-1 @max-lg/window:flex-col">
+      <nav className="w-36 shrink-0 pt-5 pl-5 text-[0.8rem] @max-lg/window:flex @max-lg/window:w-auto @max-lg/window:gap-1 @max-lg/window:overflow-x-auto @max-lg/window:border-b @max-lg/window:border-xpp-line @max-lg/window:bg-white @max-lg/window:px-2 @max-lg/window:pt-0">
         {sections.map(([title]) => (
           <button
             key={title}
@@ -240,14 +240,14 @@ function Page({ sections }: { sections: [string, ReactNode][] }) {
               setActive(title);
               scroller.current?.querySelector(`#${idOf(title)}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }}
-            className={`flex w-full cursor-pointer items-center gap-2 border-b border-xpp-line py-2.5 text-left ${active === title ? 'font-medium text-xpp-ink' : 'text-xpp-muted'}`}
+            className={`flex w-full cursor-pointer items-center gap-2 border-b border-xpp-line py-2.5 text-left @max-lg/window:w-auto @max-lg/window:shrink-0 @max-lg/window:border-0 @max-lg/window:px-2 @max-lg/window:whitespace-nowrap ${active === title ? 'font-medium text-xpp-ink' : 'text-xpp-muted'}`}
           >
             <span className={`size-1.5 rounded-full ${active === title ? 'bg-xpp-blue' : 'bg-transparent'}`} />
             {title}
           </button>
         ))}
       </nav>
-      <div ref={scroller} className="min-w-0 flex-1 overflow-y-auto px-5 pt-4 pb-8 text-[0.85rem]">
+      <div ref={scroller} className="min-w-0 flex-1 overflow-y-auto px-5 pt-4 pb-8 text-[0.85rem] @max-lg/window:px-2 @max-lg/window:pt-3">
         {sections.map(([title, content]) => (
           <section key={title} id={idOf(title)} className="mb-6 scroll-mt-3">
             <h2 className="mb-3 text-[1.05rem] font-medium text-xpp-ink">{title}</h2>
@@ -262,7 +262,7 @@ function Page({ sections }: { sections: [string, ReactNode][] }) {
 function CaseList({ ids, onOpen }: { ids: string[]; onOpen: Open }) {
   if (!ids.length) return <Card>No cases in the record.</Card>;
   return (
-    <div className="overflow-hidden rounded-lg border border-xpp-line bg-white text-[0.8rem]">
+    <div className="overflow-x-auto rounded-lg border border-xpp-line bg-white text-[0.8rem]">
       <Table
         head={['Type', 'Case #', 'Caption', 'Filed', 'Status']}
         rows={ids.map((id) => [<CourtBadge court={cases[id].court} />, cases[id].number, cases[id].caption, <span className="text-xpp-muted">{cases[id].filed}</span>, cases[id].status])}
@@ -276,10 +276,10 @@ function List({ rows }: { rows: [ReactNode, ReactNode, ReactNode?][] }) {
   return (
     <ul className="flex flex-col">
       {rows.map(([name, value, extra], index) => (
-        <li key={index} className="flex items-center gap-4 border-b border-xpp-line py-2 last:border-0">
+        <li key={index} className="flex items-center gap-4 border-b border-xpp-line py-2 last:border-0 @max-lg/window:gap-2">
           <span className="min-w-0 flex-1 truncate">{name}</span>
-          <span className="w-14 text-right text-xpp-text tabular-nums">{value}</span>
-          {extra !== undefined && <span className="flex w-36 items-center justify-end gap-3 text-xpp-text tabular-nums">{extra}</span>}
+          <span className="w-14 text-right text-xpp-text tabular-nums @max-lg/window:w-8">{value}</span>
+          {extra !== undefined && <span className="flex w-36 items-center justify-end gap-3 text-xpp-text tabular-nums @max-lg/window:w-auto @max-lg/window:gap-2">{extra}</span>}
         </li>
       ))}
     </ul>
@@ -292,7 +292,7 @@ function Side({ title, side, court, onOpen }: { title: string; side: Case['plain
   return (
     <Card title={title}>
       <p className="text-[0.75rem] font-medium text-xpp-muted">Party</p>
-      <div className="mt-1.5 flex items-center gap-2">
+      <div className="mt-1.5 flex flex-wrap items-center gap-2">
         <EntityLink to={{ kind: 'party', id: side.party }} onOpen={onOpen}>
           {party.name}
         </EntityLink>
@@ -302,14 +302,14 @@ function Side({ title, side, court, onOpen }: { title: string; side: Case['plain
         </span>
       </div>
       <p className="mt-4 text-[0.75rem] font-medium text-xpp-muted">Attorney</p>
-      <div className="mt-1.5 flex items-center">
+      <div className="mt-1.5 flex flex-wrap items-center gap-x-2">
         <EntityLink to={{ kind: 'firm', id: side.firm }} onOpen={onOpen}>
           <b className="font-medium">{firms[side.firm].name}</b>
         </EntityLink>
         <span className="ml-auto text-[0.75rem] text-xpp-text">{firms[side.firm].winRate}% win rate</span>
       </div>
       {side.attorneys.map((id) => (
-        <div key={id} className="mt-1.5 flex items-center pl-4">
+        <div key={id} className="mt-1.5 flex flex-wrap items-center gap-x-2 pl-4">
           <EntityLink to={{ kind: 'attorney', id }} onOpen={onOpen}>
             {attorneys[id].name}
           </EntityLink>
@@ -338,7 +338,7 @@ function CasePage({ id, onOpen }: { id: string; onOpen: Open }) {
       sections={[
         [
           'General',
-          <div className="grid grid-cols-[1.4fr_1fr] gap-3">
+          <div className="grid grid-cols-[1.4fr_1fr] gap-3 @max-lg/window:grid-cols-1">
             <Card title="General">
               <Stats
                 items={[
@@ -367,7 +367,7 @@ function CasePage({ id, onOpen }: { id: string; onOpen: Open }) {
         ],
         [
           'Parties',
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 @max-lg/window:grid-cols-1">
             <Side title={ptab ? 'Petitioner' : 'Plaintiff'} side={item.plaintiff} court={item.court} onOpen={onOpen} />
             <Side title={ptab ? 'Patent Owner' : 'Defendant'} side={item.defendant} court={item.court} onOpen={onOpen} />
           </div>,
@@ -375,7 +375,7 @@ function CasePage({ id, onOpen }: { id: string; onOpen: Open }) {
         [
           'Patents',
           item.patents.length ? (
-            <div className="overflow-hidden rounded-lg border border-xpp-line bg-white text-[0.8rem]">
+            <div className="overflow-x-auto rounded-lg border border-xpp-line bg-white text-[0.8rem]">
               <Table
                 head={['Patent #', 'Title', 'Art Unit', 'Expiration']}
                 rows={item.patents.map((patent) => [patents[patent].number, patents[patent].title, patents[patent].artUnit.split(' ')[0], <span className="text-xpp-muted">{patents[patent].expires}</span>])}
@@ -460,7 +460,7 @@ function PartyPage({ id, onOpen }: { id: string; onOpen: Open }) {
       sections={[
         [
           'General',
-          <div className="grid grid-cols-[1.6fr_1fr] gap-3">
+          <div className="grid grid-cols-[1.6fr_1fr] gap-3 @max-lg/window:grid-cols-1">
             <Card title="General">
               <Stats
                 items={[
@@ -640,7 +640,7 @@ function ExpertPage({ id, onOpen }: { id: string; onOpen: Open }) {
                   ['Survival rate', expert.survival],
                 ]}
               />
-              <div className="mt-4 grid grid-cols-3 gap-6 border-t border-xpp-line pt-4">
+              <div className="mt-4 grid grid-cols-3 gap-6 border-t border-xpp-line pt-4 @max-lg/window:grid-cols-1 @max-lg/window:gap-3">
                 <div>
                   <p className="text-[0.75rem] font-medium text-xpp-muted">Credentials</p>
                   {expert.credentials.map(([label, type]) => (
@@ -680,7 +680,7 @@ function ExpertPage({ id, onOpen }: { id: string; onOpen: Open }) {
         ],
         [
           'Analytics',
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 @max-lg/window:grid-cols-1">
             <Card title="On Behalf Of">
               <List rows={appearances(expert.onBehalf)} />
             </Card>
