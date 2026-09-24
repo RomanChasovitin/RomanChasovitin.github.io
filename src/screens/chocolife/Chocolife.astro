@@ -2,8 +2,9 @@
 // Chocolife and BeSmart, the product: what a coupon goes through, from the deal feed to the venue. Laid out
 // like Mad Devs: the story on the left, a working browser window on the right.
 //
-// The whole screen wears the brand picked over the window: Chocolife in light pink and white, or BeSmart in
-// the blue and white of its logo. The shop sets `data-brand` on the screen, and the backdrops cross-fade.
+// The whole screen wears the brand picked over the window: one dot grid over light pink and white for
+// Chocolife, over light blue and white for BeSmart. The shop sets `data-brand` on the screen, and the
+// backdrops cross-fade.
 import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
 import Shop from './Shop';
@@ -44,12 +45,10 @@ import Shop from './Shop';
   }
 
   .chocolife[data-brand='besmart'] {
-    --cl-bg: #1a6bc6;
-    --cl-heading: #fff;
-    --cl-body: rgb(255 255 255 / 0.9);
-    --cl-muted: rgb(255 255 255 / 0.7);
-    --nav-ink: #fff;
-    --nav-paper: #1a6bc6;
+    --cl-bg: #f1f7ff;
+    --cl-heading: #1a6bc6;
+    --cl-muted: #74818f;
+    --nav-ink: #0f3d73;
   }
 
   /* Fixed, so a stacked screen scrolls over it. */
@@ -68,13 +67,13 @@ import Shop from './Shop';
       linear-gradient(135deg, #ffe4ec 0%, #fff 60%);
   }
 
-  /* BeSmart: the blue of its logo, a white light from a corner, and fine white diagonal lines. */
+  /* BeSmart: the same dot grid, in the blue of its logo, over light blue running into white. */
   .besmart {
     opacity: 0;
     background:
-      repeating-linear-gradient(135deg, rgb(255 255 255 / 0.06) 0 1px, transparent 1px 22px),
-      radial-gradient(44vmax 44vmax at 100% 0%, rgb(255 255 255 / 0.28), transparent 70%),
-      linear-gradient(160deg, #1a6bc6 0%, #1560b4 100%);
+      radial-gradient(rgb(26 107 198 / 0.12) 1.2px, transparent 1.5px) 0 0 / 22px 22px,
+      radial-gradient(48vmax 48vmax at 0% 0%, rgb(170 208 250 / 0.75), transparent 70%),
+      linear-gradient(135deg, #deeeff 0%, #fff 60%);
   }
 
   .chocolife[data-brand='besmart'] {
