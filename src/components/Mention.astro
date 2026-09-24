@@ -38,6 +38,8 @@ const images: Partial<Record<IconName, string>> = {
 };
 
 const brand = icon in brandIcons ? brandIcons[icon as keyof typeof brandIcons] : null;
+// Black marks (Angular, GitHub, Next.js) take the text color, so they stay visible on a dark background.
+const black = (hex: string) => [0, 2, 4].every((index) => parseInt(hex.slice(index, index + 2), 16) < 0x40);
 const image = images[icon];
 const external = /^https?:/.test(href);
 ---
@@ -46,7 +48,7 @@ const external = /^https?:/.test(href);
   {
     brand ? (
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d={brand.path} fill={`#${brand.hex}`} />
+        <path d={brand.path} fill={black(brand.hex) ? 'currentColor' : `#${brand.hex}`} />
       </svg>
     ) : image ? (
       <img src={image} alt="" width="64" height="64" />
