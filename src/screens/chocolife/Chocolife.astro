@@ -1,14 +1,20 @@
 ---
 // Chocolife and BeSmart, the product: what a coupon goes through, from the deal feed to the venue. Laid out
 // like Mad Devs: the story on the left, a working browser window on the right.
+//
+// The whole screen wears the brand picked over the window: warm yellow Chocolife, or BeSmart in the deep blue
+// and yellow of its logo. The shop sets `data-brand` on the screen, and the backdrops cross-fade.
 import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
 import Shop from './Shop';
 ---
 
-<section id="chocolife" data-screen class="overflow-hidden bg-cl-grey font-roboto text-cl-ink">
+<section id="chocolife" data-screen data-brand="chocolife" class="chocolife overflow-hidden bg-(--cl-bg) font-roboto text-(--cl-body)">
+  <div class="backdrop choco" aria-hidden="true"></div>
+  <div class="backdrop besmart" aria-hidden="true"></div>
+
   <div class="split">
-    <ProjectIntro id="chocolife" slogan="Half price on the best of the city" accent="text-cl-navy" also="/icons/besmart.svg" body="text-cl-ink" muted="text-cl-muted" dim="text-cl-muted">
+    <ProjectIntro id="chocolife" slogan="Half price on the best of the city" accent="text-(--cl-heading)" also="/icons/besmart.svg" body="text-(--cl-body)" muted="text-(--cl-muted)" dim="text-(--cl-muted)">
       Chocolife sells coupons for restaurants, spas, aquaparks and trips at up to half price: buy on the site, get
       the coupon by email, show its code at the venue. BeSmart did the same in Kazakhstan and Kyrgyzstan. My first
       job: Chocolife on Angular 2+, BeSmart on React, MobX and GraphQL.
@@ -23,3 +29,61 @@ import Shop from './Shop';
     </div>
   </div>
 </section>
+
+<style>
+  .chocolife {
+    --cl-bg: #fbf4d9;
+    --cl-heading: var(--color-cl-navy);
+    --cl-body: var(--color-cl-ink);
+    --cl-muted: #7d7766;
+    --nav-ink: #1d2352;
+    --nav-paper: #fff;
+    transition:
+      background-color 500ms ease,
+      color 500ms ease;
+  }
+
+  .chocolife[data-brand='besmart'] {
+    --cl-bg: #0a2c52;
+    --cl-heading: #eab825;
+    --cl-body: rgb(255 255 255 / 0.84);
+    --cl-muted: rgb(255 255 255 / 0.6);
+    --nav-ink: #fff;
+    --nav-paper: #0a2c52;
+  }
+
+  /* Fixed, so a stacked screen scrolls over it. */
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    transition: opacity 500ms ease;
+  }
+
+  /* Chocolife: the yellow of the brand spilled from a corner, a navy glow, and a coupon-like dot grid. */
+  .choco {
+    background:
+      radial-gradient(42vmax 42vmax at 4% -6%, rgb(247 218 59 / 0.8), transparent 70%),
+      radial-gradient(36vmax 36vmax at 104% 106%, rgb(46 58 130 / 0.16), transparent 70%),
+      radial-gradient(rgb(46 58 130 / 0.1) 1.2px, transparent 1.5px) 0 0 / 22px 22px;
+  }
+
+  /* BeSmart: deep blue with the yellow of the bulb glowing from a corner, and fine diagonal lines. */
+  .besmart {
+    opacity: 0;
+    background:
+      radial-gradient(38vmax 38vmax at 96% -4%, rgb(234 184 37 / 0.34), transparent 70%),
+      radial-gradient(48vmax 48vmax at -6% 106%, rgb(16 71 128 / 0.95), transparent 70%),
+      repeating-linear-gradient(135deg, rgb(255 255 255 / 0.035) 0 1px, transparent 1px 22px);
+  }
+
+  .chocolife[data-brand='besmart'] {
+    & .choco {
+      opacity: 0;
+    }
+
+    & .besmart {
+      opacity: 1;
+    }
+  }
+</style>
