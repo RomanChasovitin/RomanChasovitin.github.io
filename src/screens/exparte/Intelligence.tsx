@@ -174,10 +174,10 @@ export default function Intelligence({ startedAt, onGenerate, onOpen }: Props) {
             <Icon.word className="size-7 rounded border border-xpp-line p-1.5" />
             <Icon.pdf className="size-7 rounded border border-xpp-line p-1.5" />
           </span>
-          <span className="ml-auto flex items-center gap-2 text-[0.75rem] text-xpp-text">
+          <button type="button" onClick={() => onOpen({ kind: 'engineer', id: 'roman' })} className="ml-auto flex cursor-pointer items-center gap-2 text-[0.75rem] text-xpp-text hover:text-xpp-ink">
             Requested by
             <span className="flex size-6 items-center justify-center rounded-full bg-xpp-soft text-[0.65rem] font-medium text-xpp-blue">RC</span>
-          </span>
+          </button>
           <span className="ml-2 flex rounded-md bg-xpp-line/70 p-0.5">
             {(['report', 'critique'] as const).map((value) => (
               <button

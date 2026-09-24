@@ -4,9 +4,10 @@
 // and real people.
 //
 // Text in documents and answers links with [[kind:id|Label]] and cites a context item with [n].
+import { projects } from '../../content/projects';
 
 export type Court = 'DCT' | 'PTAB' | 'CAFC' | 'ITC';
-export type Kind = 'case' | 'patent' | 'party' | 'firm' | 'attorney' | 'judge' | 'expert';
+export type Kind = 'case' | 'patent' | 'party' | 'firm' | 'attorney' | 'judge' | 'expert' | 'engineer';
 export type Ref = { kind: Kind; id: string };
 export type Trend = 'up' | 'down' | 'flat';
 export type Rating = { level: string; grade: string; trend: Trend };
@@ -554,6 +555,8 @@ export const name = (ref: Ref): string => {
       return judges[ref.id].name;
     case 'expert':
       return experts[ref.id].name;
+    case 'engineer':
+      return engineer.name;
   }
 };
 
@@ -582,6 +585,29 @@ export function casesOf(ref: Ref): string[] {
   const date = (value: string) => value.slice(6) + value.slice(0, 5);
   return ids.sort((a, b) => date(cases[b].filed).localeCompare(date(cases[a].filed)));
 }
+
+// The engineer behind the portal is in the record like everyone else: a row of the expert search, a page
+// with a report, and an answer of the assistant. Only facts go here: the role, the dates, what I build.
+
+const project = projects.find((item) => item.id === 'exparte')!;
+const role = project.roles[0];
+
+export const engineer = {
+  name: 'Roman Chasovitin',
+  role: role.title,
+  since: new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' }).format(new Date(`${role.period.start}-01T00:00:00Z`)),
+  through: 'Mad Devs',
+  scope: 'The whole front end and the BFF',
+  stack: project.stack,
+};
+
+/** What I build in the portal, and the tab where each piece is on this screen. */
+export const built: { title: string; body: string; workflow?: 'intelligence' | 'search' | 'assistant' }[] = [
+  { title: 'Patent intelligence', body: 'The report screen: three reports written at once, their triage and reviewer stages, Report and Critique™.', workflow: 'intelligence' },
+  { title: 'Search and entity pages', body: 'Advanced search, and a page for every case, patent, party, firm, attorney, judge and expert.', workflow: 'search' },
+  { title: 'Assistant', body: 'The chat on a case, uploads of your own documents, and the context it shows for every answer.', workflow: 'assistant' },
+  { title: 'The BFF', body: 'The back end behind these screens: a BFF on NestJS, with Databricks, Azure databases and sign-in, and n8n.' },
+];
 
 // Documents: the intelligence reports and the complaint.
 
@@ -973,6 +999,61 @@ export const complaintReport: Report = {
   timing: { draft: 0, triage: 0, review: 0, revise: 0 },
 };
 
+/** My curriculum vitae, printed the way the portal prints a report. */
+export const cv: Report = {
+  id: 'cv',
+  tab: 'Curriculum Vitae',
+  title: 'Engineer Profile',
+  items: [],
+  sections: [
+    {
+      id: 'summary',
+      heading: 'I. Summary',
+      blocks: [
+        {
+          kind: 'fields',
+          label: engineer.name,
+          rows: [
+            ['Position', engineer.role],
+            ['Since', engineer.since],
+            ['Through', engineer.through],
+            ['Scope', 'The whole front end of the portal, and the BFF on NestJS behind it'],
+          ],
+        },
+      ],
+    },
+    {
+      id: 'work',
+      heading: 'II. What I Build',
+      blocks: [
+        ...built.map((item): Block => ({ kind: 'text', label: item.title, text: item.body })),
+        { kind: 'text', label: 'The business side', text: 'I work deep in the business side of patent litigation: how judges, firms, experts and patents shape the result of a case.' },
+      ],
+    },
+    {
+      id: 'stack',
+      heading: 'III. Stack',
+      blocks: [
+        {
+          kind: 'table',
+          title: 'Stack',
+          head: ['Area', 'Technologies'],
+          rows: [
+            ['Front end', 'Next.js, TypeScript'],
+            ['BFF', 'NestJS, TypeScript'],
+            ['Data and cloud', 'Databricks, Azure'],
+            ['Workflows', 'n8n'],
+            ['Also', 'Python, Go'],
+          ],
+        },
+      ],
+    },
+  ],
+  triage: [],
+  reviews: [],
+  timing: { draft: 0, triage: 0, review: 0, revise: 0 },
+};
+
 /** The complaint itself, a few paragraphs of it. */
 export const complaint: [number, string][] = [
   [1, 'Plaintiff Northwind Acoustics LLC brings this action for patent infringement against Defendant Kestrel Devices Inc.'],
@@ -1060,6 +1141,17 @@ export const answers: Record<string, { before: Answer; after?: Answer }> = {
       text: '10/13/26: Kestrel must answer under the stipulation [1]. 12/23/26: joint case management statement [1]. 01/06/27: initial case management conference [1]. Infringement contentions are due shortly before that conference under the local patent rules [3], and [[judge:thorne|Judge Thorne]] usually holds the Markman hearing about 14 months after it [2].',
     },
   },
+  builder: {
+    before: {
+      question: 'Who built this portal?',
+      context: [
+        { label: `Engineer profile: ${engineer.name}`, tokens: 900, kept: true, why: 'The person behind the portal' },
+        { label: 'Portal release notes', tokens: 3100, kept: true, why: 'What each screen does' },
+        { label: 'Complaint, ¶¶ 1–88', tokens: 9800, kept: false, why: 'About the case, not the portal' },
+      ],
+      text: `[[engineer:roman|${engineer.name}]] builds the whole front end of this portal, every screen in this window, and the BFF on NestJS behind it [1]. That covers the three reports with their triage and reviewers, search with every entity page, and this chat with the context you see above [2]. He has been the ${engineer.role.toLowerCase()} on Ex Parte since ${engineer.since}, through ${engineer.through} [1].`,
+    },
+  },
   experts: {
     before: {
       question: 'Which experts could we face?',
@@ -1075,12 +1167,13 @@ export const answers: Record<string, { before: Answer; after?: Answer }> = {
 };
 
 export const suggestions = {
-  before: ['answered', 'claims', 'deadlines'],
-  after: ['answered', 'experts', 'claims'],
+  before: ['answered', 'claims', 'deadlines', 'builder'],
+  after: ['answered', 'experts', 'claims', 'builder'],
 };
 
 /** Free text finds the closest answer by its words. */
 export function route(question: string): string {
+  if (/\bbuil|who made|develop|engineer|roman/i.test(question)) return 'builder';
   if (/answer|respond|reply|filed/i.test(question)) return 'answered';
   if (/deadline|date|when|schedul|markman/i.test(question)) return 'deadlines';
   if (/expert|witness|declar/i.test(question)) return 'experts';
