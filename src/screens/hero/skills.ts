@@ -10,16 +10,20 @@ export type Step =
   | { kind: 'think'; label: string; ms: number }
   | { kind: 'tool'; call: string; result: string }
   | { kind: 'out'; lines: Line[] }
-  /** Opens the screen of a project, the way its button under the terminal does. */
-  | { kind: 'open'; id: ProjectId };
+  /** Fires an event on document: `screen:open` opens a project screen, `scheme:set` switches the hero theme. */
+  | { kind: 'dispatch'; event: 'screen:open' | 'scheme:set'; detail: Record<string, string> };
 
+// Colors come from the hero, which sets them per theme: the brand colors are too dark on a dark background.
 export const BRAND: Record<ProjectId, string> = {
-  exparte: '#0061ff',
-  maddevs: '#ec1c24',
-  bilebile: '#e63445',
-  teacherly: '#4e409b',
-  chocolife: '#2e3a82',
+  exparte: 'var(--brand-exparte)',
+  maddevs: 'var(--brand-maddevs)',
+  bilebile: 'var(--brand-bilebile)',
+  teacherly: 'var(--brand-teacherly)',
+  chocolife: 'var(--brand-chocolife)',
 };
+const OK = 'var(--ok)';
+const WARN = 'var(--warn)';
+const BAD = 'var(--bad)';
 
 export const skills = [
   { name: 'projects', usage: '/projects', summary: 'The products I have worked on' },
@@ -105,7 +109,7 @@ function open(input: string): Step[] {
   return [
     { kind: 'think', label: `Opening ${project(id).name}`, ms: 500 },
     { kind: 'tool', call: `Open #${id}`, result: `${project(id).name}, ${span(project(id))}` },
-    { kind: 'open', id },
+    { kind: 'dispatch', event: 'screen:open', detail: { id } },
   ];
 }
 
@@ -239,10 +243,10 @@ function match(input: string): Step[] {
     {
       kind: 'out',
       lines: [
-        [text('Match ', { bold: true }), text(asked.length ? `${score}%` : 'n/a', { bold: true, color: score >= 70 ? '#0a7d3b' : score >= 40 ? '#9a6700' : '#b42318' })],
+        [text('Match ', { bold: true }), text(asked.length ? `${score}%` : 'n/a', { bold: true, color: score >= 70 ? OK : score >= 40 ? WARN : BAD })],
         blank,
-        ...matched.map((label): Line => [text('  ✓ ', { color: '#0a7d3b' }), text(label.padEnd(16)), text(where(label), { dim: true })]),
-        ...gaps.map((label): Line => [text('  ✗ ', { color: '#b42318' }), text(label.padEnd(16)), text('not in my record yet', { dim: true })]),
+        ...matched.map((label): Line => [text('  ✓ ', { color: OK }), text(label.padEnd(16)), text(where(label), { dim: true })]),
+        ...gaps.map((label): Line => [text('  ✗ ', { color: BAD }), text(label.padEnd(16)), text('not in my record yet', { dim: true })]),
         ...(notes.length ? [blank, ...notes.map((note) => plain(note))] : []),
         blank,
         plain(verdict),
@@ -298,6 +302,17 @@ function review(input: string): Step[] {
   ];
 }
 
+// Not in the list of skills: the button in the corner does the same. /help shows it.
+function theme(input: string): Step[] {
+  const current = document.getElementById('intro')?.dataset.scheme;
+  const asked = input.trim().toLowerCase();
+  const scheme = asked === 'light' || asked === 'dark' ? asked : current === 'dark' ? 'light' : 'dark';
+  return [
+    { kind: 'tool', call: `Switch the hero to the ${scheme} theme`, result: 'Saved for the next visit' },
+    { kind: 'dispatch', event: 'scheme:set', detail: { scheme } },
+  ];
+}
+
 export function run(command: string): Step[] | null {
   const [head] = command.trim().split(/\s+/);
   const argument = command.trim().slice(head.length).trim();
@@ -316,6 +331,8 @@ export function run(command: string): Step[] | null {
       return match(argument);
     case '/review':
       return review(argument);
+    case '/theme':
+      return theme(argument);
     default:
       // Naming a project without a skill opens it too.
       return !head.startsWith('/') && find(command) ? open(command) : null;

@@ -4,13 +4,14 @@ import { run, skills, type Line, type Step } from './skills';
 // A terminal window with an agent that answers from the site's own data. Enter runs a command,
 // Shift+Enter adds a line (for pasted job posts and code), the up arrow brings back the last command.
 
-const GREEN = '#0a7d3b';
-const DIM = '#6e6e6e';
+// Theme colors, set by the hero.
+const GREEN = 'var(--ok)';
+const DIM = 'var(--dim)';
 const SPINNER = ['·', '✢', '✳', '✶', '✻', '✽'];
 const TOOL_MS = 380;
 const LINE_MS = 28;
-/** A beat after the tool line, so the visitor sees what the agent does before the screen moves. */
-const OPEN_MS = 450;
+/** A beat after the tool line, so the visitor sees what the agent does before the page changes. */
+const DISPATCH_MS = 450;
 
 type Entry = {
   id: number;
@@ -51,6 +52,7 @@ function help(): Step[] {
       kind: 'out',
       lines: [
         ...skills.map((skill): Line => [{ text: skill.usage.padEnd(28), bold: true }, { text: skill.summary, dim: true }]),
+        [{ text: '/theme [light|dark]'.padEnd(28), bold: true }, { text: 'Switch the theme of this page', dim: true }],
         [{ text: '/clear'.padEnd(28), bold: true }, { text: 'Clear the screen', dim: true }],
       ],
     },
@@ -100,13 +102,13 @@ export default function Terminal() {
           update({ shown });
           next();
         }, TOOL_MS);
-      } else if (step.kind === 'open') {
+      } else if (step.kind === 'dispatch') {
         setTimeout(() => {
-          document.dispatchEvent(new CustomEvent('screen:open', { detail: { id: step.id } }));
+          document.dispatchEvent(new CustomEvent(step.event, { detail: step.detail }));
           shown++;
           update({ shown });
           next();
-        }, OPEN_MS);
+        }, DISPATCH_MS);
       } else {
         let lines = 0;
         const stream = () => {
@@ -183,8 +185,8 @@ export default function Terminal() {
   }
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-black/10 bg-white font-jetbrains text-[0.9rem] leading-[1.5] text-black shadow-[0_30px_70px_-35px_rgb(0_0_0/0.35)]">
-      <div className="relative flex h-9 shrink-0 items-center border-b border-black/10 bg-[#f6f6f6] px-4" aria-hidden="true">
+    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-(--rule) bg-(--window) font-jetbrains text-[0.9rem] leading-[1.5] text-(--ink) shadow-[0_30px_70px_-35px_rgb(0_0_0/0.35)] transition-colors duration-300">
+      <div className="relative flex h-9 shrink-0 items-center border-b border-(--rule) bg-(--bar) px-4 transition-colors duration-300" aria-hidden="true">
         <span className="flex gap-2">
           <i className="size-3 rounded-full bg-[#ff5f57]" />
           <i className="size-3 rounded-full bg-[#febc2e]" />
@@ -196,7 +198,7 @@ export default function Terminal() {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col px-6 pt-5 pb-4">
-        <div className="border-b border-black/10 pb-5">
+        <div className="border-b border-(--rule) pb-5">
           <p>
             <span className="font-bold">✻ roman</span>
             <span style={{ color: DIM }}> An agent that knows my projects, my stack and my history. Seven skills:</span>
@@ -227,7 +229,7 @@ export default function Terminal() {
                     </p>
                   );
                 }
-                if (step.kind === 'open') return null;
+                if (step.kind === 'dispatch') return null;
                 if (step.kind === 'tool') {
                   if (current) return null;
                   return (
@@ -254,7 +256,7 @@ export default function Terminal() {
         </div>
 
         <form
-          className="flex items-start gap-2 border-t border-black/10 pt-4"
+          className="flex items-start gap-2 border-t border-(--rule) pt-4"
           onSubmit={(event) => {
             event.preventDefault();
             submit(draft);
@@ -269,7 +271,7 @@ export default function Terminal() {
             onKeyDown={onKeyDown}
             placeholder={busy ? 'Working…' : 'Type a skill, for example /stack. Shift+Enter for a new line.'}
             aria-label="Command"
-            className="min-w-0 flex-1 resize-none bg-transparent outline-none placeholder:text-black/35"
+            className="min-w-0 flex-1 resize-none bg-transparent outline-none placeholder:text-(--placeholder)"
             spellCheck={false}
           />
         </form>
