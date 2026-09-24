@@ -1,9 +1,10 @@
 ---
-// Mad Devs, after the old maddevs.io hero: the company on the left, a live Slack window on the right.
+// Mad Devs, after the old maddevs.io hero: the company on the left, and on the right a browser with the team
+// Slack and my page in enji.ai.
 import BackToIntro from '../../components/BackToIntro.astro';
 import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
-import Slack from './Slack';
+import Workspace from './Workspace';
 ---
 
 <section id="maddevs" data-screen class="overflow-hidden bg-md-ink font-inter text-white">
@@ -12,19 +13,13 @@ import Slack from './Slack';
   <div class="flex h-full items-center gap-[4vw] px-[5vw]">
     <ProjectIntro id="maddevs" slogan="My home company since 2018" body="text-md-grey" muted="text-md-grey" dim="text-md-grey">
       I lead the internal team behind maddevs.io and a few internal tools, lead the small ITC team and mentor
-      interns. Client work came through Mad Devs too: Teacherly, Bile-Bile and Ex Parte. Before that, part-time, the
-      landing page and front end of the Elcart mobile bank.
+      interns, and I helped build the first employee interface of enji.ai. Client work came through Mad Devs too:
+      Teacherly, Bile-Bile and Ex Parte.
     </ProjectIntro>
 
     <div class="stage">
-      <div class="mac dark">
-        <div class="mac-bar" aria-hidden="true">
-          <span class="mac-lights"><i></i><i></i><i></i></span>
-          <span class="mac-title">Slack — Mad Devs</span>
-        </div>
-        <div class="min-h-0 flex-1">
-          <Slack client:idle />
-        </div>
+      <div class="stage-window">
+        <Workspace client:idle />
       </div>
       <ProjectNav current="maddevs" dark />
     </div>
