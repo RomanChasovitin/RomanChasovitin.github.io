@@ -2,12 +2,16 @@
 // Ex Parte, laid out like Mad Devs: the product in a few lines on the left, in the dark brand of exparte.com,
 // and the portal on the right in its own light look. What I build there, the portal tells itself: my row in
 // the expert search, my page with a CV printed as a report, and an answer of the assistant.
+//
+// The screen itself is pleading paper, the paper of court filings: ruled lines, a double rule down the left
+// margin and the lines numbered along it.
 import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
 import Portal from './Portal';
 ---
 
 <section id="exparte" data-screen class="overflow-hidden bg-xp-void font-geist text-white">
+  <div class="pleading" aria-hidden="true"><ol>{Array.from({ length: 40 }, (_, index) => <li>{index + 1}</li>)}</ol></div>
   <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_60%_at_72%_50%,rgb(0_97_255/0.16),transparent_70%)]"></div>
   <div class="split relative [--split-gap:3.5vw]">
     <ProjectIntro id="exparte" slogan="Litigation intelligence for patent lawyers" body="text-xp-mist" muted="text-xp-mist" dim="text-xp-slate">
@@ -24,3 +28,47 @@ import Portal from './Portal';
     </div>
   </div>
 </section>
+
+<style>
+  /* Fixed, so a stacked screen scrolls over it. One ruled line every 2rem, and the numbers sit on them. */
+  .pleading {
+    --line: 2rem;
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(180deg, transparent 0 calc(var(--line) - 1px), rgb(255 255 255 / 0.045) calc(var(--line) - 1px) var(--line));
+    pointer-events: none;
+
+    /* The double rule of the left margin. */
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 2.9rem;
+      width: 4px;
+      border-inline: 1px solid rgb(91 140 255 / 0.28);
+    }
+
+    & ol {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2.2rem;
+      color: rgb(143 160 199 / 0.4);
+      font-family: var(--font-jetbrains);
+      font-size: 0.65rem;
+      line-height: var(--line);
+      text-align: right;
+    }
+  }
+
+  /* On a phone the text runs across the margin, so only the ruled lines stay. */
+  @media (width < 1024px) {
+    .pleading {
+      &::before,
+      & ol {
+        display: none;
+      }
+    }
+  }
+</style>
