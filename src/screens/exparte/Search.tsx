@@ -1,8 +1,11 @@
 import { useRef, useState, type ReactNode } from 'react';
 import {
   attorneys,
+  built,
   cases,
   casesOf,
+  cv,
+  engineer,
   experts,
   firms,
   judges,
@@ -12,13 +15,14 @@ import {
   type Case,
   type Ref,
 } from './data';
-import { Bar, Card, CourtBadge, EntityLink, RatingCells, Stats, Table, type Open } from './ui';
+import { Bar, Card, CourtBadge, Doc, EntityLink, RatingCells, Stats, Table, type Open } from './ui';
 
 // Search: the advanced search of the portal, and a page for every kind of entity in the record. Every name
 // on a page links to its own page, so a visitor can walk from a case to its judge, from a firm to the
 // experts it hires, and back.
 
 export type SearchTab = 'case' | 'patent' | 'attorney' | 'expert';
+export type Workflow = 'intelligence' | 'search' | 'assistant';
 
 type Field = { key: string; label: string; placeholder: string };
 type Row = { ref: Ref; cells: ReactNode[]; haystack: Record<string, string> };
@@ -29,19 +33,27 @@ const partyOf = (id: string) => parties[id].name;
 function rows(tab: SearchTab): Row[] {
   switch (tab) {
     case 'expert':
-      return Object.entries(experts).map(([id, expert]) => ({
-        ref: { kind: 'expert', id },
-        cells: [expert.name, expert.focus, expert.cases, `${expert.challenger}%`, `${expert.challenges.challenged} / ${expert.challenges.excluded}`],
-        haystack: {
-          name: expert.name,
-          focus: [expert.focus, ...expert.tags].join(' '),
-          party: [...expert.onBehalf, ...expert.against].map((entry) => partyOf(entry.party)).join(' '),
-          firm: Object.values(firms)
-            .filter((firm) => firm.experts.some((entry) => entry.expert === id))
-            .map((firm) => firm.name)
-            .join(' '),
+      // I come first: the engineer of the portal, found the way it finds everyone else.
+      return [
+        {
+          ref: { kind: 'engineer', id: 'roman' },
+          cells: [<b className="font-medium">{engineer.name}</b>, 'The portal itself: front end and BFF', '—', '—', '—'],
+          haystack: { name: engineer.name, focus: ['portal', 'front end', 'BFF', ...engineer.stack].join(' '), party: '', firm: engineer.through },
         },
-      }));
+        ...Object.entries(experts).map(([id, expert]): Row => ({
+          ref: { kind: 'expert', id },
+          cells: [expert.name, expert.focus, expert.cases, `${expert.challenger}%`, `${expert.challenges.challenged} / ${expert.challenges.excluded}`],
+          haystack: {
+            name: expert.name,
+            focus: [expert.focus, ...expert.tags].join(' '),
+            party: [...expert.onBehalf, ...expert.against].map((entry) => partyOf(entry.party)).join(' '),
+            firm: Object.values(firms)
+              .filter((firm) => firm.experts.some((entry) => entry.expert === id))
+              .map((firm) => firm.name)
+              .join(' '),
+          },
+        })),
+      ];
     case 'case':
       return Object.entries(cases).map(([id, item]) => ({
         ref: { kind: 'case', id },
@@ -683,9 +695,64 @@ function ExpertPage({ id, onOpen }: { id: string; onOpen: Open }) {
   );
 }
 
-export function EntityPage({ entity, onOpen }: { entity: Ref; onOpen: Open }) {
+/** Me, as the portal would show me: what I do here, what I built with links to it, and my CV as a report. */
+function EngineerPage({ onOpen, onWorkflow }: { onOpen: Open; onWorkflow: (workflow: Workflow) => void }) {
+  return (
+    <Page
+      sections={[
+        [
+          'General',
+          <Card title="General">
+            <Stats
+              cols={4}
+              items={[
+                ['Role', engineer.role],
+                ['Since', engineer.since],
+                ['Through', engineer.through],
+                ['Scope', engineer.scope],
+              ]}
+            />
+            <p className="mt-4 text-[0.75rem] font-medium text-xpp-muted">Technical Focus</p>
+            <p className="mt-1.5 flex flex-wrap gap-1.5">
+              {engineer.stack.map((tag) => (
+                <span key={tag} className="rounded bg-xpp-page px-2 py-0.5 text-[0.75rem] font-medium text-xpp-ink">
+                  {tag}
+                </span>
+              ))}
+            </p>
+          </Card>,
+        ],
+        [
+          'Built',
+          <Card>
+            <ul className="flex flex-col">
+              {built.map((item) => (
+                <li key={item.title} className="flex items-start gap-4 border-b border-xpp-line py-2.5 last:border-0">
+                  <span className="min-w-0 flex-1">
+                    <b className="font-medium text-xpp-ink">{item.title}</b>
+                    <span className="mt-0.5 block text-xpp-text">{item.body}</span>
+                  </span>
+                  {item.workflow && (
+                    <button type="button" onClick={() => onWorkflow(item.workflow!)} className="shrink-0 cursor-pointer rounded-md bg-xpp-soft px-3 py-1 text-[0.8rem] font-medium text-xpp-blue hover:bg-xpp-ptab/60">
+                      Open
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Card>,
+        ],
+        ['Curriculum Vitae', <Doc report={cv} onOpen={onOpen} zoom={0.92} />],
+      ]}
+    />
+  );
+}
+
+export function EntityPage({ entity, onOpen, onWorkflow }: { entity: Ref; onOpen: Open; onWorkflow: (workflow: Workflow) => void }) {
   const props = { id: entity.id, onOpen };
   switch (entity.kind) {
+    case 'engineer':
+      return <EngineerPage onOpen={onOpen} onWorkflow={onWorkflow} />;
     case 'case':
       return <CasePage {...props} />;
     case 'patent':
