@@ -1,14 +1,17 @@
-// The five skills of the "More about me" agent. Each one turns the site's own data into an agent-style run:
-// a short think, a few tool calls with their results, then the answer line by line. No network, no model.
+// The skills of the agent in the hero. Each one turns the site's own data into an agent-style run: a short
+// think, a few tool calls with their results, then the answer line by line. No network, no model.
 import { profile } from '../../content/profile';
-import { projects, type ProjectId } from '../../content/projects';
+import { formatYears, projects, type Project, type ProjectId } from '../../content/projects';
 
-export type Segment = { text: string; color?: string; bold?: boolean; dim?: boolean };
+/** `href` makes the segment a link; `#id` links open a screen through the router. */
+export type Segment = { text: string; color?: string; bold?: boolean; dim?: boolean; href?: string };
 export type Line = Segment[];
 export type Step =
   | { kind: 'think'; label: string; ms: number }
   | { kind: 'tool'; call: string; result: string }
-  | { kind: 'out'; lines: Line[] };
+  | { kind: 'out'; lines: Line[] }
+  /** Opens the screen of a project, the way its button under the terminal does. */
+  | { kind: 'open'; id: ProjectId };
 
 export const BRAND: Record<ProjectId, string> = {
   exparte: '#0061ff',
@@ -19,6 +22,8 @@ export const BRAND: Record<ProjectId, string> = {
 };
 
 export const skills = [
+  { name: 'projects', usage: '/projects', summary: 'The products I have worked on' },
+  { name: 'open', usage: '/open <project>', summary: 'Open the screen of one of them' },
   { name: 'about', usage: '/about', summary: 'Who I am and what I do now' },
   { name: 'timeline', usage: '/timeline', summary: 'My career as a git history' },
   { name: 'stack', usage: '/stack', summary: 'Every technology: where, and for how long' },
@@ -31,6 +36,7 @@ const plain = (value: string): Line => [text(value)];
 const blank: Line = [text('')];
 const project = (id: ProjectId) => projects.find((item) => item.id === id)!;
 const name = (id: ProjectId) => text(project(id).name, { color: BRAND[id], bold: true });
+const span = (item: Project) => formatYears({ start: item.roles.at(-1)!.period.start, end: item.roles[0].period.end });
 
 const toMonths = (month: string) => {
   const [year, value] = month.split('-').map(Number);
@@ -58,6 +64,48 @@ function about(): Step[] {
         [text('Contacts: ', { dim: true }), text(profile.contacts.map((contact) => contact.label).join(', ')), text(' (links are coming)', { dim: true })],
       ],
     },
+  ];
+}
+
+function projectLines(): Line[] {
+  const width = Math.max(...projects.map((item) => item.name.length)) + 3;
+  return projects.flatMap((item, index): Line[] => [
+    ...(index ? [blank] : []),
+    [
+      text(item.name, { color: BRAND[item.id], bold: true, href: `#${item.id}` }),
+      text(' '.repeat(width - item.name.length)),
+      text(span(item).padEnd(11), { dim: true }),
+      text(item.roles[0].title),
+    ],
+    [text(item.summary, { dim: true })],
+  ]);
+}
+
+function list(): Step[] {
+  return [
+    { kind: 'think', label: 'Listing the projects', ms: 600 },
+    { kind: 'tool', call: 'Read content/projects.ts', result: `${projects.length} projects since June 2018` },
+    { kind: 'out', lines: projectLines() },
+  ];
+}
+
+// Spaces, dots and case do not matter: "Ex Parte", "bile-bile.kz" and "teach" all find their project.
+function find(input: string): ProjectId | undefined {
+  const key = input.toLowerCase().replace(/[^a-z]/g, '');
+  if (key.includes('besmart')) return 'chocolife';
+  return projects.find((item) => key.includes(item.id) || (key.length >= 3 && item.id.startsWith(key)))?.id;
+}
+
+function open(input: string): Step[] {
+  const id = find(input);
+  if (!id) {
+    const asked = input.trim();
+    return [{ kind: 'out', lines: [plain(asked ? `I have no project called ${asked}. These are the ones I have:` : 'Which one? These are the ones I have:'), blank, ...projectLines()] }];
+  }
+  return [
+    { kind: 'think', label: `Opening ${project(id).name}`, ms: 500 },
+    { kind: 'tool', call: `Open #${id}`, result: `${project(id).name}, ${span(project(id))}` },
+    { kind: 'open', id },
   ];
 }
 
@@ -254,6 +302,10 @@ export function run(command: string): Step[] | null {
   const [head] = command.trim().split(/\s+/);
   const argument = command.trim().slice(head.length).trim();
   switch (head) {
+    case '/projects':
+      return list();
+    case '/open':
+      return open(argument);
     case '/about':
       return about();
     case '/timeline':
@@ -265,6 +317,7 @@ export function run(command: string): Step[] | null {
     case '/review':
       return review(argument);
     default:
-      return null;
+      // Naming a project without a skill opens it too.
+      return !head.startsWith('/') && find(command) ? open(command) : null;
   }
 }

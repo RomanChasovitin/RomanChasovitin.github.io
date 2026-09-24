@@ -42,7 +42,7 @@ const company = {
 } satisfies Record<string, Mention>;
 
 export const profile = {
-  name: 'Roman Chas',
+  name: 'Roman Chasovitin',
   headline: 'Full-stack TypeScript engineer',
   about: [
     'Full-stack ',
