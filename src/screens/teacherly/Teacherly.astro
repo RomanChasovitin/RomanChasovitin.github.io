@@ -1,6 +1,7 @@
 ---
 // Teacherly, in its own look: white, purple buttons, big color blobs at the edges, a script logo.
 import BackToIntro from '../../components/BackToIntro.astro';
+import ProjectNav from '../../components/ProjectNav.astro';
 import { formatYears, projects } from '../../content/projects';
 import Lesson from './Lesson';
 
@@ -28,8 +29,11 @@ const role = project.roles[0];
       <p class="mt-5 text-sm text-tl-ink/70">{project.stack.join(', ')}</p>
     </div>
 
-    <div class="h-[82svh] min-w-0 flex-1">
-      <Lesson client:idle />
+    <div class="stage">
+      <div class="stage-window">
+        <Lesson client:idle />
+      </div>
+      <ProjectNav current="teacherly" />
     </div>
   </div>
 </section>

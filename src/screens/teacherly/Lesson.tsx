@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react';
+import Window from '../../components/Window';
 
 // Teacherly, the product, end to end: create a lesson on a free canvas, split it into screens, put it in the
 // timetable for a class, teach it on a call, then grade the class. Student names are placeholders for the
@@ -19,6 +20,25 @@ const STAGES: { id: Stage; label: string }[] = [
   { id: 'teach', label: 'Teach' },
   { id: 'grade', label: 'Grade' },
 ];
+
+/** A small icon per stage, for its browser tab. */
+const stageIcon = (d: string) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke={PURPLE} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={d} />
+  </svg>
+);
+const STAGE_ICONS: Record<Stage, ReactNode> = {
+  create: stageIcon('M4 20h4L19 9l-4-4L4 16zM13 7l4 4'),
+  schedule: stageIcon('M4 6h16v14H4zM4 10h16M9 3v4M15 3v4'),
+  teach: stageIcon('M3 7h12v10H3zM15 11l6-3v8l-6-3'),
+  grade: stageIcon('M5 12.5 10 17l9-10'),
+};
+const STAGE_PATHS: Record<Stage, string> = {
+  create: 'lessons/new',
+  schedule: 'timetable/9b',
+  teach: 'class/9b/live',
+  grade: 'class/9b/grades',
+};
 const STUDENTS = [
   { name: 'Asel', color: '#f7da49' },
   { name: 'Bekzat', color: '#65b8be' },
@@ -258,229 +278,219 @@ export default function Lesson() {
 
   const slotLabel = slot ? `${DAYS[Number(slot.split('-')[0])]}, ${PERIODS[Number(slot.split('-')[1])]}` : null;
 
+  // The four stages are the tabs of the browser; a stage opens once the lesson has got that far.
   return (
-    <div
-      onKeyDown={onKeyDown}
-      className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-[#e5e2f0] bg-white font-helvetica text-tl-ink shadow-[0_30px_70px_-35px_rgb(78_64_155/0.45)]"
+    <Window
+      tabs={STAGES.map((item, index) => ({ id: item.id, label: `${index + 1}. ${item.label}`, icon: STAGE_ICONS[item.id], disabled: index > reached }))}
+      active={stage}
+      onTab={(id) => go(id as Stage)}
+      url={`teacherly.com/${STAGE_PATHS[stage]}`}
     >
-      <header className="flex items-center gap-5 border-b border-[#eeebf7] px-5 py-3">
-        <span className="font-dancing text-2xl font-bold text-tl-purple">
-          Teacher<span className="text-tl-teal">ly</span>
-        </span>
-        <ol className="flex items-center gap-1 text-sm">
-          {STAGES.map((item, index) => (
-            <li key={item.id} className="flex items-center gap-1">
-              {index > 0 && <span className="text-tl-ink/30">›</span>}
-              <button
-                type="button"
-                disabled={index > reached}
-                onClick={() => go(item.id)}
-                aria-current={stage === item.id ? 'step' : undefined}
-                className="cursor-pointer rounded-full px-3 py-1 disabled:cursor-default disabled:text-tl-ink/35 aria-[current=step]:bg-tl-purple aria-[current=step]:text-white"
-              >
-                {index + 1}. {item.label}
-              </button>
-            </li>
-          ))}
-        </ol>
-        {stage === 'teach' && (
-          <span className="ml-auto text-sm text-tl-ink/60">
-            <LiveClock />
+      <div onKeyDown={onKeyDown} className="flex min-h-0 flex-1 flex-col bg-white font-helvetica text-tl-ink">
+        <header className="flex items-center gap-5 border-b border-[#eeebf7] px-5 py-3">
+          <span className="font-dancing text-2xl font-bold text-tl-purple">
+            Teacher<span className="text-tl-teal">ly</span>
           </span>
-        )}
-      </header>
+          <span className="text-sm text-tl-ink/60">{STAGES.find((item) => item.id === stage)!.label}</span>
+          {stage === 'teach' && (
+            <span className="ml-auto text-sm text-tl-ink/60">
+              <LiveClock />
+            </span>
+          )}
+        </header>
 
-      {stage === 'create' && (
-        <div className="flex min-h-0 flex-1">
-          <aside className="flex w-40 shrink-0 flex-col gap-2 overflow-y-auto border-r border-[#eeebf7] bg-tl-mist p-3" aria-label="Screens">
-            {screens.map((item, index) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  setCurrent(index);
-                  setSelected(null);
-                }}
-                aria-current={index === current || undefined}
-                className="cursor-pointer rounded-lg border-2 border-transparent p-1 text-left text-xs aria-[current=true]:border-tl-purple"
-              >
-                <div className="pointer-events-none">
-                  <Board screen={item} />
-                </div>
-                <span className="mt-1 block">Screen {index + 1}</span>
-              </button>
-            ))}
-            <button
-              type="button"
-              onClick={() => {
-                setScreens((all) => [...all, { id: nextId++, elements: [] }]);
-                setCurrent(screens.length);
-              }}
-              className="cursor-pointer rounded-lg border-2 border-dashed border-[#d9d4ee] py-3 text-xs font-bold text-tl-purple"
-            >
-              + Add screen
-            </button>
-          </aside>
-
-          <div className="flex min-w-0 flex-1 flex-col">
-            <div className="flex items-center gap-2 border-b border-[#eeebf7] px-5 py-2.5">
-              <input
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                aria-label="Lesson title"
-                className="mr-auto min-w-0 flex-1 rounded-md px-2 py-1 font-bold outline-none focus:bg-tl-mist"
-              />
-              {(['text', 'image', 'video', 'shape'] as Kind[]).map((kind) => (
+        {stage === 'create' && (
+          <div className="flex min-h-0 flex-1">
+            <aside className="flex w-40 shrink-0 flex-col gap-2 overflow-y-auto border-r border-[#eeebf7] bg-tl-mist p-3" aria-label="Screens">
+              {screens.map((item, index) => (
                 <button
-                  key={kind}
+                  key={item.id}
                   type="button"
-                  onClick={() => add(kind)}
-                  className="cursor-pointer rounded-full border border-[#d9d4ee] px-3 py-1 text-sm capitalize hover:border-tl-purple hover:text-tl-purple"
+                  onClick={() => {
+                    setCurrent(index);
+                    setSelected(null);
+                  }}
+                  aria-current={index === current || undefined}
+                  className="cursor-pointer rounded-lg border-2 border-transparent p-1 text-left text-xs aria-[current=true]:border-tl-purple"
                 >
-                  + {kind === 'shape' ? 'Shape' : kind}
+                  <div className="pointer-events-none">
+                    <Board screen={item} />
+                  </div>
+                  <span className="mt-1 block">Screen {index + 1}</span>
                 </button>
               ))}
               <button
                 type="button"
-                onClick={remove}
-                disabled={selected === null}
-                className="cursor-pointer rounded-full px-3 py-1 text-sm text-[#c2410c] disabled:cursor-default disabled:text-tl-ink/30"
+                onClick={() => {
+                  setScreens((all) => [...all, { id: nextId++, elements: [] }]);
+                  setCurrent(screens.length);
+                }}
+                className="cursor-pointer rounded-lg border-2 border-dashed border-[#d9d4ee] py-3 text-xs font-bold text-tl-purple"
               >
-                Delete
+                + Add screen
               </button>
-            </div>
-            <div className="flex min-h-0 flex-1 items-center justify-center bg-tl-mist p-5">
-              <div className="w-full max-w-[min(100%,calc((82svh-9rem)*16/9))]">
-                <Board screen={screen} editable selected={selected} onSelect={setSelected} onChange={update} />
+            </aside>
+
+            <div className="flex min-w-0 flex-1 flex-col">
+              <div className="flex items-center gap-2 border-b border-[#eeebf7] px-5 py-2.5">
+                <input
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  aria-label="Lesson title"
+                  className="mr-auto min-w-0 flex-1 rounded-md px-2 py-1 font-bold outline-none focus:bg-tl-mist"
+                />
+                {(['text', 'image', 'video', 'shape'] as Kind[]).map((kind) => (
+                  <button
+                    key={kind}
+                    type="button"
+                    onClick={() => add(kind)}
+                    className="cursor-pointer rounded-full border border-[#d9d4ee] px-3 py-1 text-sm capitalize hover:border-tl-purple hover:text-tl-purple"
+                  >
+                    + {kind === 'shape' ? 'Shape' : kind}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={remove}
+                  disabled={selected === null}
+                  className="cursor-pointer rounded-full px-3 py-1 text-sm text-[#c2410c] disabled:cursor-default disabled:text-tl-ink/30"
+                >
+                  Delete
+                </button>
+              </div>
+              <div className="flex min-h-0 flex-1 items-center justify-center bg-tl-mist p-5">
+                <div className="w-full max-w-[min(100%,calc((82svh-9rem)*16/9))]">
+                  <Board screen={screen} editable selected={selected} onSelect={setSelected} onChange={update} />
+                </div>
+              </div>
+              <div className="flex items-center justify-end border-t border-[#eeebf7] px-5 py-3 text-sm">
+                <PrimaryButton onClick={() => go('schedule')}>Next: schedule it</PrimaryButton>
               </div>
             </div>
-            <div className="flex items-center justify-end border-t border-[#eeebf7] px-5 py-3 text-sm">
-              <PrimaryButton onClick={() => go('schedule')}>Next: schedule it</PrimaryButton>
-            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {stage === 'schedule' && (
-        <div className="flex min-h-0 flex-1 gap-5 p-5">
-          <div className="min-w-0 flex-1">
-            <p className="mb-3 text-sm">
-              Pick a free period for <span className="font-bold">{title}</span> ({screens.length} screens).
+        {stage === 'schedule' && (
+          <div className="flex min-h-0 flex-1 gap-5 p-5">
+            <div className="min-w-0 flex-1">
+              <p className="mb-3 text-sm">
+                Pick a free period for <span className="font-bold">{title}</span> ({screens.length} screens).
+              </p>
+              <div className="grid grid-cols-[4rem_repeat(5,minmax(0,1fr))] gap-1.5 text-sm">
+                <span />
+                {DAYS.map((day) => (
+                  <span key={day} className="text-center font-bold">
+                    {day}
+                  </span>
+                ))}
+                {PERIODS.map((time, period) => (
+                  <PeriodRow key={time} time={time} period={period} slot={slot} onPick={setSlot} title={title} />
+                ))}
+              </div>
+            </div>
+            <aside className="flex w-64 shrink-0 flex-col rounded-xl bg-tl-mist p-4" aria-label="Class">
+              <p className="font-bold">Front-end team</p>
+              <p className="text-xs text-tl-ink/60">{assigned.length} of {STUDENTS.length} students</p>
+              <ul className="mt-3 space-y-2">
+                {STUDENTS.map((student) => (
+                  <li key={student.name}>
+                    <label className="flex cursor-pointer items-center gap-2.5">
+                      <input
+                        type="checkbox"
+                        checked={assigned.includes(student.name)}
+                        onChange={(event) =>
+                          setAssigned((all) => (event.target.checked ? [...all, student.name] : all.filter((name) => name !== student.name)))
+                        }
+                        className="accent-[#4e409b]"
+                      />
+                      <Avatar name={student.name} color={student.color} />
+                      {student.name}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-auto">
+                {scheduled && slotLabel && (
+                  <p className="mb-3 text-sm text-[#2e7d6f]">
+                    Assigned to {assigned.length} students for {slotLabel}.
+                  </p>
+                )}
+                <PrimaryButton
+                  disabled={!slot || assigned.length === 0}
+                  onClick={() => (scheduled ? go('teach') : setScheduled(true))}
+                >
+                  {scheduled ? 'Start the lesson' : 'Assign lesson'}
+                </PrimaryButton>
+              </div>
+            </aside>
+          </div>
+        )}
+
+        {stage === 'teach' && (
+          <Call screens={screens} students={STUDENTS.filter((student) => assigned.includes(student.name))} onEnd={() => go('grade')} />
+        )}
+
+        {stage === 'grade' && (
+          <div className="flex min-h-0 flex-1 flex-col p-5">
+            <p className="text-sm">
+              <span className="font-bold">{title}</span>
+              {slotLabel && `, ${slotLabel}`}. Grade the class.
             </p>
-            <div className="grid grid-cols-[4rem_repeat(5,minmax(0,1fr))] gap-1.5 text-sm">
-              <span />
-              {DAYS.map((day) => (
-                <span key={day} className="text-center font-bold">
-                  {day}
-                </span>
-              ))}
-              {PERIODS.map((time, period) => (
-                <PeriodRow key={time} time={time} period={period} slot={slot} onPick={setSlot} title={title} />
-              ))}
-            </div>
-          </div>
-          <aside className="flex w-64 shrink-0 flex-col rounded-xl bg-tl-mist p-4" aria-label="Class">
-            <p className="font-bold">Front-end team</p>
-            <p className="text-xs text-tl-ink/60">{assigned.length} of {STUDENTS.length} students</p>
-            <ul className="mt-3 space-y-2">
-              {STUDENTS.map((student) => (
-                <li key={student.name}>
-                  <label className="flex cursor-pointer items-center gap-2.5">
-                    <input
-                      type="checkbox"
-                      checked={assigned.includes(student.name)}
-                      onChange={(event) =>
-                        setAssigned((all) => (event.target.checked ? [...all, student.name] : all.filter((name) => name !== student.name)))
-                      }
-                      className="accent-[#4e409b]"
-                    />
-                    <Avatar name={student.name} color={student.color} />
-                    {student.name}
-                  </label>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-auto">
-              {scheduled && slotLabel && (
-                <p className="mb-3 text-sm text-[#2e7d6f]">
-                  Assigned to {assigned.length} students for {slotLabel}.
-                </p>
+            <table className="mt-4 w-full border-separate border-spacing-y-1.5 text-sm">
+              <thead className="text-left text-tl-ink/60">
+                <tr>
+                  <th className="px-3 font-normal">Student</th>
+                  <th className="px-3 font-normal">Present</th>
+                  <th className="px-3 font-normal">Grade</th>
+                  <th className="px-3 font-normal">Comment</th>
+                  <th className="px-3" />
+                </tr>
+              </thead>
+              <tbody>
+                {STUDENTS.filter((student) => assigned.includes(student.name)).map((student) => {
+                  const row = grades[student.name];
+                  const set = (patch: Partial<typeof row>) => setGrades((all) => ({ ...all, [student.name]: { ...all[student.name], ...patch } }));
+                  return (
+                    <tr key={student.name} className="bg-tl-mist">
+                      <td className="rounded-l-lg px-3 py-2">
+                        <span className="flex items-center gap-2.5">
+                          <Avatar name={student.name} color={student.color} />
+                          {student.name}
+                        </span>
+                      </td>
+                      <td className="px-3">
+                        <input type="checkbox" checked={row.present} onChange={(event) => set({ present: event.target.checked })} className="accent-[#4e409b]" aria-label={`${student.name} was present`} />
+                      </td>
+                      <td className="px-3">
+                        <select value={row.grade} onChange={(event) => set({ grade: event.target.value })} disabled={published} className="rounded-md border border-[#d9d4ee] bg-white px-2 py-1" aria-label={`Grade for ${student.name}`}>
+                          {GRADES.map((grade) => (
+                            <option key={grade}>{grade}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="px-3">
+                        <input value={row.comment} onChange={(event) => set({ comment: event.target.value })} disabled={published} placeholder="A short note for the student" className="w-full rounded-md border border-[#d9d4ee] bg-white px-2 py-1" aria-label={`Comment for ${student.name}`} />
+                      </td>
+                      <td className="rounded-r-lg px-3 text-xs text-[#2e7d6f]">{published ? 'Sent' : ''}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <div className="mt-auto flex items-center justify-between pt-4 text-sm">
+              <span className="text-tl-ink/60">
+                {published ? 'Grades are in the students’ reports.' : 'Grades go to each student’s report when you publish them.'}
+              </span>
+              {published ? (
+                <PrimaryButton onClick={() => go('create')}>Plan the next lesson</PrimaryButton>
+              ) : (
+                <PrimaryButton onClick={() => setPublished(true)}>Publish grades</PrimaryButton>
               )}
-              <PrimaryButton
-                disabled={!slot || assigned.length === 0}
-                onClick={() => (scheduled ? go('teach') : setScheduled(true))}
-              >
-                {scheduled ? 'Start the lesson' : 'Assign lesson'}
-              </PrimaryButton>
             </div>
-          </aside>
-        </div>
-      )}
-
-      {stage === 'teach' && (
-        <Call screens={screens} students={STUDENTS.filter((student) => assigned.includes(student.name))} onEnd={() => go('grade')} />
-      )}
-
-      {stage === 'grade' && (
-        <div className="flex min-h-0 flex-1 flex-col p-5">
-          <p className="text-sm">
-            <span className="font-bold">{title}</span>
-            {slotLabel && `, ${slotLabel}`}. Grade the class.
-          </p>
-          <table className="mt-4 w-full border-separate border-spacing-y-1.5 text-sm">
-            <thead className="text-left text-tl-ink/60">
-              <tr>
-                <th className="px-3 font-normal">Student</th>
-                <th className="px-3 font-normal">Present</th>
-                <th className="px-3 font-normal">Grade</th>
-                <th className="px-3 font-normal">Comment</th>
-                <th className="px-3" />
-              </tr>
-            </thead>
-            <tbody>
-              {STUDENTS.filter((student) => assigned.includes(student.name)).map((student) => {
-                const row = grades[student.name];
-                const set = (patch: Partial<typeof row>) => setGrades((all) => ({ ...all, [student.name]: { ...all[student.name], ...patch } }));
-                return (
-                  <tr key={student.name} className="bg-tl-mist">
-                    <td className="rounded-l-lg px-3 py-2">
-                      <span className="flex items-center gap-2.5">
-                        <Avatar name={student.name} color={student.color} />
-                        {student.name}
-                      </span>
-                    </td>
-                    <td className="px-3">
-                      <input type="checkbox" checked={row.present} onChange={(event) => set({ present: event.target.checked })} className="accent-[#4e409b]" aria-label={`${student.name} was present`} />
-                    </td>
-                    <td className="px-3">
-                      <select value={row.grade} onChange={(event) => set({ grade: event.target.value })} disabled={published} className="rounded-md border border-[#d9d4ee] bg-white px-2 py-1" aria-label={`Grade for ${student.name}`}>
-                        {GRADES.map((grade) => (
-                          <option key={grade}>{grade}</option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-3">
-                      <input value={row.comment} onChange={(event) => set({ comment: event.target.value })} disabled={published} placeholder="A short note for the student" className="w-full rounded-md border border-[#d9d4ee] bg-white px-2 py-1" aria-label={`Comment for ${student.name}`} />
-                    </td>
-                    <td className="rounded-r-lg px-3 text-xs text-[#2e7d6f]">{published ? 'Sent' : ''}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          <div className="mt-auto flex items-center justify-between pt-4 text-sm">
-            <span className="text-tl-ink/60">
-              {published ? 'Grades are in the students’ reports.' : 'Grades go to each student’s report when you publish them.'}
-            </span>
-            {published ? (
-              <PrimaryButton onClick={() => go('create')}>Plan the next lesson</PrimaryButton>
-            ) : (
-              <PrimaryButton onClick={() => setPublished(true)}>Publish grades</PrimaryButton>
-            )}
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </Window>
   );
 }
 
