@@ -31,8 +31,9 @@ const STAGES: { id: Stage; label: string }[] = [
   { id: 'redeem', label: 'Redeem' },
 ];
 
+// Navy in the light Chocolife browser, the yellow of BeSmart in its dark one.
 const stepIcon = (d: string) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="#2e3a82" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none" style={{ stroke: 'var(--step-icon, #2e3a82)' }} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <path d={d} />
   </svg>
 );
@@ -109,6 +110,11 @@ export default function Shop() {
   useEffect(() => {
     scroller.current?.scrollTo({ top: 0 });
   }, [step, store]);
+
+  // The whole screen wears the brand of the store: its background and the color of the slogan.
+  useEffect(() => {
+    document.getElementById('chocolife')?.setAttribute('data-brand', store);
+  }, [store]);
 
   const skin = SKIN[store];
   const storeMarket: Market = store === 'chocolife' ? 'kz' : market;
@@ -206,15 +212,16 @@ export default function Shop() {
             aria-label={brand === 'chocolife' ? 'Chocolife.me' : `BeSmart.${MARKETS[market].domain}`}
             title={brand === 'chocolife' ? 'Chocolife.me' : `BeSmart.${MARKETS[market].domain}`}
             onClick={() => setStore(brand)}
-            className="cursor-pointer rounded-lg p-0.5 opacity-55 ring-2 ring-transparent transition hover:opacity-100 aria-pressed:opacity-100 aria-pressed:ring-cl-navy"
+            className="cursor-pointer rounded-lg p-0.5 opacity-55 ring-2 ring-transparent transition hover:opacity-100 aria-pressed:opacity-100 aria-pressed:ring-(--cl-heading)"
           >
             <img src={brand === 'chocolife' ? '/icons/chocolife.png' : '/icons/besmart.svg'} alt="" width="64" height="64" className="block size-8 rounded-md" />
           </button>
         ))}
       </div>
 
-      <div className="h-full">
+      <div className={`h-full ${store === 'besmart' ? '[--step-icon:#eab825]' : ''}`}>
         <Window
+          dark={store === 'besmart'}
           tabs={STAGES.map((item) => ({
             id: item.id,
             label: item.label,
@@ -230,7 +237,7 @@ export default function Shop() {
               aria-pressed={mobile}
               aria-label={mobile ? 'Show at desktop width' : 'Show at phone width'}
               onClick={() => setMobile((value) => !value)}
-              className="flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.75rem] text-[#5f6368] hover:bg-[#f1f3f4] aria-pressed:bg-cl-navy aria-pressed:text-white @max-lg/window:hidden"
+              className={`flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.75rem] aria-pressed:bg-cl-navy aria-pressed:text-white @max-lg/window:hidden ${store === 'besmart' ? 'text-[#bdc1c6] hover:bg-white/10' : 'text-[#5f6368] hover:bg-[#f1f3f4]'}`}
             >
               <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
                 {mobile ? <rect x="3" y="5" width="18" height="12" rx="1.5" /> : <rect x="7" y="2.5" width="10" height="19" rx="2" />}
