@@ -187,8 +187,7 @@
 
   /*
    * The right side of every screen: a window over the row of projects, the same size everywhere, the
-   * terminal of the hero included. The text on the left takes the rest of the width. A screen with a
-   * control above its window adds that height as --stage-above.
+   * terminal of the hero included. The text on the left takes the rest of the width.
    */
   .stage {
     display: flex;
@@ -196,7 +195,7 @@
     flex-direction: column;
     gap: 1rem;
     width: 56vw;
-    height: calc(84svh + var(--stage-above, 0rem));
+    height: 84svh;
 
     & > .mac,
     & > .stage-window {

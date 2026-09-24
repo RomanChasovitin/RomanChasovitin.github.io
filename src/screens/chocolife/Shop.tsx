@@ -3,9 +3,9 @@ import Window from '../../components/Window';
 import { CATEGORIES, deals, MARKETS, money, soldBefore, type Brand, type Category, type Deal, type Market } from './deals';
 
 // The life of a coupon, in one browser window whose five tabs are its five steps: pick a deal in the feed,
-// choose an option, pay, get the coupon by email, and redeem it in the partner cabinet at the venue. The
-// switch above the window runs the same loop in the other brand: Chocolife or BeSmart, and BeSmart in two
-// countries. The device button in the address bar shows every page at phone width, email included.
+// choose an option, pay, get the coupon by email, and redeem it in the partner cabinet at the venue. The two
+// icons over the top left corner of the window run the same loop in the other brand: Chocolife or BeSmart,
+// and BeSmart in two countries. The device button in the address bar shows every page at phone width, email included.
 
 type Order = {
   id: number;
@@ -192,23 +192,25 @@ export default function Shop() {
   }[step];
 
   return (
-    <div className="flex h-full flex-col gap-3">
-      <div className="flex h-8 shrink-0 items-center gap-2 text-sm" role="group" aria-label="Brand">
+    <div className="relative h-full">
+      {/* Outside the window, so the window sits where every other window does. */}
+      <div className="absolute bottom-full left-0 mb-2.5 flex gap-2" role="group" aria-label="Brand">
         {(['chocolife', 'besmart'] as Brand[]).map((brand) => (
           <button
             key={brand}
             type="button"
             aria-pressed={store === brand}
+            aria-label={brand === 'chocolife' ? 'Chocolife.me' : `BeSmart.${MARKETS[market].domain}`}
+            title={brand === 'chocolife' ? 'Chocolife.me' : `BeSmart.${MARKETS[market].domain}`}
             onClick={() => setStore(brand)}
-            className="flex h-full cursor-pointer items-center gap-2 rounded-full bg-white px-3.5 font-medium text-cl-ink shadow-sm transition-colors aria-pressed:bg-cl-navy aria-pressed:text-white"
+            className="cursor-pointer rounded-lg p-0.5 opacity-55 ring-2 ring-transparent transition hover:opacity-100 aria-pressed:opacity-100 aria-pressed:ring-cl-navy"
           >
-            <img src={brand === 'chocolife' ? '/icons/chocolife.png' : '/icons/besmart.svg'} alt="" width="64" height="64" className="size-5 rounded" />
-            {brand === 'chocolife' ? 'Chocolife.me' : `BeSmart.${MARKETS[market].domain}`}
+            <img src={brand === 'chocolife' ? '/icons/chocolife.png' : '/icons/besmart.svg'} alt="" width="64" height="64" className="block size-8 rounded-md" />
           </button>
         ))}
       </div>
 
-      <div className="min-h-0 flex-1">
+      <div className="h-full">
         <Window
           tabs={STAGES.map((item) => ({
             id: item.id,

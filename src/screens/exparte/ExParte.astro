@@ -3,16 +3,9 @@
 // and the portal on the right in its own light look. What I build there, the portal tells itself: my row in
 // the expert search, my page with a CV printed as a report, and an answer of the assistant.
 import BackToIntro from '../../components/BackToIntro.astro';
-import ExParteLogo from '../../components/ExParteLogo.astro';
+import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
-import { projects } from '../../content/projects';
 import Portal from './Portal';
-
-const project = projects.find((item) => item.id === 'exparte')!;
-const role = project.roles[0];
-const since = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' }).format(
-  new Date(`${role.period.start}-01T00:00:00Z`),
-);
 ---
 
 <section id="exparte" data-screen class="overflow-hidden bg-xp-void font-geist text-white">
@@ -20,19 +13,11 @@ const since = new Intl.DateTimeFormat('en', { month: 'long', year: 'numeric' }).
   <BackToIntro class="rounded-md border border-xp-rule bg-xp-panel font-geist-mono text-sm text-xp-mist hover:border-xp-cyan hover:text-white" />
 
   <div class="relative flex h-full items-center gap-[3.5vw] px-[5vw]">
-    <div class="min-w-0 flex-1">
-      <h2><ExParteLogo class="block h-auto w-[clamp(11rem,17vw,18rem)]" /></h2>
-      <p class="mt-6 text-[clamp(1.7rem,2.5vw,2.7rem)] leading-[1.1] font-medium tracking-[-0.03em]">
-        Litigation intelligence for patent lawyers
-      </p>
-      <p class="mt-4 font-geist-mono text-sm text-xp-mist">{role.title} through Mad Devs, since {since}</p>
-      <p class="mt-6 leading-relaxed text-xp-mist">
-        Ex Parte shows patent lawyers what decides a case: the judge, the lawyers and experts on the other side,
-        the weak points of a patent. AI reports, search and an assistant over the record of patent cases in
-        district courts, the PTAB, the CAFC and the ITC.
-      </p>
-      <p class="mt-6 font-geist-mono text-sm text-xp-slate">{project.stack.join(', ')}</p>
-    </div>
+    <ProjectIntro id="exparte" slogan="Litigation intelligence for patent lawyers" mono="font-geist-mono" body="text-xp-mist" muted="text-xp-mist" dim="text-xp-slate">
+      Ex Parte shows patent lawyers what decides a case: the judge, the lawyers and experts on the other side, the
+      weak points of a patent. AI reports, search and an assistant over the record of patent cases in district courts,
+      the PTAB, the CAFC and the ITC.
+    </ProjectIntro>
 
     <div class="stage">
       <div class="stage-window">
