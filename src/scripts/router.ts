@@ -44,13 +44,26 @@ function away(side: HTMLElement, index: number) {
   return `translateX(${index === 0 ? -(rect.right + CLEAR_PX) : innerWidth - rect.left + CLEAR_PX}px)`;
 }
 
+/** Drops every move this router has put on a screen, so no side is left over an edge by an old one. */
+function reset(screen: HTMLElement) {
+  const { sides, rest } = parts(screen);
+  for (const element of [screen, ...sides, ...rest]) {
+    for (const animation of element.getAnimations()) {
+      if (!(animation instanceof CSSAnimation) && !(animation instanceof CSSTransition)) animation.cancel();
+    }
+  }
+}
+
 function settle(visible: HTMLElement) {
   for (const screen of screens) {
     const shown = screen === visible;
     screen.toggleAttribute('data-shown', shown);
     screen.toggleAttribute('data-front', false);
     screen.inert = !shown;
+    reset(screen);
   }
+  // Something inside may have scrolled the screen sideways, a focus or a scrollIntoView; the screen never is.
+  visible.scrollLeft = 0;
 }
 
 function show(next: HTMLElement, animate: boolean) {
@@ -95,7 +108,6 @@ function show(next: HTMLElement, animate: boolean) {
     if (finish !== done) return;
     finish = null;
     settle(next);
-    for (const animation of animations) animation.cancel();
   };
   finish = done;
   Promise.all(animations.map((animation) => animation.finished)).then(done, () => {});

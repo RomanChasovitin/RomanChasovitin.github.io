@@ -9,9 +9,11 @@ body {
   overflow: hidden;
 }
 
+/* Clipped, not hidden: a hidden box can still be scrolled by a focus or a scrollIntoView inside it. */
 [data-screen] {
   position: fixed;
   inset: 0;
+  overflow: clip;
   visibility: hidden;
   outline: none;
 }
