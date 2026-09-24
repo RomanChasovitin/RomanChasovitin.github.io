@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 
 // A macOS window around a working piece of a screen, from styles/window.css. With `tabs` it is a browser:
 // the tabs sit in the bar and `url` shows under them; without, the bar carries `title`. `dark` is the frame
-// for the dark screens.
+// for the dark screens. The page under the bar keeps a desktop width and scrolls sideways in a narrow window.
 
 export type WindowTab = { id: string; label: string; icon: ReactNode; disabled?: boolean; badge?: ReactNode };
 
@@ -54,7 +54,9 @@ export default function Window({ title, dark = false, tabs, active, onTab, url, 
           {tools}
         </div>
       )}
-      <div className="relative flex min-h-0 flex-1 flex-col">{children}</div>
+      <div className="mac-scroll">
+        <div className="mac-page">{children}</div>
+      </div>
     </div>
   );
 }
