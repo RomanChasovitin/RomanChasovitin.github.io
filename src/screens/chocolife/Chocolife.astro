@@ -2,6 +2,7 @@
 // Chocolife and BeSmart, the product: what a coupon goes through, from the deal feed to the venue. Laid out
 // like Mad Devs: the story on the left, a working browser window on the right.
 import BackToIntro from '../../components/BackToIntro.astro';
+import ProjectNav from '../../components/ProjectNav.astro';
 import { formatYears, projects } from '../../content/projects';
 import Shop from './Shop';
 
@@ -13,7 +14,7 @@ const role = project.roles[0];
   <BackToIntro class="rounded bg-cl-yellow text-sm font-medium text-[#212121] hover:bg-[#fccc22]" />
 
   <div class="flex h-full items-center gap-[4vw] px-[5vw]">
-    <div class="w-[27vw] shrink-0">
+    <div class="min-w-0 flex-1">
       <div class="flex items-center gap-2.5">
         <img src="/icons/chocolife.png" alt="" width="64" height="64" class="size-8 rounded" />
         <img src="/icons/besmart.svg" alt="" width="64" height="64" class="size-8 rounded" />
@@ -39,8 +40,12 @@ const role = project.roles[0];
       </dl>
     </div>
 
-    <div class="h-[84svh] min-w-0 flex-1">
-      <Shop client:idle />
+    <!-- The brand switch sits above the window, so the stage grows by its height and the window keeps its own. -->
+    <div class="stage" style="--stage-above: 2.75rem">
+      <div class="stage-window">
+        <Shop client:idle />
+      </div>
+      <ProjectNav current="chocolife" />
     </div>
   </div>
 </section>

@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import Window from '../../components/Window';
 import { CATEGORIES, deals, MARKETS, money, soldBefore, type Brand, type Category, type Deal, type Market } from './deals';
 
-// The life of a coupon, in one browser window. Pick a deal in the feed, choose an option, pay, get the
-// coupon by email, and redeem it in the partner cabinet at the venue. Chocolife and BeSmart are two tabs of
-// the same window: the same loop in two brands, and BeSmart in two countries. The device button in the
-// address bar shows every page at phone width, email included.
+// The life of a coupon, in one browser window whose five tabs are its five steps: pick a deal in the feed,
+// choose an option, pay, get the coupon by email, and redeem it in the partner cabinet at the venue. The
+// switch above the window runs the same loop in the other brand: Chocolife or BeSmart, and BeSmart in two
+// countries. The device button in the address bar shows every page at phone width, email included.
 
-type Tab = Brand | 'mail' | 'partner';
-type Page = { name: 'feed' } | { name: 'deal'; deal: string } | { name: 'checkout'; deal: string } | { name: 'paid'; order: number };
 type Order = {
   id: number;
   brand: Brand;
@@ -30,6 +29,19 @@ const STAGES: { id: Stage; label: string }[] = [
   { id: 'coupon', label: 'Coupon' },
   { id: 'redeem', label: 'Redeem' },
 ];
+
+const stepIcon = (d: string) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="#2e3a82" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={d} />
+  </svg>
+);
+const STEP_ICONS: Record<Stage, ReactNode> = {
+  feed: stepIcon('M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z'),
+  deal: stepIcon('M3 12V4h8l10 10-8 8zM7.5 8.5h.01'),
+  checkout: stepIcon('M3 6h18v12H3zM3 10h18M7 15h4'),
+  coupon: stepIcon('M3 6h18v12H3zM3 7l9 7 9-7'),
+  redeem: stepIcon('M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M8 12l3 3 5-6'),
+};
 
 const SKIN: Record<Brand, { name: string; accent: string; onAccent: string; ink: string; badge: string; font: string; partnerBar: string }> = {
   chocolife: { name: 'Chocolife', accent: '#f7da3b', onAccent: '#212121', ink: '#2e3a82', badge: '#e31e24', font: 'font-roboto', partnerBar: '#2e3a82' },
@@ -57,10 +69,12 @@ const digits = (value: string) => value.replace(/\D/g, '');
 let nextOrder = 0;
 
 export default function Shop() {
-  const [tab, setTab] = useState<Tab>('chocolife');
+  const [step, setStep] = useState<Stage>('feed');
   const [store, setStore] = useState<Brand>('chocolife');
   const [market, setMarket] = useState<Market>('kz');
-  const [pages, setPages] = useState<Record<Brand, Page>>({ chocolife: { name: 'feed' }, besmart: { name: 'feed' } });
+  const [chosen, setChosen] = useState<Record<Brand, string>>({ chocolife: deals[0].id, besmart: deals[0].id });
+  /** The order a checkout has just paid for, per brand; the Checkout tab shows it until the next purchase. */
+  const [paid, setPaid] = useState<Record<Brand, number | null>>({ chocolife: null, besmart: null });
   const [category, setCategory] = useState<Category>('all');
   const [option, setOption] = useState<Record<string, string>>({});
   const [quantity, setQuantity] = useState(1);
@@ -89,52 +103,46 @@ export default function Shop() {
     return () => clearInterval(timer);
   }, []);
 
-  const page = pages[store];
   useEffect(() => {
     scroller.current?.scrollTo({ top: 0 });
-  }, [tab, page]);
+  }, [step, store]);
 
   const skin = SKIN[store];
   const storeMarket: Market = store === 'chocolife' ? 'kz' : market;
+  const dealId = chosen[store];
   const unread = orders.filter((order) => !order.read).length;
-  const latest = orders.at(-1);
+  const latestOf = (brand: Brand) => [...orders].reverse().find((order) => order.brand === brand);
+  const receipt = paid[store] === null ? null : orders.find((order) => order.id === paid[store]) ?? null;
 
-  const stage: Stage =
-    tab === 'mail' ? 'coupon' : tab === 'partner' ? 'redeem' : page.name === 'feed' ? 'feed' : page.name === 'deal' ? 'deal' : 'checkout';
-
-  const go = (next: Page) => setPages((all) => ({ ...all, [store]: next }));
-  const openStore = (brand: Brand) => {
-    setStore(brand);
-    setTab(brand);
-  };
   const openDeal = (id: string) => {
+    setChosen((all) => ({ ...all, [store]: id }));
     setQuantity(1);
-    go({ name: 'deal', deal: id });
+    setStep('deal');
   };
 
-  function place(dealId: string, brand = store) {
-    const deal = dealOf(dealId);
-    const id = nextOrder++;
+  function place(id: string, brand = store) {
+    const deal = dealOf(id);
+    const next = nextOrder++;
     const prefix = brand === 'chocolife' ? 'CL' : 'BS';
     const order: Order = {
-      id,
+      id: next,
       brand,
       market: brand === 'chocolife' ? 'kz' : market,
-      deal: dealId,
-      option: option[dealId] ?? deal.options[0].id,
+      deal: id,
+      option: option[id] ?? deal.options[0].id,
       quantity,
-      code: `${prefix}-${4827 + id * 13}-${String((1953 + id * 377) % 10000).padStart(4, '0')}`,
+      code: `${prefix}-${4827 + next * 13}-${String((1953 + next * 377) % 10000).padStart(4, '0')}`,
       email: form.email,
       at: clock(),
       redeemed: null,
       read: false,
     };
     setOrders((all) => [...all, order]);
-    setBought((all) => ({ ...all, [dealId]: all[dealId] + quantity }));
+    setBought((all) => ({ ...all, [id]: all[id] + quantity }));
     return order;
   }
 
-  function pay(dealId: string) {
+  function pay(id: string) {
     const found: Record<string, string> = {};
     if (!EMAIL.test(form.email)) found.email = 'Enter an email: the coupon goes there.';
     if (digits(form.phone).length !== 11) found.phone = 'A phone number has 11 digits, with the country code.';
@@ -143,9 +151,9 @@ export default function Shop() {
     if (Object.keys(found).length) return;
     setPaying(true);
     setTimeout(() => {
-      const order = place(dealId);
+      const order = place(id);
       setPaying(false);
-      go({ name: 'paid', order: order.id });
+      setPaid((all) => ({ ...all, [store]: order.id }));
     }, 1200);
   }
 
@@ -153,20 +161,18 @@ export default function Shop() {
     const target = id ?? orders.at(-1)?.id ?? null;
     setMail(target);
     if (target !== null) setOrders((all) => all.map((order) => (order.id === target ? { ...order, read: true } : order)));
-    setTab('mail');
+    setStep('coupon');
   }
 
   function jump(to: Stage) {
-    const current = page.name === 'feed' ? deals[0].id : page.name === 'paid' ? orders.find((order) => order.id === page.order)!.deal : page.deal;
-    if (to === 'feed' || to === 'deal' || to === 'checkout') {
-      setTab(store);
-      go(to === 'feed' ? { name: 'feed' } : { name: to, deal: current });
+    // The coupon and the venue need a purchase; without one, this buys the deal on screen.
+    if (to === 'coupon' || to === 'redeem') {
+      const order = latestOf(store) ?? place(dealId);
+      if (to === 'coupon') openMail(order.id);
+      else setStep('redeem');
       return;
     }
-    // The coupon and the venue need a purchase; without one, this buys the deal on screen.
-    const order = latest ?? place(current);
-    if (to === 'coupon') openMail(order.id);
-    else setTab('partner');
+    setStep(to);
   }
 
   function redeem(code: string) {
@@ -176,150 +182,122 @@ export default function Shop() {
     else setRedeemedBefore((all) => ({ ...all, [code]: at }));
   }
 
-  const partnerBrand = latest?.brand ?? store;
-  const url =
-    tab === 'mail'
-      ? 'mail.example.com/inbox'
-      : tab === 'partner'
-        ? `partner.${domain(partnerBrand, latest?.market ?? storeMarket)}/coupons`
-        : `${domain(store, storeMarket)}${page.name === 'feed' ? `/${MARKETS[storeMarket].cities[0].toLowerCase()}` : page.name === 'deal' ? `/deal/${page.deal}` : page.name === 'checkout' ? '/checkout' : '/checkout/done'}`;
+  const site = domain(store, storeMarket);
+  const url = {
+    feed: `${site}/${MARKETS[storeMarket].cities[0].toLowerCase()}`,
+    deal: `${site}/deal/${dealId}`,
+    checkout: `${site}/checkout${receipt ? '/done' : ''}`,
+    coupon: 'mail.example.com/inbox',
+    redeem: `partner.${site}/coupons`,
+  }[step];
 
   return (
     <div className="flex h-full flex-col gap-3">
-      <ol className="flex shrink-0 items-center gap-1.5 text-sm">
-        {STAGES.map((item, index) => (
-          <li key={item.id} className="flex items-center gap-1.5">
-            <button
-              type="button"
-              aria-current={stage === item.id ? 'step' : undefined}
-              onClick={() => jump(item.id)}
-              className="flex cursor-pointer items-center gap-2 rounded-full bg-white px-3.5 py-1.5 font-medium text-cl-ink shadow-sm transition-colors hover:bg-[#fff6c2] aria-[current=step]:bg-cl-navy aria-[current=step]:text-white"
-            >
-              <span className="text-xs opacity-60">{index + 1}</span>
-              {item.label}
-            </button>
-            {index < STAGES.length - 1 && <span className="text-cl-muted">→</span>}
-          </li>
-        ))}
-      </ol>
-
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl bg-white shadow-[0_30px_70px_-35px_rgb(46_58_130/0.45)]">
-        {/* Tabs */}
-        <div className="flex shrink-0 items-end gap-1 bg-[#dfe1e5] px-3 pt-2 text-[0.8rem]">
-          <span className="mr-2 mb-2.5 flex gap-1.5" aria-hidden="true">
-            <i className="size-3 rounded-full bg-[#ff5f57]" />
-            <i className="size-3 rounded-full bg-[#febc2e]" />
-            <i className="size-3 rounded-full bg-[#28c840]" />
-          </span>
-          {(
-            [
-              ['chocolife', <img src="/icons/chocolife.png" alt="" className="size-4 rounded" />, 'Chocolife.me'],
-              ['besmart', <img src="/icons/besmart.svg" alt="" className="size-4 rounded" />, `BeSmart.${MARKETS[market].domain}`],
-              ['mail', <MailIcon />, 'Mail'],
-              ['partner', <span className="size-4 rounded" style={{ background: SKIN[partnerBrand].partnerBar }} />, 'Partner cabinet'],
-            ] as [Tab, ReactNode, string][]
-          ).map(([id, icon, label]) => (
-            <button
-              key={id}
-              type="button"
-              aria-pressed={tab === id}
-              onClick={() => (id === 'mail' ? openMail(mail ?? undefined) : id === 'partner' ? setTab('partner') : openStore(id))}
-              className="flex max-w-48 min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-t-lg px-3 py-2 text-[#3c4043] hover:bg-white/50 aria-pressed:bg-white"
-            >
-              {icon}
-              <span className="truncate">{label}</span>
-              {id === 'mail' && unread > 0 && <span className="ml-auto rounded-full bg-[#d93025] px-1.5 text-[0.65rem] font-bold text-white">{unread}</span>}
-            </button>
-          ))}
-        </div>
-
-        {/* Address bar */}
-        <div className="flex shrink-0 items-center gap-2 border-b border-[#e1e1e1] px-3 py-1.5">
-          <span className="flex-1 truncate rounded-full bg-[#f1f3f4] px-4 py-1 text-[0.8rem] text-[#5f6368]">
-            <span className="text-[#1e8e3e]">🔒</span> {url}
-          </span>
+      <div className="flex h-8 shrink-0 items-center gap-2 text-sm" role="group" aria-label="Brand">
+        {(['chocolife', 'besmart'] as Brand[]).map((brand) => (
           <button
+            key={brand}
             type="button"
-            aria-pressed={mobile}
-            aria-label={mobile ? 'Show at desktop width' : 'Show at phone width'}
-            onClick={() => setMobile((value) => !value)}
-            className="flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.75rem] text-[#5f6368] hover:bg-[#f1f3f4] aria-pressed:bg-cl-navy aria-pressed:text-white"
+            aria-pressed={store === brand}
+            onClick={() => setStore(brand)}
+            className="flex h-full cursor-pointer items-center gap-2 rounded-full bg-white px-3.5 font-medium text-cl-ink shadow-sm transition-colors aria-pressed:bg-cl-navy aria-pressed:text-white"
           >
-            <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-              {mobile ? <rect x="3" y="5" width="18" height="12" rx="1.5" /> : <rect x="7" y="2.5" width="10" height="19" rx="2" />}
-              {mobile ? <path d="M1 20h22" /> : <path d="M11 18.5h2" />}
-            </svg>
-            {mobile ? 'Desktop' : 'Phone'}
+            <img src={brand === 'chocolife' ? '/icons/chocolife.png' : '/icons/besmart.svg'} alt="" width="64" height="64" className="size-5 rounded" />
+            {brand === 'chocolife' ? 'Chocolife.me' : `BeSmart.${MARKETS[market].domain}`}
           </button>
-        </div>
+        ))}
+      </div>
 
-        {/* Page */}
-        <div ref={scroller} className={`min-h-0 flex-1 overflow-y-auto ${mobile ? 'bg-[#e9e9ec] py-4' : ''}`}>
-          <div className={`@container min-h-full ${mobile ? 'mx-auto w-[390px] overflow-hidden rounded-[1.6rem] border-[6px] border-[#1f1f1f] bg-white' : ''}`}>
-            {tab === 'mail' ? (
-              <Mail orders={orders} selected={mail} onSelect={openMail} />
-            ) : tab === 'partner' ? (
-              <Partner brand={partnerBrand} deal={dealOf(latest?.deal ?? deals[0].id)} orders={orders} redeemedBefore={redeemedBefore} onRedeem={redeem} />
-            ) : (
-              <div className={`${skin.font} text-cl-ink`}>
-                <StoreHeader brand={store} market={storeMarket} onMarket={setMarket} onHome={() => go({ name: 'feed' })} orders={orders.filter((order) => order.brand === store).length} />
-                {page.name === 'feed' && (
-                  <Feed
-                    brand={store}
-                    market={storeMarket}
-                    category={category}
-                    onCategory={setCategory}
-                    bought={bought}
-                    ends={(deal) => left(opened.current + deal.endsIn * 3600_000 - now)}
-                    onOpen={openDeal}
-                  />
-                )}
-                {page.name === 'deal' && (
-                  <DealPage
-                    brand={store}
-                    market={storeMarket}
-                    deal={dealOf(page.deal)}
-                    option={option[page.deal] ?? dealOf(page.deal).options[0].id}
-                    onOption={(id) => setOption((all) => ({ ...all, [page.deal]: id }))}
-                    quantity={quantity}
-                    onQuantity={setQuantity}
-                    bought={bought[page.deal]}
-                    ends={left(opened.current + dealOf(page.deal).endsIn * 3600_000 - now)}
-                    onBack={() => go({ name: 'feed' })}
-                    onBuy={() => go({ name: 'checkout', deal: page.deal })}
-                  />
-                )}
-                {page.name === 'checkout' && (
-                  <Checkout
-                    brand={store}
-                    market={storeMarket}
-                    deal={dealOf(page.deal)}
-                    option={option[page.deal] ?? dealOf(page.deal).options[0].id}
-                    quantity={quantity}
-                    form={form}
-                    errors={errors}
-                    paying={paying}
-                    onField={(key, value) => setForm((all) => ({ ...all, [key]: value }))}
-                    onPay={() => pay(page.deal)}
-                    onBack={() => go({ name: 'deal', deal: page.deal })}
-                  />
-                )}
-                {page.name === 'paid' && <Paid brand={store} order={orders.find((order) => order.id === page.order)!} onMail={() => openMail(page.order)} onFeed={() => go({ name: 'feed' })} />}
-              </div>
-            )}
+      <div className="min-h-0 flex-1">
+        <Window
+          tabs={STAGES.map((item) => ({
+            id: item.id,
+            label: item.label,
+            icon: STEP_ICONS[item.id],
+            badge: item.id === 'coupon' && unread > 0 ? <span className="ml-auto rounded-full bg-[#d93025] px-1.5 text-[0.65rem] font-bold text-white">{unread}</span> : undefined,
+          }))}
+          active={step}
+          onTab={(id) => jump(id as Stage)}
+          url={url}
+          tools={
+            <button
+              type="button"
+              aria-pressed={mobile}
+              aria-label={mobile ? 'Show at desktop width' : 'Show at phone width'}
+              onClick={() => setMobile((value) => !value)}
+              className="flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.75rem] text-[#5f6368] hover:bg-[#f1f3f4] aria-pressed:bg-cl-navy aria-pressed:text-white"
+            >
+              <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                {mobile ? <rect x="3" y="5" width="18" height="12" rx="1.5" /> : <rect x="7" y="2.5" width="10" height="19" rx="2" />}
+                {mobile ? <path d="M1 20h22" /> : <path d="M11 18.5h2" />}
+              </svg>
+              {mobile ? 'Desktop' : 'Phone'}
+            </button>
+          }
+        >
+          <div ref={scroller} className={`min-h-0 flex-1 overflow-y-auto ${mobile ? 'bg-[#e9e9ec] py-4' : ''}`}>
+            <div className={`@container min-h-full ${mobile ? 'mx-auto w-[390px] overflow-hidden rounded-[1.6rem] border-[6px] border-[#1f1f1f] bg-white' : ''}`}>
+              {step === 'coupon' ? (
+                <Mail orders={orders} selected={mail} onSelect={openMail} />
+              ) : step === 'redeem' ? (
+                <Partner brand={store} deal={dealOf(latestOf(store)?.deal ?? dealId)} orders={orders} redeemedBefore={redeemedBefore} onRedeem={redeem} />
+              ) : (
+                <div className={`${skin.font} text-cl-ink`}>
+                  <StoreHeader brand={store} market={storeMarket} onMarket={setMarket} onHome={() => setStep('feed')} orders={orders.filter((order) => order.brand === store).length} />
+                  {step === 'feed' && (
+                    <Feed
+                      brand={store}
+                      market={storeMarket}
+                      category={category}
+                      onCategory={setCategory}
+                      bought={bought}
+                      ends={(deal) => left(opened.current + deal.endsIn * 3600_000 - now)}
+                      onOpen={openDeal}
+                    />
+                  )}
+                  {step === 'deal' && (
+                    <DealPage
+                      brand={store}
+                      market={storeMarket}
+                      deal={dealOf(dealId)}
+                      option={option[dealId] ?? dealOf(dealId).options[0].id}
+                      onOption={(id) => setOption((all) => ({ ...all, [dealId]: id }))}
+                      quantity={quantity}
+                      onQuantity={setQuantity}
+                      bought={bought[dealId]}
+                      ends={left(opened.current + dealOf(dealId).endsIn * 3600_000 - now)}
+                      onBack={() => setStep('feed')}
+                      onBuy={() => {
+                        setPaid((all) => ({ ...all, [store]: null }));
+                        setStep('checkout');
+                      }}
+                    />
+                  )}
+                  {step === 'checkout' &&
+                    (receipt ? (
+                      <Paid brand={store} order={receipt} onMail={() => openMail(receipt.id)} onFeed={() => setStep('feed')} />
+                    ) : (
+                      <Checkout
+                        brand={store}
+                        market={storeMarket}
+                        deal={dealOf(dealId)}
+                        option={option[dealId] ?? dealOf(dealId).options[0].id}
+                        quantity={quantity}
+                        form={form}
+                        errors={errors}
+                        paying={paying}
+                        onField={(key, value) => setForm((all) => ({ ...all, [key]: value }))}
+                        onPay={() => pay(dealId)}
+                        onBack={() => setStep('deal')}
+                      />
+                    ))}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        </Window>
       </div>
     </div>
-  );
-}
-
-function MailIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-4 shrink-0" aria-hidden="true">
-      <rect x="2" y="4.5" width="20" height="15" rx="2.5" fill="#ea4335" />
-      <path d="m5 8 7 5.5L19 8" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
-    </svg>
   );
 }
 
