@@ -2,7 +2,6 @@
 // Ex Parte, laid out like Mad Devs: the product in a few lines on the left, in the dark brand of exparte.com,
 // and the portal on the right in its own light look. What I build there, the portal tells itself: my row in
 // the expert search, my page with a CV printed as a report, and an answer of the assistant.
-import BackToIntro from '../../components/BackToIntro.astro';
 import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
 import Portal from './Portal';
@@ -10,9 +9,8 @@ import Portal from './Portal';
 
 <section id="exparte" data-screen class="overflow-hidden bg-xp-void font-geist text-white">
   <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_60%_at_72%_50%,rgb(0_97_255/0.16),transparent_70%)]"></div>
-  <BackToIntro class="rounded-md border border-xp-rule bg-xp-panel font-geist-mono text-sm text-xp-mist hover:border-xp-cyan hover:text-white" />
 
-  <div class="relative flex h-full items-center gap-[3.5vw] px-[5vw]">
+  <div class="split relative [--split-gap:3.5vw]">
     <ProjectIntro id="exparte" slogan="Litigation intelligence for patent lawyers" body="text-xp-mist" muted="text-xp-mist" dim="text-xp-slate">
       Ex Parte shows patent lawyers what decides a case: the judge, the lawyers and experts on the other side, the
       weak points of a patent. AI reports, search and an assistant over the record of patent cases in district courts,

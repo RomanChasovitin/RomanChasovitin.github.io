@@ -1,6 +1,5 @@
 ---
 // Teacherly, in its own look: white, purple buttons, big color blobs at the edges.
-import BackToIntro from '../../components/BackToIntro.astro';
 import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
 import Lesson from './Lesson';
@@ -10,9 +9,8 @@ import Lesson from './Lesson';
   <div class="blob yellow" aria-hidden="true"></div>
   <div class="blob teal" aria-hidden="true"></div>
   <div class="blob sky" aria-hidden="true"></div>
-  <BackToIntro class="rounded-full border-2 border-tl-purple bg-white text-sm font-bold text-tl-purple hover:bg-tl-purple hover:text-white" />
 
-  <div class="relative flex h-full items-center gap-[3.5vw] px-[5vw]">
+  <div class="split relative [--split-gap:3.5vw]">
     <ProjectIntro id="teacherly" slogan="Turning teachers into teams" accent="text-tl-purple" body="text-tl-ink" muted="text-tl-ink/70" dim="text-tl-ink/60">
       A British ed-tech startup for schools: teachers build interactive lessons, put them in the timetable of a
       class, teach them on video calls and grade the students, with the curriculum behind it all. Video classes came

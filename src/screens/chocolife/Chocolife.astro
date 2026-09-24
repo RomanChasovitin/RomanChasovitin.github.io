@@ -1,16 +1,14 @@
 ---
 // Chocolife and BeSmart, the product: what a coupon goes through, from the deal feed to the venue. Laid out
 // like Mad Devs: the story on the left, a working browser window on the right.
-import BackToIntro from '../../components/BackToIntro.astro';
 import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
 import Shop from './Shop';
 ---
 
 <section id="chocolife" data-screen class="overflow-hidden bg-cl-grey font-roboto text-cl-ink">
-  <BackToIntro class="rounded bg-cl-yellow text-sm font-medium text-[#212121] hover:bg-[#fccc22]" />
 
-  <div class="flex h-full items-center gap-[4vw] px-[5vw]">
+  <div class="split">
     <ProjectIntro id="chocolife" slogan="Half price on the best of the city" accent="text-cl-navy" also="/icons/besmart.svg" body="text-cl-ink" muted="text-cl-muted" dim="text-cl-muted">
       Chocolife sells coupons for restaurants, spas, aquaparks and trips at up to half price: buy on the site, get
       the coupon by email, show its code at the venue. BeSmart did the same in Kazakhstan and Kyrgyzstan. My first

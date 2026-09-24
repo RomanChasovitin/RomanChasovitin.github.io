@@ -1,7 +1,8 @@
 // Screens sit on top of each other in one fixed viewport; the page never scrolls.
 // The URL hash names the open screen, so links (`#exparte`, `#intro`), the browser's back button and shared
-// URLs all work. Opening a project grows its screen out of its button in the hero; "Back to intro" folds it
-// back into that button.
+// URLs all work. Opening a project grows its screen out of its button in the hero; Intro in the row of
+// projects folds it back into that button. Below 1024px a screen scrolls inside itself, and a project always
+// opens at its top.
 //
 // Sets `data-active-screen` and `data-theme` on <html> and fires `screen:change` on document. A
 // `screen:open` event on document opens a screen, for the agent in the hero.
@@ -19,11 +20,12 @@ let running: Animation | null = null;
 const byId = (id: string) => screens.find((screen) => screen.id === id);
 const fromHash = () => byId(decodeURIComponent(location.hash.slice(1))) ?? screens[0];
 
-/** The hero button a screen opens from, as a clip-path inset of the viewport. */
+/** The hero button a screen opens from, as a clip-path inset of the viewport; none when it is out of view. */
 function buttonInset(id: string) {
   const button = document.querySelector(`#intro [data-opens="${id}"]`);
   if (!button) return null;
   const rect = button.getBoundingClientRect();
+  if (rect.bottom <= 0 || rect.top >= innerHeight || rect.right <= 0 || rect.left >= innerWidth) return null;
   return `inset(${rect.top}px ${innerWidth - rect.right}px ${innerHeight - rect.bottom}px ${rect.left}px)`;
 }
 
@@ -43,6 +45,8 @@ function show(next: HTMLElement, animate: boolean) {
   current = next;
   running?.finish();
 
+  // The hero keeps its place, so the way back lands where the visitor left it.
+  if (next !== screens[0]) next.scrollTop = 0;
   root.dataset.activeScreen = next.id;
   root.dataset.theme = next.id;
   document.dispatchEvent(new CustomEvent('screen:change', { detail: { id: next.id } }));
