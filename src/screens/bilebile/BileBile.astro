@@ -1,20 +1,20 @@
 ---
 // Bile-Bile, laid out like Mad Devs: the product on the left, the site on the right in a browser window.
-// On the site, a window on the Aktobe to Mangystau line with the train in it. The train stops at four
-// stations; each one shows a working piece of what I built: search, the seat map, checkout, the ticket. The
-// four stations are also the four tabs of the browser.
+// On the site, a window on the Aktobe to Mangystau line with the train in it, the route under it, and the
+// working piece of what I built at the current station: search, the seat map, checkout, the ticket. Each piece
+// sends the train on, and the four stations are also the four tabs of the browser.
 //
-// In a narrow window (a phone) the page scrolls: the story of a station stands above its widget, and the car
-// of the seat map scrolls sideways with seats big enough for a finger.
+// In a narrow window (a phone) the page scrolls, and the car of the seat map scrolls sideways with seats big
+// enough for a finger.
 import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
 
 // Station names are real stops on the line; the times are made up.
 const stations = [
-  { name: 'Aktobe-1', time: '18:40', title: 'From scratch', body: 'I built the Bile-Bile front end from zero: React and Next.js on top of a Python back end.' },
-  { name: 'Kandyagash', time: '20:55', title: 'The seat map', body: 'Every car drawn from live back-end data: free and taken berths, upper and lower, the price of each.' },
-  { name: 'Beyneu', time: '04:10', title: 'Checkout', body: 'Order forms for several passengers at once, each one checked before it reaches billing.' },
-  { name: 'Mangystau', time: '09:25', title: 'Built to hold', body: 'Tests and fault tolerance for the days when everyone buys tickets at once.' },
+  { name: 'Aktobe-1', time: '18:40' },
+  { name: 'Kandyagash', time: '20:55' },
+  { name: 'Beyneu', time: '04:10' },
+  { name: 'Mangystau', time: '09:25' },
 ];
 
 // The browser tab and the address of each station's page.
@@ -138,79 +138,72 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
             <span class="train" aria-hidden="true"></span>
           </ol>
 
-          <!-- What this station is about -->
-          <div class="station grid min-h-0 flex-1 grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-5">
-            <div aria-live="polite" class="min-h-0 overflow-y-auto">
-              <p class="text-xs text-bb-silver" data-at>Station 1 of 4: {stations[0].name}</p>
-              <h3 class="mt-1.5 text-[clamp(1.3rem,1.8vw,2rem)] leading-tight font-extrabold tracking-tight" data-title>
-                {stations[0].title}
-              </h3>
-              <p class="mt-2 text-sm leading-relaxed text-white/75" data-body>{stations[0].body}</p>
-              <button type="button" data-next class="next mt-4">Next station</button>
+          <!-- The piece of the site at this station -->
+          <div class="panel">
+            <!-- 1. Search -->
+            <form data-widget="0" class="search" onsubmit="return false">
+              <label><span>From</span><input value="Aktobe-1" readonly /></label>
+              <label><span>To</span><input value="Mangystau" readonly /></label>
+              <label><span>Departure</span><input value="10 December" readonly /></label>
+              <label><span>Passengers</span><input value="1 passenger" readonly /></label>
+              <button type="submit" data-find class="find">Find tickets</button>
+            </form>
+
+            <!-- 2. Seat map -->
+            <div data-widget="1" data-off inert class="seats">
+              <p class="text-sm font-bold">Car 7, compartment</p>
+              <div class="car" role="group" aria-label="Seats in car 7">
+                {
+                  compartments.map((seats) => (
+                    <div class="compartment">
+                      {seats.map((seat) => (
+                        <button
+                          type="button"
+                          class="seat"
+                          data-seat={seat}
+                          disabled={taken.has(seat)}
+                          aria-label={`Seat ${seat}, ${seat % 2 ? 'lower' : 'upper'} berth, ${taken.has(seat) ? 'taken' : `${price(seat)} tenge`}`}
+                        >
+                          {seat}
+                        </button>
+                      ))}
+                    </div>
+                  ))
+                }
+              </div>
+              <p class="legend">
+                <span><i class="free"></i>Free</span><span><i class="taken"></i>Taken</span><span
+                  ><i class="mine"></i>Your seat</span
+                >
+              </p>
+              <p class="choice">
+                <span class="text-sm" data-choice>No seat chosen yet.</span>
+                <button type="button" data-continue class="find" disabled>Continue</button>
+              </p>
             </div>
 
-            <div class="panel min-h-0">
-              <!-- 1. Search -->
-              <form data-widget="0" class="search" onsubmit="return false">
-                <label><span>From</span><input value="Aktobe-1" readonly /></label>
-                <label><span>To</span><input value="Mangystau" readonly /></label>
-                <label><span>Departure</span><input value="10 December" readonly /></label>
-                <label><span>Passengers</span><input value="1 passenger" readonly /></label>
-                <button type="submit" data-find class="find">Find tickets</button>
-              </form>
+            <!-- 3. Checkout -->
+            <form data-widget="2" data-off inert class="checkout" novalidate>
+              <label><span>Full name</span><input data-name placeholder="As in the ID card" autocomplete="off" /></label>
+              <label>
+                <span>IIN</span>
+                <input data-iin inputmode="numeric" maxlength="12" placeholder="12 digits" autocomplete="off" />
+              </label>
+              <p class="hint" data-iin-hint>The IIN has 12 digits.</p>
+              <button type="submit" data-pay class="find" disabled>Pay</button>
+            </form>
 
-              <!-- 2. Seat map -->
-              <div data-widget="1" hidden class="seats">
-                <p class="text-sm font-bold">Car 7, compartment</p>
-                <div class="car" role="group" aria-label="Seats in car 7">
-                  {
-                    compartments.map((seats) => (
-                      <div class="compartment">
-                        {seats.map((seat) => (
-                          <button
-                            type="button"
-                            class="seat"
-                            data-seat={seat}
-                            disabled={taken.has(seat)}
-                            aria-label={`Seat ${seat}, ${seat % 2 ? 'lower' : 'upper'} berth, ${taken.has(seat) ? 'taken' : `${price(seat)} tenge`}`}
-                          >
-                            {seat}
-                          </button>
-                        ))}
-                      </div>
-                    ))
-                  }
-                </div>
-                <p class="legend">
-                  <span><i class="free"></i>Free</span><span><i class="taken"></i>Taken</span><span
-                    ><i class="mine"></i>Your seat</span
-                  >
-                </p>
-                <p class="mt-3 text-sm" data-choice>No seat chosen yet.</p>
+            <!-- 4. Ticket -->
+            <div data-widget="3" data-off inert class="ticket">
+              <div>
+                <p class="text-xs text-bb-muted">Electronic ticket</p>
+                <p class="mt-1 text-lg font-extrabold">Aktobe-1 → Mangystau</p>
+                <p class="mt-1 text-sm">10 December, 18:40</p>
+                <p class="mt-3 text-sm" data-ticket-seat>Car 7, seat 14, upper berth</p>
+                <p class="text-sm" data-ticket-name>Passenger</p>
               </div>
-
-              <!-- 3. Checkout -->
-              <form data-widget="2" hidden class="checkout" novalidate>
-                <label><span>Full name</span><input data-name placeholder="As in the ID card" autocomplete="off" /></label>
-                <label>
-                  <span>IIN</span>
-                  <input data-iin inputmode="numeric" maxlength="12" placeholder="12 digits" autocomplete="off" />
-                </label>
-                <p class="hint" data-iin-hint>The IIN has 12 digits.</p>
-                <button type="submit" data-pay class="find" disabled>Pay</button>
-              </form>
-
-              <!-- 4. Ticket -->
-              <div data-widget="3" hidden class="ticket">
-                <div>
-                  <p class="text-xs text-bb-muted">Electronic ticket</p>
-                  <p class="mt-1 text-lg font-extrabold">Aktobe-1 → Mangystau</p>
-                  <p class="mt-1 text-sm">10 December, 18:40</p>
-                  <p class="mt-3 text-sm" data-ticket-seat>Car 7, seat 14, upper berth</p>
-                  <p class="text-sm" data-ticket-name>Passenger</p>
-                </div>
-                <div class="code" aria-hidden="true"></div>
-              </div>
+              <div class="code" aria-hidden="true"></div>
+              <button type="button" data-again class="again">Book another ticket</button>
             </div>
           </div>
         </div>
@@ -233,9 +226,10 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
     color: #fff;
   }
 
+  /* The train is the point of the page: the window on the line takes all the height the rest leaves. */
   .scene {
     position: relative;
-    flex: 0 0 34%;
+    flex: 1 1 0;
     min-height: 0;
     overflow: hidden;
     border: 10px solid #1b2a44;
@@ -457,7 +451,6 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
     transition: left 4.6s cubic-bezier(0.45, 0, 0.35, 1);
   }
 
-  .next,
   .find {
     padding: 0.75em 1.6em;
     border-radius: 8px;
@@ -467,19 +460,21 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
     cursor: pointer;
   }
 
-  .next[disabled],
   .find[disabled] {
     background: var(--color-bb-silver);
     cursor: default;
   }
 
-  /* Their search panel: a white bar with grey fields. */
+  /* Their search panel: a white bar with grey fields. The four pieces share one cell and the others only
+     turn invisible, so the panel is always as tall as the tallest and the train does not jump. */
   .panel {
+    display: grid;
+    flex: none;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 1.1rem;
     border-radius: 12px;
     background: #fff;
     color: var(--color-bb-ink);
-    padding: 1.1rem;
-    overflow: auto;
   }
 
   .search,
@@ -507,13 +502,28 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
       outline: none;
     }
 
-    & .find {
-      grid-column: 1 / -1;
-      justify-self: end;
-    }
+  }
+
+  .panel > * {
+    grid-area: 1 / 1;
+    align-self: center;
+  }
+
+  .panel > [data-off] {
+    visibility: hidden;
+  }
+
+  /* One row: the four fields, then the button. */
+  .search {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  }
+
+  .checkout {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
   }
 
   .checkout .hint {
+    order: 1;
     grid-column: 1 / -1;
     color: var(--color-bb-muted);
     font-size: 0.8rem;
@@ -604,13 +614,33 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
     }
   }
 
-  .ticket {
+  .choice {
     display: flex;
+    align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    height: 100%;
+    margin-top: 0.6rem;
+  }
+
+  .ticket {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
     padding-left: 1rem;
     border-left: 4px solid var(--color-bb-red);
+  }
+
+  .again {
+    margin-left: auto;
+    padding: 0.75em 1.4em;
+    border: 2px solid var(--color-bb-silver);
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:hover {
+      border-color: var(--color-bb-red);
+    }
   }
 
   /* A code block drawn from a fixed pattern, not a real code. */
@@ -643,19 +673,25 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
       flex: none;
     }
 
-    .station {
-      flex: none;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 0.8rem;
+    .panel {
+      padding: 0.8rem;
+    }
 
-      & > * {
-        overflow: visible;
+    .search,
+    .checkout {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+
+      & .find {
+        grid-column: 1 / -1;
       }
     }
 
-    .panel {
-      padding: 0.8rem;
-      overflow: visible;
+    .checkout .hint {
+      order: 0;
+    }
+
+    .ticket {
+      flex-wrap: wrap;
     }
 
     .car {
@@ -699,13 +735,10 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
   const route = screen.querySelector<HTMLElement>('.route')!;
   const stops = Array.from(screen.querySelectorAll<HTMLButtonElement>('[data-station]'));
   const widgets = Array.from(screen.querySelectorAll<HTMLElement>('[data-widget]'));
-  const at = screen.querySelector<HTMLElement>('[data-at]')!;
-  const title = screen.querySelector<HTMLElement>('[data-title]')!;
-  const body = screen.querySelector<HTMLElement>('[data-body]')!;
-  const next = screen.querySelector<HTMLButtonElement>('[data-next]')!;
+  const onward = screen.querySelector<HTMLButtonElement>('[data-continue]')!;
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const stations: { name: string; title: string; body: string }[] = JSON.parse(screen.dataset.stations!);
+  const stations: { name: string }[] = JSON.parse(screen.dataset.stations!);
 
   let station = 0;
   let travelling = false;
@@ -728,12 +761,11 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
       else stop.removeAttribute('aria-current');
       stop.toggleAttribute('data-passed', index < station);
     });
-    widgets.forEach((widget, index) => (widget.hidden = index !== station));
-    at.textContent = `Station ${station + 1} of ${stations.length}: ${stations[station].name}`;
-    title.textContent = stations[station].title;
-    body.textContent = stations[station].body;
-    next.textContent = station === stations.length - 1 ? 'Back to Aktobe-1' : 'Next station';
-    next.disabled = station === 1 && seat === null;
+    widgets.forEach((widget, index) => {
+      widget.toggleAttribute('data-off', index !== station);
+      widget.inert = index !== station;
+    });
+    onward.disabled = seat === null;
   }
 
   function arrive(to: number) {
@@ -778,7 +810,9 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
     }, HALF_MS);
   }
 
-  next.addEventListener('click', () => travel(station === stations.length - 1 ? 0 : station + 1));
+  // Each piece of the site sends the train on: search, the chosen seat, the payment, and the ticket back home.
+  onward.addEventListener('click', () => travel(2));
+  screen.querySelector('[data-again]')!.addEventListener('click', () => travel(0));
   stops.forEach((stop, index) => stop.addEventListener('click', () => travel(index)));
   tabs.forEach((tab, index) => tab.addEventListener('click', () => travel(index)));
   screen.querySelector('[data-find]')!.addEventListener('click', () => travel(1));
