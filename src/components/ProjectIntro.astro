@@ -1,14 +1,14 @@
 ---
 // The left side of every project screen, the same everywhere: the icon and the name as Mad Devs has them,
-// then the slogan, the role, a paragraph about the product and the stack, as Ex Parte has them. A screen
-// passes its brand: `mono` is the font of the role and the stack, the rest are colors.
+// then the slogan, the role, a paragraph about the product and the stack, as Ex Parte has them. It is set in
+// the fonts of the hero, the fonts of the whole site: Bricolage Grotesque, and JetBrains Mono for the role and
+// the stack. A screen passes only its brand colors.
 import { brandIcon } from '../content/icons';
 import { formatYears, projects, type ProjectId } from '../content/projects';
 
 type Props = {
   id: ProjectId;
   slogan: string;
-  mono: string;
   /** Color of the slogan, when it is not the color of the screen. */
   accent?: string;
   body: string;
@@ -18,7 +18,7 @@ type Props = {
   also?: string;
 };
 
-const { id, slogan, mono, accent, body, muted, dim, also } = Astro.props;
+const { id, slogan, accent, body, muted, dim, also } = Astro.props;
 const project = projects.find((item) => item.id === id)!;
 const role = project.roles[0];
 const years = formatYears({ start: project.roles.at(-1)!.period.start, end: role.period.end });
@@ -26,14 +26,14 @@ const years = formatYears({ start: project.roles.at(-1)!.period.start, end: role
 const via = id === 'maddevs' ? null : (project.company ?? 'through Mad Devs');
 ---
 
-<div class="min-w-0 flex-1">
+<div class="min-w-0 flex-1 font-['Bricolage_Grotesque_Variable']">
   <p class="flex items-center gap-2.5 text-sm font-semibold">
     <img src={brandIcon[id]} alt="" width="64" height="64" class="size-7 rounded" />
     {also && <img src={also} alt="" width="64" height="64" class="size-7 rounded" />}
     {project.name}
   </p>
   <h2 class:list={['mt-6 text-[clamp(1.7rem,2.5vw,2.7rem)] leading-[1.1] font-medium tracking-[-0.03em]', accent]}>{slogan}</h2>
-  <p class:list={['mt-4 text-sm', mono, muted]}>{[role.title, years, via].filter(Boolean).join(', ')}</p>
+  <p class:list={['mt-4 font-jetbrains text-sm', muted]}>{[role.title, years, via].filter(Boolean).join(', ')}</p>
   <p class:list={['mt-6 leading-relaxed', body]}><slot /></p>
-  <p class:list={['mt-6 text-sm', mono, dim]}>{project.stack.join(', ')}</p>
+  <p class:list={['mt-6 font-jetbrains text-sm', dim]}>{project.stack.join(', ')}</p>
 </div>
