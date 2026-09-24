@@ -2,46 +2,22 @@
 // Chocolife and BeSmart, the product: what a coupon goes through, from the deal feed to the venue. Laid out
 // like Mad Devs: the story on the left, a working browser window on the right.
 import BackToIntro from '../../components/BackToIntro.astro';
+import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
-import { formatYears, projects } from '../../content/projects';
 import Shop from './Shop';
-
-const project = projects.find((item) => item.id === 'chocolife')!;
-const role = project.roles[0];
 ---
 
 <section id="chocolife" data-screen class="overflow-hidden bg-cl-grey font-roboto text-cl-ink">
   <BackToIntro class="rounded bg-cl-yellow text-sm font-medium text-[#212121] hover:bg-[#fccc22]" />
 
   <div class="flex h-full items-center gap-[4vw] px-[5vw]">
-    <div class="min-w-0 flex-1">
-      <div class="flex items-center gap-2.5">
-        <img src="/icons/chocolife.png" alt="" width="64" height="64" class="size-8 rounded" />
-        <img src="/icons/besmart.svg" alt="" width="64" height="64" class="size-8 rounded" />
-        <img src="/icons/chocolife-logo.svg" alt="chocolife.me" width="125" height="23" class="ml-2 h-5 w-auto" />
-      </div>
-      <h2 class="mt-6 text-[clamp(1.9rem,2.8vw,3rem)] leading-[1.1] font-bold text-cl-navy">Half price on the best of the city</h2>
-      <p class="mt-4 text-sm text-cl-muted">{role.title}, {formatYears(role.period)}, {project.company}. My first job.</p>
-      <p class="mt-5 leading-relaxed">
-        Chocolife sells coupons for restaurants, spas, aquaparks and trips at up to half price: buy on the site, get
-        the coupon by email, show its code at the venue. BeSmart did the same in Kazakhstan and Kyrgyzstan.
-      </p>
-      <p class="mt-3 leading-relaxed">
-        I rewrote Chocolife from scratch on Angular 2+ and built BeSmart on React, MobX and GraphQL, with the
-        responsive pages, the email templates and the tests.
-      </p>
-      <dl class="mt-6 grid grid-cols-[auto_1fr] gap-x-5 gap-y-1.5 text-sm">
-        <dt class="font-medium text-cl-navy">Chocolife</dt>
-        <dd class="text-cl-muted">Angular 2+, TypeScript, RxJS</dd>
-        <dt class="font-medium text-[#1f6f4d]">BeSmart</dt>
-        <dd class="text-cl-muted">React, MobX, GraphQL</dd>
-        <dt class="font-medium">Tests</dt>
-        <dd class="text-cl-muted">Karma, Jasmine, Jest, Enzyme</dd>
-      </dl>
-    </div>
+    <ProjectIntro id="chocolife" slogan="Half price on the best of the city" mono="font-jetbrains" accent="text-cl-navy" also="/icons/besmart.svg" body="text-cl-ink" muted="text-cl-muted" dim="text-cl-muted">
+      Chocolife sells coupons for restaurants, spas, aquaparks and trips at up to half price: buy on the site, get
+      the coupon by email, show its code at the venue. BeSmart did the same in Kazakhstan and Kyrgyzstan. My first
+      job: Chocolife on Angular 2+, BeSmart on React, MobX and GraphQL.
+    </ProjectIntro>
 
-    <!-- The brand switch sits above the window, so the stage grows by its height and the window keeps its own. -->
-    <div class="stage" style="--stage-above: 2.75rem">
+    <div class="stage">
       <div class="stage-window">
         <Shop client:idle />
       </div>

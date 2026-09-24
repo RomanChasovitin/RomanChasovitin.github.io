@@ -4,11 +4,8 @@
 // stations; each one shows a working piece of what I built: search, the seat map, checkout, the ticket. The
 // four stations are also the four tabs of the browser.
 import BackToIntro from '../../components/BackToIntro.astro';
+import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
-import { formatYears, projects } from '../../content/projects';
-
-const project = projects.find((item) => item.id === 'bilebile')!;
-const role = project.roles[0];
 
 // Station names are real stops on the line; the times are made up.
 const stations = [
@@ -49,19 +46,11 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
   <BackToIntro class="rounded-lg bg-white/10 text-sm font-bold text-white hover:bg-bb-red" />
 
   <div class="flex h-full items-center gap-[4vw] px-[5vw]">
-    <div class="min-w-0 flex-1">
-      <p class="flex items-center gap-3 text-sm font-semibold">
-        <img src="/icons/bilebile.png" alt="" width="64" height="64" class="size-8 rounded-lg" />
-        {project.name}
-      </p>
-      <h2 class="mt-6 text-[clamp(2rem,3vw,3.2rem)] leading-[1.08] font-extrabold tracking-tight">Train tickets across Kazakhstan</h2>
-      <p class="mt-4 text-sm text-bb-silver">{role.title}, {formatYears(role.period)}, through Mad Devs</p>
-      <p class="mt-6 leading-relaxed text-white/75">
-        A private railway in Kazakhstan sells its tickets here: find a train, pick a berth on the seat map of a car, pay
-        for everyone in one order and get the ticket.
-      </p>
-      <p class="mt-6 text-sm text-bb-silver">{project.stack.join(', ')}</p>
-    </div>
+    <ProjectIntro id="bilebile" slogan="Train tickets across Kazakhstan" mono="font-jetbrains" body="text-white/75" muted="text-bb-silver" dim="text-bb-silver">
+      A private railway in Kazakhstan sells its tickets here: find a train, pick a berth on the seat map of a car,
+      pay for everyone in one order and get the ticket. On busy days the site has to hold high traffic, and it
+      does.
+    </ProjectIntro>
 
     <div class="stage">
       <div class="mac dark">

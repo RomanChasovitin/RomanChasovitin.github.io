@@ -1,41 +1,20 @@
 ---
-// Mad Devs, after the old maddevs.io hero: a large light headline on the left, a live Slack window on the right.
+// Mad Devs, after the old maddevs.io hero: the company on the left, a live Slack window on the right.
 import BackToIntro from '../../components/BackToIntro.astro';
+import ProjectIntro from '../../components/ProjectIntro.astro';
 import ProjectNav from '../../components/ProjectNav.astro';
-import { formatYears, projects } from '../../content/projects';
 import Slack from './Slack';
-
-const project = projects.find((item) => item.id === 'maddevs')!;
 ---
 
 <section id="maddevs" data-screen class="overflow-hidden bg-md-ink font-inter text-white">
   <BackToIntro class="rounded-full border border-md-grey text-sm font-medium text-white hover:bg-white hover:text-md-ink" />
 
   <div class="flex h-full items-center gap-[4vw] px-[5vw]">
-    <div class="min-w-0 flex-1">
-      <p class="flex items-center gap-2.5 text-sm font-semibold">
-        <img src="/icons/maddevs.svg" alt="" width="64" height="64" class="size-7 rounded" />
-        Mad Devs
-      </p>
-      <h2 class="mt-6 text-[clamp(2.4rem,4.2vw,4.6rem)] leading-[1.08] font-normal tracking-[-0.02em]">
-        My home company since 2018
-      </h2>
-      <dl class="mt-8 grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-[0.95rem]">
-        {
-          project.roles.map((role) => (
-            <>
-              <dt class="text-md-grey tabular-nums">{formatYears(role.period)}</dt>
-              <dd>{role.title}</dd>
-            </>
-          ))
-        }
-      </dl>
-      <p class="mt-8 max-w-[34em] leading-relaxed text-md-grey">
-        I lead the internal team behind maddevs.io and a few internal tools, lead the small ITC team and mentor
-        interns. Client work came through Mad Devs too: Teacherly, Bile-Bile and Ex Parte.
-      </p>
-      <p class="mt-6 font-plex-mono text-sm text-md-grey">{project.stack.join(', ')}</p>
-    </div>
+    <ProjectIntro id="maddevs" slogan="My home company since 2018" mono="font-plex-mono" body="text-md-grey" muted="text-md-grey" dim="text-md-grey">
+      I lead the internal team behind maddevs.io and a few internal tools, lead the small ITC team and mentor
+      interns. Client work came through Mad Devs too: Teacherly, Bile-Bile and Ex Parte. Before that, part-time, the
+      landing page and front end of the Elcart mobile bank.
+    </ProjectIntro>
 
     <div class="stage">
       <div class="mac dark">
