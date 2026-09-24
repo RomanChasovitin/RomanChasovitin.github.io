@@ -43,9 +43,11 @@ const wheels = (x: number) => [x + 35, x + 72, x + 158, x + 195];
   data-screen
   data-stations={JSON.stringify(stations)}
   data-paths={JSON.stringify(steps.map((step) => step.path))}
-  class="overflow-hidden bg-[#16223a] font-inter text-white"
+  class="overflow-hidden bg-[#080d18] font-inter text-white"
 >
-  <div class="split">
+  <!-- Darker than the site in the window, so the window stands out; a red glow of the brand behind it. -->
+  <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(50%_60%_at_72%_50%,rgb(230_52_69/0.13),transparent_70%)]"></div>
+  <div class="split relative">
     <ProjectIntro id="bilebile" slogan="Train tickets across Kazakhstan" body="text-white/75" muted="text-bb-silver" dim="text-bb-silver">
       A private railway in Kazakhstan sells its tickets here: find a train, pick a berth on the seat map of a car,
       pay for everyone in one order and get the ticket. On busy days the site has to hold high traffic, and it
