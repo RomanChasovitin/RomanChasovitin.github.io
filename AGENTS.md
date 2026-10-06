@@ -38,11 +38,7 @@ codegraph when the checkout has an index (`codegraph init .` once per checkout);
 
 - Claude work here runs on the Personal subscription (`claudeAgent_personal`). Its budget is small:
   use subagents only for genuinely parallel work.
-- Cross-vendor review goes to GPT. In T3 Code: `delegate_task` with provider `codex`, model
-  `gpt-6.1-sol`, reasoning `high`, `runtimeMode: "auto"`. Outside T3:
-  `codex exec -s read-only -c approval_policy="never" -m gpt-6.1-sol -c model_reasoning_effort="high" "<prompt>"`,
-  adding `-c mcp_servers.<name>.enabled=false` for every server in `codex mcp list`: Codex MCP tools
-  bypass its read-only sandbox.
+- No cross-vendor review in this project: the skills end with self-review and the checks above.
 
 ## Skills
 

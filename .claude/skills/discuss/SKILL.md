@@ -19,11 +19,8 @@ read-only data evidence when a claim depends on data.
    verification approach. Add rollout, rollback or sequencing only when the risk requires it. Small
    tasks can use the issue or the conversation directly.
 4. Self-review the result for missed cases, blast radius, contradictions and unnecessary machinery.
-   This is self-review, not independent validation.
-5. A saved spec gets one review by a subagent from the other vendor; see
-   [design review](references/design-review.md). Small tasks without a spec skip this.
-6. Resolve each concrete concern through a spec change, an explicit exclusion or an evidence-based
-   dismissal. One review round is normally enough; validate the changed parts after fixes.
+5. Resolve each concrete concern through a spec change, an explicit exclusion or an evidence-based
+   dismissal, then validate the changed parts.
 
 An agreed spec is executable input; no separate plan is needed. If implementation is authorized,
 continue with the build skill. If the user asked for a proposal first, deliver the proposal without

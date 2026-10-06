@@ -1,8 +1,8 @@
 # Completion gate
 
-Scope coverage, self-review, cross-vendor verification and verification by impact apply to every
-implementation: builds, debug fixes and accepted review findings. Using this reference does not by
-itself authorize a commit, push, merge or deployment.
+Scope coverage, self-review and verification by impact apply to every implementation: builds,
+debug fixes and accepted review findings. Using this reference does not by itself authorize a
+commit, push, merge or deployment.
 
 ## Establish the full scope
 
@@ -28,26 +28,11 @@ a conflict. Merge the base in, resolve and rerun the affected checks first.
 ## Self-review
 
 Check failure paths, permissions, data shapes, compatibility and regressions relevant to the diff.
-Validate findings with source, a reproduction or a meaningful test. Reviewer agreement is not
-evidence, and failing to refute a claim does not confirm it.
+Validate findings with source, a reproduction or a meaningful test; failing to refute a claim does
+not confirm it.
 
 Update the docs that describe current boundaries, decisions and traps. Retire the task's completed
 spec only after its durable content is preserved; do not delete unrelated or future specs.
-
-## Cross-vendor verification
-
-After self-review, one subagent from the other vendor checks the change: a Claude session asks GPT, a
-Codex session asks Claude, with the route in AGENTS.md under "Subagents". Skip it for
-documentation-only and trivial changes, such as a typo, a rename or a single config value, and say so.
-
-Give the verifier the intent, the full diff and the checks already run. It reviews only: no edits, no
-comments, no publication and no further delegation, and it never runs its own cross-vendor
-verification. Ask for findings with severity, location, triggering scenario and evidence. Confirm each
-finding against source, a reproduction or a test before acting; an unconfirmed claim stays unverified.
-One round is enough; after fixes, check the affected parts yourself.
-
-If no route to the other vendor is available, report cross-vendor verification as not run. A
-same-vendor subagent is not a substitute and is never labeled cross-vendor.
 
 ## Verification by impact
 

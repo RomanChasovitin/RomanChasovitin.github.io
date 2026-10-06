@@ -25,4 +25,4 @@ area it points to. A matching trap is a hypothesis, not proof.
    document when it is broadly useful.
 
 Report the cause, the evidence, the change and the limits of the verification. Apply the build
-skill's [completion gate](../build/references/completion.md), including its cross-vendor verification.
+skill's [completion gate](../build/references/completion.md).
