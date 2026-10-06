@@ -16,13 +16,6 @@ prevent a useful independent inspection; state the limit and tell existing failu
 A dependency finding needs the relevant usage and current primary-source evidence, not a scanner
 headline. Use runtime-shaped data for API claims.
 
-After your own pass, one subagent from the other vendor reviews the same PR independently (GPT for a
-Claude session, Claude for a Codex session; route in AGENTS.md under "Subagents"). Give it the PR
-intent and diff, not your findings. It reviews only: it does not post and does not delegate further.
-If you are that delegated reviewer, skip this step. Confirm its claims against source, a reproduction
-or tests before merging them into yours; neither model agreement nor a failed refutation proves them.
-If no route to the other vendor is available, say the review is single-vendor.
-
 Return actionable findings with severity, file and line, triggering scenario, consequence and
 evidence. Drop generic suggestions and unsupported claims; an empty result is valid.
 
