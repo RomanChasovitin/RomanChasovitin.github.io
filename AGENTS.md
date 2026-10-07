@@ -43,5 +43,6 @@ codegraph when the checkout has an index (`codegraph init .` once per checkout);
 ## Skills
 
 `.claude/skills/` (Codex sees them through `.agents/skills`): **discuss** → **build** → **debug**, and
-**review** for other people's PRs. They come from the `bond` repository; update them there and
-reinstall with `sh <bond>/scripts/install-skills.sh <this repo>`.
+**review** for other people's PRs. They started from the templates in the `bond` repository. The
+copies here are this project's working versions: edit them here, never in bond. Propose porting an
+edit back to bond only when it would help every project.
